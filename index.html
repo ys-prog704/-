@@ -8,12 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap">
 <style>
-/* ── 이 페이지는 "밤의 대장간" 하나의 세계에 의도적으로 고정된 단일 테마입니다.
-      모든 색은 토큰으로 :root에 선언하고 배경을 명시적으로 칠합니다. ── */
+/* ── "밤의 대장간" 하나의 세계에 의도적으로 고정된 단일 테마.
+      모든 색을 토큰으로 :root 에 선언하고 배경을 명시적으로 칠합니다. ── */
 :root{
+  color-scheme:dark;
+
   --ink:#100E0C;
   --iron:#1A1613;
   --iron-2:#221C17;
+  --iron-3:#2A231C;
   --line:#332B22;
   --line-2:#463A2D;
   --ash:#8A7F72;
@@ -21,7 +24,6 @@
   --parch:#F3ECE0;
 
   --ember:#E8622C;
-  --ember-dim:#7E3417;
   --gold:#D9A441;
   --quench:#6FA8B8;
 
@@ -29,8 +31,6 @@
   --keep:#8A8076;
   --down:#CE9140;
   --boom:#C94A40;
-
-  color-scheme:dark;
 
   --r-sm:6px;
   --r-md:10px;
@@ -60,170 +60,113 @@ body{
 img{max-width:100%}
 [hidden]{display:none !important}
 
-/* ── 레이아웃 ── */
-.forge{
-  max-width:1060px;
-  margin:0 auto;
-  padding-inline:16px;
-  padding-block:22px 56px;
-}
+.forge{max-width:1060px;margin:0 auto;padding-inline:16px;padding-block:22px 56px}
 
 .brand{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:16px;
-  flex-wrap:wrap;
-  padding-bottom:14px;
-  border-bottom:1px solid var(--line);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);
 }
 .brand h1{
-  margin:0;
-  font-family:var(--font-display);
-  font-size:clamp(28px,6.2vw,40px);
-  font-weight:400;
-  letter-spacing:-.01em;
-  line-height:1;
-  text-wrap:balance;
-  color:var(--parch);
-  text-shadow:0 0 26px rgba(232,98,44,.34);
+  margin:0;font-family:var(--font-display);
+  font-size:clamp(28px,6.2vw,40px);font-weight:400;
+  letter-spacing:-.01em;line-height:1;text-wrap:balance;
+  color:var(--parch);text-shadow:0 0 26px rgba(232,98,44,.34);
 }
-.brand .tagline{
-  margin:6px 0 0;
-  font-size:13px;
-  font-weight:300;
-  color:var(--ash);
-}
-.brand-tools{display:flex;gap:8px}
+.brand .tagline{margin:6px 0 0;font-size:13px;font-weight:300;color:var(--ash)}
+.brand-tools{display:flex;gap:8px;flex-wrap:wrap}
 
 .btn-ghost{
-  font-family:var(--font-body);
-  font-size:12.5px;
-  font-weight:500;
-  color:var(--ash-2);
-  background:transparent;
-  border:1px solid var(--line-2);
-  border-radius:var(--r-sm);
-  padding:7px 11px;
-  cursor:pointer;
+  font-family:var(--font-body);font-size:12.5px;font-weight:500;
+  color:var(--ash-2);background:transparent;
+  border:1px solid var(--line-2);border-radius:var(--r-sm);
+  padding:7px 11px;cursor:pointer;
   transition:color .16s,border-color .16s,background .16s;
 }
 .btn-ghost:hover{color:var(--parch);border-color:var(--ash);background:rgba(255,255,255,.03)}
 .btn-ghost.armed{color:var(--boom);border-color:var(--boom)}
 
-/* ── HUD ── */
 .hud{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:1px;
-  margin-top:18px;
-  background:var(--line);
-  border:1px solid var(--line);
-  border-radius:var(--r-md);
-  overflow:hidden;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;
+  margin-top:18px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;
 }
-.hud div{
-  background:var(--iron);
-  padding:11px 13px;
-}
+.hud div{background:var(--iron);padding:11px 13px}
 .hud dt{
-  margin:0;
-  font-size:10.5px;
-  font-weight:500;
-  letter-spacing:.09em;
-  text-transform:uppercase;
-  color:var(--ash);
+  margin:0;font-size:10.5px;font-weight:500;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ash);
 }
 .hud dd{
-  margin:3px 0 0;
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-size:clamp(15px,3.4vw,19px);
-  font-weight:600;
-  letter-spacing:-.02em;
+  margin:3px 0 0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+  font-size:clamp(15px,3.4vw,19px);font-weight:600;letter-spacing:-.02em;
 }
 .hud .v-gold{color:var(--gold)}
 .hud .v-boom{color:var(--boom)}
+@media (max-width:560px){.hud{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-@media (max-width:560px){
-  .hud{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
+.stage{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:18px}
+@media (min-width:820px){.stage{grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);align-items:start}}
 
-/* ── 무대 ── */
-.stage{
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:18px;
-  margin-top:18px;
-}
-@media (min-width:820px){
-  .stage{grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);align-items:start}
-}
+.panel{background:var(--iron);border:1px solid var(--line);border-radius:var(--r-lg)}
+.side{display:flex;flex-direction:column;gap:18px;min-width:0}
 
-.panel{
-  background:var(--iron);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-}
-
-/* ── 모루 (검) ── */
 .anvil{
-  padding:18px 16px 20px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:14px;
-  position:relative;
-  overflow:hidden;
+  padding:18px 16px 20px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;position:relative;overflow:hidden;
 }
 .anvil::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-140px;
-  width:340px;
-  height:240px;
-  transform:translateX(-50%);
+  content:"";position:absolute;left:50%;bottom:-140px;
+  width:340px;height:240px;transform:translateX(-50%);
   background:radial-gradient(closest-side, rgba(232,98,44,.26), transparent);
   pointer-events:none;
 }
+.tierband{font-size:10.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ash)}
 
-.tierband{
-  font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.24em;
-  text-transform:uppercase;
-  color:var(--ash);
-}
+.swordstage{position:relative;width:100%;max-width:262px;aspect-ratio:160/330}
+.ambient{position:absolute;inset:-8% -10%;pointer-events:none;overflow:hidden}
+.sword{width:100%;height:100%;display:block;overflow:visible;position:relative}
+.sword-body{transform-origin:80px 200px;filter:drop-shadow(0 0 var(--glow-size) var(--glow));transition:filter .5s ease}
 
-.swordstage{
-  position:relative;
-  width:100%;
-  max-width:260px;
-  aspect-ratio:160/330;
-}
-.sword{width:100%;height:100%;display:block;overflow:visible}
-.sword-body{
-  transform-origin:80px 200px;
-  filter:drop-shadow(0 0 var(--glow-size) var(--glow));
-  transition:filter .5s ease;
-}
 .stop-a{stop-color:var(--blade-a)}
 .stop-b{stop-color:var(--blade-b)}
-.blade-fuller{fill:var(--edge)}
+.blade{stroke:var(--edge);stroke-width:1.1;stroke-opacity:.45}
+.blade-sheen{stroke:none}
 .blade-guard{fill:var(--guard)}
 .blade-gem{fill:var(--gem)}
+.guard-ring{fill:none;stroke:var(--guard);stroke-width:4.5}
+.wrap{stroke:#150E09;stroke-width:3;opacity:.72;fill:none}
 .aura{fill:var(--glow);opacity:var(--aura)}
 
-/* 등급별 금속 — 3레벨마다 한 단계 */
-.tier-0{--blade-a:#55504B;--blade-b:#9A948C;--edge:#C4BDB4;--guard:#463E37;--gem:#38322C;--glow:rgba(184,172,154,.16);--glow-size:3px;--aura:0}
-.tier-1{--blade-a:#6E7A88;--blade-b:#C7D2DE;--edge:#EDF3F9;--guard:#565E68;--gem:#9CB4CC;--glow:rgba(156,180,204,.42);--glow-size:9px;--aura:.05}
-.tier-2{--blade-a:#1F5B66;--blade-b:#79CFDB;--edge:#C9F5FA;--guard:#264A52;--gem:#4FD2E3;--glow:rgba(79,210,227,.52);--glow-size:15px;--aura:.09}
-.tier-3{--blade-a:#7A5718;--blade-b:#EFCB6E;--edge:#FFF1C6;--guard:#685122;--gem:#F0D27A;--glow:rgba(232,178,60,.58);--glow-size:21px;--aura:.13}
-.tier-4{--blade-a:#6E1B26;--blade-b:#E06A50;--edge:#FFCFB0;--guard:#582018;--gem:#E8622C;--glow:rgba(232,98,44,.64);--glow-size:27px;--aura:.17}
-.tier-5{--blade-a:#33206B;--blade-b:#9B7FEA;--edge:#DCCDFF;--guard:#2A1D4E;--gem:#7C5CE0;--glow:rgba(124,92,224,.7);--glow-size:33px;--aura:.23}
-.tier-6{--blade-a:#9EB6F0;--blade-b:#FFFFFF;--edge:#FFFFFF;--guard:#848CAF;--gem:#FFFFFF;--glow:rgba(202,220,255,.86);--glow-size:42px;--aura:.3}
+/* 상시 이펙트 — 고리 */
+.ring{
+  fill:none;stroke:var(--gem);stroke-width:1.5;opacity:0;
+  transform-box:view-box;transform-origin:80px 140px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes huecycle{to{filter:hue-rotate(360deg)}}
+.amb-spark .ring-1{opacity:.3;stroke-dasharray:1 14;animation:spin 5s linear infinite}
+.amb-runes .ring-1{opacity:.55;stroke-dasharray:3 10;animation:spin 16s linear infinite}
+.amb-runes .ring-2{opacity:.3;stroke-dasharray:16 26;animation:spin 26s linear infinite reverse}
+.amb-void .ring-1{opacity:.4;stroke-dasharray:2 7;animation:spin 11s linear infinite}
+.amb-void .ring-2{opacity:.22;stroke-width:6;stroke-dasharray:1 12;animation:spin 30s linear infinite reverse}
+.amb-prism .ring-1{opacity:.6;stroke-dasharray:5 7;animation:spin 8s linear infinite}
+.amb-prism .ring-2{opacity:.4;stroke-dasharray:22 10;animation:spin 15s linear infinite reverse}
+.amb-prism .aura{animation:huecycle 7s linear infinite}
 
+/* 상시 이펙트 — 입자 */
+.mote{
+  position:absolute;border-radius:50%;
+  background:var(--gem);box-shadow:0 0 7px var(--gem);
+  opacity:0;animation-duration:var(--dur);animation-delay:var(--delay);
+  animation-iteration-count:infinite;animation-timing-function:linear;
+}
+.m-embers,.m-runes,.m-prism{animation-name:rise}
+.m-frost,.m-void{animation-name:fall}
+.m-spark{animation-name:flick}
+@keyframes rise{0%{transform:translateY(0) scale(1);opacity:0}12%{opacity:.85}100%{transform:translateY(-160px) scale(.2);opacity:0}}
+@keyframes fall{0%{transform:translateY(-50px) scale(.5);opacity:0}15%{opacity:.8}100%{transform:translateY(150px) scale(1);opacity:0}}
+@keyframes flick{0%,100%{opacity:0;transform:scale(.4)}6%{opacity:1;transform:scale(1.6)}13%{opacity:0;transform:scale(.4)}}
+
+/* 강화 연출 */
 @keyframes forge-shake{
   0%,100%{transform:translate(0,0) rotate(0)}
   20%{transform:translate(-3px,1px) rotate(-1.3deg)}
@@ -247,10 +190,7 @@ img{max-width:100%}
 
 .sparks{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .spark{
-  position:absolute;
-  left:50%;top:44%;
-  width:4px;height:4px;
-  border-radius:50%;
+  position:absolute;left:50%;top:44%;width:4px;height:4px;border-radius:50%;
   background:var(--ember);
   animation:fly var(--dur) cubic-bezier(.16,.72,.3,1) var(--delay) forwards;
 }
@@ -263,62 +203,24 @@ img{max-width:100%}
 
 .nameplate{text-align:center}
 .nameplate .lv{
-  font-family:var(--font-display);
-  font-size:clamp(34px,8vw,48px);
-  line-height:1;
-  letter-spacing:-.02em;
-  color:var(--ember);
+  font-family:var(--font-display);font-size:clamp(34px,8vw,48px);
+  line-height:1;letter-spacing:-.02em;color:var(--ember);
   text-shadow:0 0 30px rgba(232,98,44,.45);
 }
-.nameplate .sname{
-  display:block;
-  margin-top:4px;
-  font-size:16px;
-  font-weight:600;
-  letter-spacing:.01em;
-}
-.verdict{
-  min-height:22px;
-  font-size:13.5px;
-  font-weight:600;
-  letter-spacing:.02em;
-  text-align:center;
-}
+.nameplate .sname{display:block;margin-top:4px;font-size:16px;font-weight:600;letter-spacing:.01em}
+.verdict{min-height:22px;font-size:13.5px;font-weight:600;letter-spacing:.02em;text-align:center}
 .verdict.v-ok{color:var(--ok)}
 .verdict.v-keep{color:var(--keep)}
 .verdict.v-down{color:var(--down)}
 .verdict.v-boom{color:var(--boom)}
 
-/* ── 확률 바 ── */
 .odds{width:100%;max-width:440px}
-.odds-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:baseline;
-  gap:10px;
-  margin-bottom:7px;
-}
-.odds-head .label{
-  font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:var(--ash);
-}
-.odds-head .roll{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-size:12px;
-  color:var(--ash-2);
-}
+.odds-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:7px}
+.odds-head .label{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ash)}
+.odds-head .roll{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--ash-2)}
 .oddsbar{
-  position:relative;
-  display:flex;
-  height:22px;
-  border-radius:var(--r-sm);
-  overflow:hidden;
-  background:var(--iron-2);
-  border:1px solid var(--line-2);
+  position:relative;display:flex;height:22px;border-radius:var(--r-sm);
+  overflow:hidden;background:var(--iron-2);border:1px solid var(--line-2);
 }
 .seg{transition:flex-basis .32s ease;flex-grow:0;flex-shrink:0}
 .seg-s{background:linear-gradient(180deg,#6BB870,#4E8B52)}
@@ -326,220 +228,91 @@ img{max-width:100%}
 .seg-d{background:linear-gradient(180deg,#DBA052,#A86F2C)}
 .seg-x{background:linear-gradient(180deg,#D75B50,#93332C)}
 .marker{
-  position:absolute;
-  top:-4px;bottom:-4px;
-  left:0;
-  width:2px;
-  margin-left:-1px;
-  background:var(--parch);
-  box-shadow:0 0 9px rgba(255,255,255,.9);
-  opacity:0;
-  transition:opacity .2s;
+  position:absolute;top:-4px;bottom:-4px;left:0;width:2px;margin-left:-1px;
+  background:var(--parch);box-shadow:0 0 9px rgba(255,255,255,.9);
+  opacity:0;transition:opacity .2s;
 }
 .marker.on{opacity:1}
-
-.legend{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:6px;
-  margin-top:9px;
-}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:9px}
 .legend div{display:flex;flex-direction:column;gap:2px}
-.legend .k{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  font-size:11px;
-  color:var(--ash);
-}
+.legend .k{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ash)}
 .legend .k i{width:7px;height:7px;border-radius:2px;flex:none}
-.legend .v{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-size:13.5px;
-  font-weight:600;
-}
+.legend .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
 .dot-s{background:#5FA463}.dot-k{background:#8A8076}.dot-d{background:#CE9140}.dot-x{background:#C94A40}
 .legend .hit{color:var(--parch)}
 
-/* ── 행동 ── */
 .actions{display:flex;gap:9px;width:100%;max-width:440px;flex-wrap:wrap}
 .btn{
-  font-family:var(--font-body);
-  font-size:15px;
-  font-weight:600;
-  border:none;
-  border-radius:var(--r-md);
-  padding:13px 16px;
-  cursor:pointer;
-  transition:transform .1s,filter .16s,opacity .16s;
-  line-height:1.2;
+  font-family:var(--font-body);font-size:15px;font-weight:600;
+  border:none;border-radius:var(--r-md);padding:13px 16px;cursor:pointer;
+  transition:transform .1s,filter .16s,opacity .16s;line-height:1.2;
 }
 .btn:active:not(:disabled){transform:translateY(1px)}
 .btn:disabled{opacity:.36;cursor:not-allowed}
 .btn-forge{
-  flex:2 1 200px;
-  color:#1A0D06;
+  flex:2 1 200px;color:#1A0D06;
   background:linear-gradient(180deg,#F5813F,#D24F1C);
   box-shadow:0 0 0 1px rgba(255,180,120,.28) inset,0 6px 22px rgba(232,98,44,.3);
 }
 .btn-forge:hover:not(:disabled){filter:brightness(1.08)}
-.btn-forge .cost{
-  display:block;
-  font-family:var(--font-mono);
-  font-size:11.5px;
-  font-weight:500;
-  opacity:.82;
-  margin-top:2px;
+.btn-forge .cost,.btn-sell .cost{
+  display:block;font-family:var(--font-mono);font-size:11.5px;
+  font-weight:500;opacity:.82;margin-top:2px;
 }
-.btn-sell{
-  flex:1 1 128px;
-  color:var(--gold);
-  background:var(--iron-2);
-  box-shadow:0 0 0 1px var(--line-2) inset;
-}
+.btn-sell{flex:1 1 128px;color:var(--gold);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
 .btn-sell:hover:not(:disabled){box-shadow:0 0 0 1px var(--gold) inset}
 .btn-sell.armed{color:#1A0D06;background:var(--gold)}
-.btn-sell .cost{
-  display:block;
-  font-family:var(--font-mono);
-  font-size:11.5px;
-  font-weight:500;
-  opacity:.8;
-  margin-top:2px;
-}
-.bellows{
-  width:100%;
-  max-width:440px;
-  font-size:12.5px;
-  color:var(--ash);
-  text-align:center;
-}
+.bellows{width:100%;max-width:440px;font-size:12.5px;color:var(--ash);text-align:center}
 .bellows button{
-  font-family:var(--font-body);
-  font-size:12.5px;
-  font-weight:600;
-  color:var(--quench);
-  background:none;
-  border:1px dashed var(--line-2);
-  border-radius:var(--r-sm);
-  padding:6px 12px;
-  cursor:pointer;
+  font-family:var(--font-body);font-size:12.5px;font-weight:600;color:var(--quench);
+  background:none;border:1px dashed var(--line-2);border-radius:var(--r-sm);
+  padding:6px 12px;cursor:pointer;
 }
 .bellows button:hover{border-color:var(--quench)}
 
-/* ── 상점 ── */
 .shop{width:100%;max-width:440px}
-.shop-label{
-  font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:var(--ash);
-  margin-bottom:8px;
+.shop-label,.block-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ash);margin-bottom:8px;
 }
 .shop-grid{display:grid;gap:7px}
 .item{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  text-align:left;
-  font-family:var(--font-body);
-  color:var(--parch);
-  background:var(--iron-2);
-  border:1px solid var(--line);
-  border-left:3px solid var(--rail);
-  border-radius:var(--r-sm);
-  padding:9px 11px;
-  cursor:pointer;
-  transition:border-color .16s,background .16s;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;
+  width:100%;text-align:left;font-family:var(--font-body);color:var(--parch);
+  background:var(--iron-2);border:1px solid var(--line);
+  border-left:3px solid var(--rail);border-radius:var(--r-sm);
+  padding:9px 11px;cursor:pointer;transition:border-color .16s,background .16s;
 }
-.item:hover:not(:disabled){background:#2A231C;border-color:var(--line-2);border-left-color:var(--rail)}
+.item:hover:not(:disabled){background:var(--iron-3);border-color:var(--line-2);border-left-color:var(--rail)}
 .item:disabled{opacity:.4;cursor:not-allowed}
 .item .nm{font-size:13.5px;font-weight:600}
 .item .ds{font-size:11.5px;color:var(--ash);line-height:1.35}
-.item .pr{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-size:12.5px;
-  font-weight:600;
-  color:var(--gold);
-  white-space:nowrap;
-}
-.item.held{
-  border-color:var(--rail);
-  background:color-mix(in srgb, var(--rail) 14%, var(--iron-2));
-}
+.item .pr{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--gold);white-space:nowrap}
+.item.held{border-color:var(--rail);background:color-mix(in srgb, var(--rail) 14%, var(--iron-2))}
 .item.held .pr{color:var(--rail)}
 .i-bless{--rail:#5FA463}
 .i-protect{--rail:#C94A40}
 .i-master{--rail:#8A8076}
-
-.buffs{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  justify-content:center;
-  min-height:0;
-}
+.buffs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .buffs:empty{display:none}
 .chip{
-  font-size:11px;
-  font-weight:600;
-  letter-spacing:.02em;
-  padding:3px 9px;
-  border-radius:999px;
-  border:1px solid var(--rail);
-  color:var(--rail);
+  font-size:11px;font-weight:600;letter-spacing:.02em;padding:3px 9px;
+  border-radius:999px;border:1px solid var(--rail);color:var(--rail);
   background:color-mix(in srgb, var(--rail) 12%, transparent);
 }
 
-/* ── 장부 ── */
 .ledger{padding:16px 15px 18px;display:flex;flex-direction:column;gap:16px}
 .ledger h2{
-  margin:0 0 9px;
-  font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:var(--ash);
+  margin:0 0 9px;font-size:10.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ash);
 }
-.log{
-  list-style:none;
-  margin:0;
-  padding:0;
-  max-height:302px;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-}
+.log{list-style:none;margin:0;padding:0;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
 .log li{
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
-  align-items:baseline;
-  gap:9px;
-  padding:6px 8px;
-  border-radius:var(--r-sm);
-  background:var(--iron-2);
-  font-size:12.5px;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:baseline;
+  gap:9px;padding:6px 8px;border-radius:var(--r-sm);background:var(--iron-2);font-size:12.5px;
 }
-.log .tag{
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:.04em;
-  padding:1px 6px;
-  border-radius:3px;
-  white-space:nowrap;
-}
-.log .r{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-size:11px;
-  color:var(--ash);
-}
+.log .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.log .r{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:11px;color:var(--ash)}
 .log .txt{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12px}
 .t-ok{background:rgba(95,164,99,.16);color:var(--ok)}
 .t-keep{background:rgba(138,128,118,.18);color:var(--ash-2)}
@@ -547,105 +320,99 @@ img{max-width:100%}
 .t-boom{background:rgba(201,74,64,.18);color:var(--boom)}
 .t-sell{background:rgba(217,164,65,.16);color:var(--gold)}
 .t-buy{background:rgba(111,168,184,.16);color:var(--quench)}
-.log .empty{
-  display:block;
-  background:none;
-  padding:0;
-  color:var(--ash);
-  font-size:12.5px;
-}
+.log .empty{display:block;background:none;padding:0;color:var(--ash);font-size:12.5px}
 
 .stats{
-  list-style:none;
-  margin:0;
-  padding:0;
-  display:grid;
-  gap:1px;
-  background:var(--line);
-  border:1px solid var(--line);
-  border-radius:var(--r-sm);
-  overflow:hidden;
+  list-style:none;margin:0;padding:0;display:grid;gap:1px;
+  background:var(--line);border:1px solid var(--line);
+  border-radius:var(--r-sm);overflow:hidden;
 }
-.stats li{
-  display:flex;
-  justify-content:space-between;
-  align-items:baseline;
-  gap:10px;
-  padding:7px 10px;
-  background:var(--iron-2);
-  font-size:12.5px;
-}
+.stats li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 10px;background:var(--iron-2);font-size:12.5px}
 .stats .sk{color:var(--ash)}
-.stats .sv{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-weight:600;
+.stats .sv{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:600}
+
+/* ── 도감 ── */
+.codex{margin-top:18px;padding:16px 15px 18px}
+.codex-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.codex-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ash)}
+.codex-head .count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--gold)}
+.codex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.cell{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:9px 4px 8px;border-radius:var(--r-sm);
+  background:var(--iron-2);border:1px solid var(--line);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.cell:hover{transform:translateY(-3px);border-color:var(--line-2);background:var(--iron-3)}
+.cell.now{border-color:var(--ember);background:color-mix(in srgb, var(--ember) 12%, var(--iron-2))}
+.cell .mini{width:100%;height:94px;display:block;overflow:visible}
+.cell .cl{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--ash-2);margin-top:3px}
+.cell.now .cl{color:var(--ember)}
+.cell .cn{font-size:10.5px;color:var(--ash);text-align:center;line-height:1.25}
+.cell.locked{opacity:.72}
+.cell.locked .cn{color:#5C544B}
+
+/* ── 저장 ── */
+.save{padding:16px 15px 18px}
+.save-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.save-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ash)}
+.save-state{font-size:12px;color:var(--ash)}
+.save-state b{font-weight:600;color:var(--ok)}
+.save-state.warn b{color:var(--down)}
+.save-lead{margin:0 0 12px;font-size:12.5px;line-height:1.6;color:var(--ash);max-width:62ch}
+.save-row{display:flex;gap:8px;flex-wrap:wrap}
+.save-box{margin-top:11px}
+.save-box textarea{
+  width:100%;min-height:74px;resize:vertical;
+  font-family:var(--font-mono);font-size:12px;line-height:1.5;
+  color:var(--parch);background:var(--ink);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);
+  padding:9px 10px;word-break:break-all;
+}
+.save-box textarea:focus{outline:2px solid var(--quench);outline-offset:1px}
+.save-box .hint{margin:7px 0 0;font-size:11.5px;color:var(--ash)}
+.save-box .hint.err{color:var(--boom)}
+.save-box .hint.good{color:var(--ok)}
+.cloud-note{
+  margin-top:11px;padding:9px 11px;font-size:12px;line-height:1.5;
+  background:color-mix(in srgb, var(--quench) 10%, var(--iron-2));
+  border:1px solid color-mix(in srgb, var(--quench) 34%, var(--line));
+  border-radius:var(--r-sm);
+}
+.cloud-note button{
+  margin-top:7px;font-family:var(--font-body);font-size:12px;font-weight:600;
+  color:var(--quench);background:none;border:1px solid var(--quench);
+  border-radius:var(--r-sm);padding:5px 10px;cursor:pointer;
 }
 
 /* ── 강화표 ── */
 .chart{margin-top:18px}
 .chart summary{
-  cursor:pointer;
-  font-size:12.5px;
-  font-weight:600;
-  color:var(--ash-2);
-  padding:10px 13px;
-  background:var(--iron);
-  border:1px solid var(--line);
-  border-radius:var(--r-md);
-  list-style:none;
+  cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ash-2);
+  padding:10px 13px;background:var(--iron);border:1px solid var(--line);
+  border-radius:var(--r-md);list-style:none;
 }
 .chart summary::-webkit-details-marker{display:none}
-.chart summary::before{content:"▸ ";color:var(--ember)}
-.chart[open] summary::before{content:"▾ "}
+.chart summary::before{content:"\25B8  ";color:var(--ember)}
+.chart[open] summary::before{content:"\25BE  "}
 .chart summary:hover{color:var(--parch)}
-.table-scroll{
-  overflow-x:auto;
-  margin-top:8px;
-  border:1px solid var(--line);
-  border-radius:var(--r-md);
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12.5px;
-  font-variant-numeric:tabular-nums;
-  min-width:520px;
-}
+.table-scroll{overflow-x:auto;margin-top:8px;border:1px solid var(--line);border-radius:var(--r-md)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:560px}
 th,td{padding:7px 11px;text-align:right;white-space:nowrap}
 th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 thead th{
-  background:var(--iron-2);
-  font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--ash);
-  position:sticky;
-  top:0;
+  background:var(--iron-2);font-size:10.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ash);
 }
 tbody td{background:var(--iron);border-top:1px solid var(--line);font-family:var(--font-mono)}
 tbody td:nth-child(2){font-family:var(--font-body)}
-tbody tr.now td{background:#2C241C;color:var(--parch)}
+tbody tr.now td{background:var(--iron-3);color:var(--parch)}
 tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 .c-s{color:var(--ok)}.c-d{color:var(--down)}.c-x{color:var(--boom)}.c-p{color:var(--gold)}
 
-.note{
-  margin-top:16px;
-  font-size:11.5px;
-  line-height:1.6;
-  color:var(--ash);
-  text-align:center;
-}
+.note{margin-top:16px;font-size:11.5px;line-height:1.6;color:var(--ash);text-align:center}
 
-/* ── 전체 화면 효과 ── */
-.flash{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:0;
-  z-index:9;
-}
+.flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:9}
 @keyframes flash-ok{0%{opacity:0}18%{opacity:.5}100%{opacity:0}}
 @keyframes flash-boom{0%{opacity:0}12%{opacity:.62}100%{opacity:0}}
 .flash.f-ok{background:radial-gradient(70% 55% at 50% 44%, rgba(255,226,160,.85), transparent 72%);animation:flash-ok .55s ease-out}
@@ -661,10 +428,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 }
 .quake{animation:quake .45s cubic-bezier(.36,.07,.19,.97)}
 
-:where(button,summary,a):focus-visible{
-  outline:2px solid var(--quench);
-  outline-offset:2px;
-}
+:where(button,summary,a):focus-visible{outline:2px solid var(--quench);outline-offset:2px}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
@@ -702,37 +466,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   <main class="stage">
 
     <section class="panel anvil" id="anvil">
-      <p class="tierband" id="tierband">무쇠</p>
+      <p class="tierband" id="tierband">녹슨 무쇠</p>
 
-      <div class="swordstage">
-        <svg class="sword" viewBox="0 0 160 330" role="img" aria-labelledby="swordTitle">
-          <title id="swordTitle">현재 강화 단계의 검</title>
-          <defs>
-            <linearGradient id="bladeGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop class="stop-a" offset="0%"></stop>
-              <stop class="stop-b" offset="44%"></stop>
-              <stop class="stop-b" offset="56%"></stop>
-              <stop class="stop-a" offset="100%"></stop>
-            </linearGradient>
-            <linearGradient id="gripGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#281F18"></stop>
-              <stop offset="50%" stop-color="#4C3B2C"></stop>
-              <stop offset="100%" stop-color="#281F18"></stop>
-            </linearGradient>
-          </defs>
-          <g class="sword-body" id="swordBody">
-            <ellipse class="aura" cx="80" cy="118" rx="54" ry="112"></ellipse>
-            <path d="M80 14 L97 58 L97 196 L63 196 L63 58 Z" fill="url(#bladeGrad)"></path>
-            <path class="blade-fuller" d="M80 46 L87 72 L87 188 L73 188 L73 72 Z" opacity=".26"></path>
-            <path d="M80 14 L88 56 L88 190 L80 190 Z" fill="#FFFFFF" opacity=".1"></path>
-            <path class="blade-guard" d="M30 197 Q80 187 130 197 L130 212 Q80 203 30 213 Z"></path>
-            <circle class="blade-gem" cx="80" cy="204" r="5"></circle>
-            <rect x="71" y="211" width="18" height="63" rx="5" fill="url(#gripGrad)"></rect>
-            <path d="M71 223 H89 M71 235 H89 M71 247 H89 M71 259 H89" stroke="#170F0A" stroke-width="3" opacity=".75" fill="none"></path>
-            <circle class="blade-guard" cx="80" cy="286" r="14"></circle>
-            <circle class="blade-gem" cx="80" cy="286" r="6"></circle>
-          </g>
-        </svg>
+      <div class="swordstage" id="swordstage">
+        <div class="ambient" id="ambient" aria-hidden="true"></div>
+        <div id="swordSlot"></div>
         <div class="sparks" id="sparks" aria-hidden="true"></div>
       </div>
 
@@ -742,13 +480,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       </div>
 
       <p class="verdict" id="verdict" role="status" aria-live="polite"></p>
-
       <div class="buffs" id="buffs"></div>
 
       <div class="odds">
         <div class="odds-head">
           <span class="label">다음 강화 확률</span>
-          <span class="roll" id="rollText">—</span>
+          <span class="roll" id="rollText">&#8212;</span>
         </div>
         <div class="oddsbar" id="oddsbar">
           <span class="seg seg-s" id="segS"></span>
@@ -757,7 +494,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           <span class="seg seg-x" id="segX"></span>
           <i class="marker" id="marker" aria-hidden="true"></i>
         </div>
-        <div class="legend" id="legend">
+        <div class="legend">
           <div><span class="k"><i class="dot-s"></i>성공</span><span class="v c-s" id="valS">0%</span></div>
           <div><span class="k"><i class="dot-k"></i>유지</span><span class="v" id="valK">0%</span></div>
           <div><span class="k"><i class="dot-d"></i>하락</span><span class="v c-d" id="valD">0%</span></div>
@@ -766,21 +503,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       </div>
 
       <div class="actions">
-        <button class="btn btn-forge" id="forgeBtn" type="button">
-          강화하기<span class="cost" id="forgeCost">100 G</span>
-        </button>
-        <button class="btn btn-sell" id="sellBtn" type="button">
-          판매<span class="cost" id="sellPrice">0 G</span>
-        </button>
+        <button class="btn btn-forge" id="forgeBtn" type="button">강화하기<span class="cost" id="forgeCost">100 G</span></button>
+        <button class="btn btn-sell" id="sellBtn" type="button">판매<span class="cost" id="sellPrice">0 G</span></button>
       </div>
 
       <p class="bellows" id="bellows" hidden>
-        골드가 부족합니다 —
+        골드가 부족합니다 &#8212;
         <button id="bellowsBtn" type="button">풀무질해서 300 G 벌기</button>
       </p>
 
       <div class="shop">
-        <p class="shop-label">대장간 상점 · 다음 1회에만 적용</p>
+        <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용</p>
         <div class="shop-grid">
           <button class="item i-bless" id="buyBless" type="button">
             <span><span class="nm">축복의 주문서</span><br><span class="ds">성공 확률 +10%p</span></span>
@@ -791,31 +524,76 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <span class="pr" id="prProtect">0 G</span>
           </button>
           <button class="item i-master" id="buyMaster" type="button">
-            <span><span class="nm">장인의 손길</span><br><span class="ds">하락·파괴를 모두 유지로 대체</span></span>
+            <span><span class="nm">장인의 손길</span><br><span class="ds">하락&middot;파괴를 모두 유지로 대체</span></span>
             <span class="pr" id="prMaster">0 G</span>
           </button>
         </div>
       </div>
     </section>
 
-    <aside class="panel ledger">
-      <section>
-        <h2>강화 기록</h2>
-        <ul class="log" id="log"><li class="empty">아직 기록이 없습니다.</li></ul>
+    <div class="side">
+      <aside class="panel ledger">
+        <section>
+          <h2>강화 기록</h2>
+          <ul class="log" id="log"><li class="empty">아직 기록이 없습니다.</li></ul>
+        </section>
+        <section>
+          <h2>통계</h2>
+          <ul class="stats">
+            <li><span class="sk">성공 / 시도</span><span class="sv" id="stTries">0 / 0</span></li>
+            <li><span class="sk">실측 성공률</span><span class="sv" id="stRate">&#8212;</span></li>
+            <li><span class="sk">누적 강화 비용</span><span class="sv" id="stSpent">0 G</span></li>
+            <li><span class="sk">누적 판매 수익</span><span class="sv" id="stEarned">0 G</span></li>
+            <li><span class="sk">최고 보유 골드</span><span class="sv" id="stPeak">0 G</span></li>
+          </ul>
+        </section>
+      </aside>
+
+      <section class="panel save">
+        <div class="save-head">
+          <h2>저장 &amp; 이어하기</h2>
+          <span class="save-state" id="saveState">자동 저장됨</span>
+        </div>
+        <p class="save-lead">
+          진행 상황은 강화할 때마다 이 브라우저에 자동 저장됩니다. 다른 기기나 다른
+          브라우저에서 이어하려면 <strong>저장 코드</strong>를 만들어 옮기세요.
+        </p>
+        <div class="save-row">
+          <button class="btn-ghost" id="exportBtn" type="button">저장 코드 만들기</button>
+          <button class="btn-ghost" id="importBtn" type="button">저장 코드 불러오기</button>
+        </div>
+
+        <div class="save-box" id="exportBox" hidden>
+          <label class="block-label" for="exportText">이 코드를 복사해 두세요</label>
+          <textarea id="exportText" readonly spellcheck="false"></textarea>
+          <div class="save-row" style="margin-top:7px">
+            <button class="btn-ghost" id="copyBtn" type="button">복사</button>
+          </div>
+          <p class="hint" id="exportHint">메모장이나 메신저에 붙여 두면 어디서든 이어할 수 있습니다.</p>
+        </div>
+
+        <div class="save-box" id="importBox" hidden>
+          <label class="block-label" for="importText">저장 코드를 붙여넣으세요</label>
+          <textarea id="importText" spellcheck="false" placeholder="SWORD2-..."></textarea>
+          <div class="save-row" style="margin-top:7px">
+            <button class="btn-ghost" id="loadBtn" type="button">불러오기</button>
+          </div>
+          <p class="hint" id="importHint">불러오면 지금 진행 상황을 덮어씁니다.</p>
+        </div>
+
+        <div class="cloud-note" id="cloudNote" hidden></div>
       </section>
-      <section>
-        <h2>통계</h2>
-        <ul class="stats">
-          <li><span class="sk">성공 / 시도</span><span class="sv" id="stTries">0 / 0</span></li>
-          <li><span class="sk">실측 성공률</span><span class="sv" id="stRate">—</span></li>
-          <li><span class="sk">누적 강화 비용</span><span class="sv" id="stSpent">0 G</span></li>
-          <li><span class="sk">누적 판매 수익</span><span class="sv" id="stEarned">0 G</span></li>
-          <li><span class="sk">최고 보유 골드</span><span class="sv" id="stPeak">0 G</span></li>
-        </ul>
-      </section>
-    </aside>
+    </div>
 
   </main>
+
+  <section class="panel codex">
+    <div class="codex-head">
+      <h2>검 도감</h2>
+      <span class="count" id="codexCount">0 / 21</span>
+    </div>
+    <div class="codex-grid" id="codexGrid"></div>
+  </section>
 
   <details class="chart">
     <summary>전체 강화표 보기</summary>
@@ -823,14 +601,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <table>
         <thead>
           <tr>
-            <th scope="col">단계</th>
-            <th scope="col">이름</th>
-            <th scope="col">성공</th>
-            <th scope="col">유지</th>
-            <th scope="col">하락</th>
-            <th scope="col">파괴</th>
-            <th scope="col">비용</th>
-            <th scope="col">판매가</th>
+            <th scope="col">단계</th><th scope="col">이름</th>
+            <th scope="col">성공</th><th scope="col">유지</th>
+            <th scope="col">하락</th><th scope="col">파괴</th>
+            <th scope="col">비용</th><th scope="col">판매가</th>
           </tr>
         </thead>
         <tbody id="chartBody"></tbody>
@@ -838,9 +612,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     </div>
   </details>
 
-  <p class="note">
-    진행 상황은 이 브라우저에만 저장됩니다. 강화표를 바꾸고 싶다면 소스의 <code>SWORDS</code> 배열만 고치면 됩니다.
-  </p>
+  <p class="note">강화표를 바꾸고 싶다면 소스의 <code>SWORDS</code> 배열만 고치면 됩니다.</p>
 
 </div>
 
@@ -848,59 +620,111 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 (function(){
   "use strict";
 
-  /* ───────── 강화표: 이 배열 하나가 게임 밸런스 전부입니다 ─────────
-     s = 성공, d = 하락, x = 파괴 (유지는 1 - s - d - x)
-     cost = 이 단계에서 강화를 시도하는 비용, price = 이 단계 검의 판매가     */
+  /* ───────── 칼날 실루엣 11종 ───────── */
+  var BLADES = {
+    dagger:  'M80 74 L93 104 L93 197 L67 197 L67 104 Z',
+    straight:'M80 16 L96 60 L96 197 L64 197 L64 60 Z',
+    broad:   'M80 18 L104 62 L104 197 L56 197 L56 62 Z',
+    leaf:    'M80 14 C94 46 103 92 101 132 C100 164 99 182 99 197 L61 197 C61 182 60 164 59 132 C57 92 66 46 80 14 Z',
+    flame:   'M80 12 C88 34 100 42 97 62 C94 82 104 92 99 114 C94 136 104 148 98 170 C94 186 97 190 97 197 L63 197 C63 190 66 186 62 170 C56 148 66 136 61 114 C56 92 66 82 63 62 C60 42 72 34 80 12 Z',
+    katana:  'M93 16 C79 56 68 112 65 197 L93 197 C97 140 101 70 100 34 C100 24 97 18 93 16 Z',
+    cleaver: 'M80 16 L107 54 L103 197 L57 197 L53 54 Z',
+    shard:   'M80 10 L92 48 L86 70 L100 108 L92 140 L102 176 L98 197 L62 197 L58 176 L68 140 L60 108 L74 70 L68 48 Z',
+    twin:    'M80 14 L98 58 L98 197 L62 197 L62 58 Z M80 62 L88 86 L88 186 L72 186 L72 86 Z',
+    hollow:  'M80 12 C96 52 104 100 100 148 C98 174 98 188 98 197 L62 197 C62 188 62 174 60 148 C56 100 64 52 80 12 Z M80 68 C72 98 70 130 74 162 L86 162 C90 130 88 98 80 68 Z',
+    prism:   'M80 8 L94 44 L99 110 L96 170 L94 197 L66 197 L64 170 L61 110 L66 44 Z'
+  };
+  var HOLLOW = { twin:1, hollow:1 };
+
+  /* ───────── 손잡이 보호대 7종 ───────── */
+  var GUARDS = {
+    nub:     'M56 195 L104 195 L104 208 L56 208 Z',
+    bar:     'M36 195 L124 195 L124 212 L36 212 Z',
+    curve:   'M30 194 Q80 185 130 194 L130 211 Q80 202 30 211 Z',
+    quillon: 'M24 213 C24 194 42 189 60 193 L100 193 C118 189 136 194 136 213 L126 213 C126 203 114 199 102 203 L58 203 C46 199 34 203 34 213 Z',
+    wing:    'M16 199 C40 184 62 189 74 195 L86 195 C98 189 120 184 144 199 C124 206 106 203 92 211 L68 211 C54 203 36 206 16 199 Z',
+    spike:   'M80 190 L118 195 L132 184 L127 203 L142 212 L116 209 L80 214 L44 209 L18 212 L33 203 L28 184 L42 195 Z',
+    ring:    'M38 196 L122 196 L122 210 L38 210 Z',
+    halo:    ''
+  };
+  var HASRING = { ring:1, halo:1 };
+
+  /* ───────── 강화표 · 검 21종 ─────────
+     s 성공 / d 하락 / x 파괴 (유지는 1-s-d-x), cost 시도 비용, price 판매가
+     blade·guard 는 생김새, a·b·edge·guardC·gem·glow·size·aura 는 색, fx 는 상시 효과 */
   var SWORDS = [
-    { name:'낡은 단검', s:1.00, d:0.00, x:0.00, cost:100,    price:0 },
-    { name:'강철 검',   s:0.95, d:0.00, x:0.00, cost:220,    price:180 },
-    { name:'기사의 검', s:0.90, d:0.00, x:0.00, cost:450,    price:430 },
-    { name:'은빛 장검', s:0.85, d:0.00, x:0.00, cost:800,    price:980 },
-    { name:'화염검',    s:0.80, d:0.10, x:0.00, cost:1400,   price:1900 },
-    { name:'서리검',    s:0.75, d:0.15, x:0.00, cost:2300,   price:3600 },
-    { name:'뇌전검',    s:0.70, d:0.18, x:0.04, cost:3700,   price:6600 },
-    { name:'흑염검',    s:0.64, d:0.21, x:0.08, cost:5900,   price:12000 },
-    { name:'용살검',    s:0.58, d:0.24, x:0.12, cost:9200,   price:21000 },
-    { name:'성검',      s:0.52, d:0.27, x:0.16, cost:14000,  price:37000 },
-    { name:'마검',      s:0.46, d:0.29, x:0.20, cost:21000,  price:64000 },
-    { name:'심연검',    s:0.40, d:0.32, x:0.24, cost:31000,  price:110000 },
-    { name:'천공검',    s:0.34, d:0.34, x:0.28, cost:46000,  price:190000 },
-    { name:'파멸검',    s:0.29, d:0.36, x:0.32, cost:68000,  price:330000 },
-    { name:'창세검',    s:0.24, d:0.37, x:0.36, cost:100000, price:570000 },
-    { name:'종말검',    s:0.19, d:0.38, x:0.40, cost:150000, price:980000 },
-    { name:'신검',      s:0.15, d:0.39, x:0.44, cost:220000, price:1700000 },
-    { name:'초월검',    s:0.11, d:0.39, x:0.48, cost:330000, price:2900000 },
-    { name:'무한검',    s:0.08, d:0.38, x:0.52, cost:490000, price:5000000 },
-    { name:'개념검',    s:0.05, d:0.37, x:0.56, cost:730000, price:8700000 },
-    { name:'갓검',      s:null, d:null, x:null, cost:null,   price:16000000 }
+    { name:'낡은 단검', tier:'녹슨 무쇠', s:1.00, d:0.00, x:0.00, cost:100,    price:0,
+      blade:'dagger',  guard:'nub',     a:'#4A443E', b:'#857D73', edge:'#A89F93', guardC:'#3E3730', gem:'#2E2823', glow:'rgba(160,150,135,.12)', size:2,  aura:0,   fx:'none' },
+    { name:'강철 검',   tier:'강철',     s:0.95, d:0.00, x:0.00, cost:220,    price:180,
+      blade:'straight',guard:'bar',     a:'#5A5A5C', b:'#A3A5A8', edge:'#C9CBCE', guardC:'#4A4A4C', gem:'#6E6E70', glow:'rgba(170,175,180,.2)',  size:4,  aura:.02, fx:'none' },
+    { name:'기사의 검', tier:'백은',     s:0.90, d:0.00, x:0.00, cost:450,    price:430,
+      blade:'broad',   guard:'curve',   a:'#6E7684', b:'#BFC8D4', edge:'#E4EAF1', guardC:'#5A6170', gem:'#8F9AA8', glow:'rgba(180,195,215,.3)',  size:6,  aura:.04, fx:'none' },
+    { name:'은빛 장검', tier:'순은',     s:0.85, d:0.00, x:0.00, cost:800,    price:980,
+      blade:'leaf',    guard:'quillon', a:'#7D8896', b:'#D5DEE8', edge:'#F2F7FB', guardC:'#666F7C', gem:'#B8C6D6', glow:'rgba(200,215,235,.4)',  size:9,  aura:.06, fx:'none' },
+    { name:'화염검',    tier:'화염',     s:0.80, d:0.10, x:0.00, cost:1400,   price:1900,
+      blade:'flame',   guard:'curve',   a:'#7A2E12', b:'#F0863C', edge:'#FFD5A0', guardC:'#5E2410', gem:'#FF9A3C', glow:'rgba(240,120,50,.55)',  size:14, aura:.10, fx:'embers' },
+    { name:'서리검',    tier:'서리',     s:0.75, d:0.15, x:0.00, cost:2300,   price:3600,
+      blade:'shard',   guard:'spike',   a:'#1E4A5E', b:'#7FC8E0', edge:'#D6F2FB', guardC:'#1A3C4C', gem:'#A8E4F5', glow:'rgba(120,200,225,.55)', size:14, aura:.10, fx:'frost' },
+    { name:'뇌전검',    tier:'뇌전',     s:0.70, d:0.18, x:0.04, cost:3700,   price:6600,
+      blade:'prism',   guard:'wing',    a:'#1F5B66', b:'#6EE0E8', edge:'#C9FAFE', guardC:'#1A4850', gem:'#4FE8F5', glow:'rgba(80,225,240,.6)',   size:16, aura:.12, fx:'spark' },
+    { name:'흑염검',    tier:'흑염',     s:0.64, d:0.21, x:0.08, cost:5900,   price:12000,
+      blade:'katana',  guard:'quillon', a:'#2A1420', b:'#9C2E5A', edge:'#F06A96', guardC:'#22101A', gem:'#E03A72', glow:'rgba(200,50,100,.6)',   size:18, aura:.13, fx:'embers' },
+    { name:'용살검',    tier:'용비늘',   s:0.58, d:0.24, x:0.12, cost:9200,   price:21000,
+      blade:'cleaver', guard:'spike',   a:'#1E4A2E', b:'#6FC47E', edge:'#C4F0CE', guardC:'#183824', gem:'#4FD36A', glow:'rgba(90,200,120,.6)',   size:18, aura:.14, fx:'none' },
+    { name:'성검',      tier:'성광',     s:0.52, d:0.27, x:0.16, cost:14000,  price:37000,
+      blade:'leaf',    guard:'wing',    a:'#7A5718', b:'#F5D67A', edge:'#FFF3CC', guardC:'#6B5424', gem:'#FFE08A', glow:'rgba(245,205,90,.65)',  size:22, aura:.16, fx:'runes' },
+    { name:'마검',      tier:'마력',     s:0.46, d:0.29, x:0.20, cost:21000,  price:64000,
+      blade:'flame',   guard:'quillon', a:'#4A1A5E', b:'#C46FE0', edge:'#EEC9FA', guardC:'#3A1248', gem:'#D84FF5', glow:'rgba(195,90,225,.65)',  size:24, aura:.18, fx:'runes' },
+    { name:'심연검',    tier:'심연',     s:0.40, d:0.32, x:0.24, cost:31000,  price:110000,
+      blade:'hollow',  guard:'ring',    a:'#14203E', b:'#4A6FC4', edge:'#A8C0F0', guardC:'#101A30', gem:'#3A6FE8', glow:'rgba(70,110,200,.68)',  size:26, aura:.20, fx:'void' },
+    { name:'천공검',    tier:'천공',     s:0.34, d:0.34, x:0.28, cost:46000,  price:190000,
+      blade:'prism',   guard:'wing',    a:'#1A4A6E', b:'#6FC8F0', edge:'#C4EAFA', guardC:'#143A56', gem:'#4FB8F5', glow:'rgba(90,190,240,.7)',   size:28, aura:.22, fx:'spark' },
+    { name:'파멸검',    tier:'파멸',     s:0.29, d:0.36, x:0.32, cost:68000,  price:330000,
+      blade:'cleaver', guard:'spike',   a:'#5E1418', b:'#E04A3C', edge:'#FFB8A0', guardC:'#480F12', gem:'#FF5A3C', glow:'rgba(230,70,50,.72)',   size:30, aura:.24, fx:'embers' },
+    { name:'창세검',    tier:'창세',     s:0.24, d:0.37, x:0.36, cost:100000, price:570000,
+      blade:'broad',   guard:'curve',   a:'#6E5A14', b:'#F0DC6F', edge:'#FFF8C4', guardC:'#564610', gem:'#FFE84F', glow:'rgba(245,225,90,.74)',  size:32, aura:.25, fx:'runes' },
+    { name:'종말검',    tier:'종말',     s:0.19, d:0.38, x:0.40, cost:150000, price:980000,
+      blade:'flame',   guard:'quillon', a:'#2E0F1A', b:'#8A1E3C', edge:'#E04A6E', guardC:'#240B14', gem:'#C42E52', glow:'rgba(190,40,80,.76)',   size:34, aura:.26, fx:'void' },
+    { name:'신검',      tier:'신성',     s:0.15, d:0.39, x:0.44, cost:220000, price:1700000,
+      blade:'twin',    guard:'halo',    a:'#8A6E1A', b:'#FFEFA8', edge:'#FFFFFF', guardC:'#6E5614', gem:'#FFF4C4', glow:'rgba(255,230,140,.8)',  size:36, aura:.28, fx:'runes' },
+    { name:'초월검',    tier:'초월',     s:0.11, d:0.39, x:0.48, cost:330000, price:2900000,
+      blade:'prism',   guard:'wing',    a:'#3A2470', b:'#B89BFF', edge:'#E8DCFF', guardC:'#2C1B54', gem:'#9C7BFF', glow:'rgba(150,110,255,.82)', size:38, aura:.29, fx:'prism' },
+    { name:'무한검',    tier:'무한',     s:0.08, d:0.38, x:0.52, cost:490000, price:5000000,
+      blade:'hollow',  guard:'ring',    a:'#0E3A4A', b:'#5FE8D8', edge:'#C4FFF6', guardC:'#0A2C38', gem:'#3FF0D8', glow:'rgba(70,235,215,.84)',  size:40, aura:.30, fx:'void' },
+    { name:'개념검',    tier:'개념',     s:0.05, d:0.37, x:0.56, cost:730000, price:8700000,
+      blade:'shard',   guard:'spike',   a:'#4A0F3A', b:'#E85FC8', edge:'#FFC4EE', guardC:'#380B2C', gem:'#FF3FD0', glow:'rgba(235,80,200,.86)',  size:42, aura:.31, fx:'prism' },
+    { name:'갓검',      tier:'신위',     s:null, d:null, x:null, cost:null,   price:16000000,
+      blade:'twin',    guard:'halo',    a:'#9EB6F0', b:'#FFFFFF', edge:'#FFFFFF', guardC:'#8A93B8', gem:'#FFFFFF', glow:'rgba(215,230,255,.92)', size:50, aura:.34, fx:'prism' }
   ];
 
   var MAX = SWORDS.length - 1;
-  var TIERS = ['무쇠','은빛','뇌전','성흔','마염','심연','초월'];
   var ITEMS = {
     bless:   { label:'축복', mult:3 },
     protect: { label:'파괴 방지', mult:4 },
     master:  { label:'장인의 손길', mult:7 }
   };
-  var SAVE_KEY = 'forge-sword-kr-v1';
+  var START_GOLD = 100000;
+  var SAVE_KEY = 'forge-sword-kr-v2';
+  var CODE_TAG = 'SWORD2';
 
   /* ───────── 상태 ───────── */
   function freshState(){
     return {
-      gold: 1000,
+      gold: START_GOLD,
       level: 0,
       buffs: { bless:false, protect:false, master:false },
       sound: true,
       log: [],
-      stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:1000 }
+      stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:START_GOLD }
     };
   }
   var state = freshState();
   var rolling = false;
   var sellArmed = false, sellTimer = null;
   var resetArmed = false, resetTimer = null;
+  var builtLevel = -1;
+  var uidSeq = 0;
 
-  /* ───────── 도우미 ───────── */
   var $ = function(id){ return document.getElementById(id); };
   function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
   function gold(n){ return fmt(n) + ' G'; }
@@ -910,14 +734,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     catch (e) { return false; }
   }
 
-  /* ───────── 확률 계산 ─────────
-     보호 아이템은 기본 확률을 재분배할 뿐, 총합은 항상 1입니다. */
+  /* ───────── 확률 ─────────
+     보호 아이템은 확률을 재분배할 뿐, 네 구간의 합은 항상 1입니다. */
   function odds(level, buffs){
     var row = SWORDS[level];
     if (row.s === null) return null;
     var s = row.s, d = row.d, x = row.x;
     var k = Math.max(0, 1 - s - d - x);
-
     if (buffs.bless){
       var add = Math.min(0.10, 1 - s);
       var rest = k + d + x;
@@ -931,30 +754,128 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (buffs.master){ k += d + x; d = 0; x = 0; }
     return { s:s, k:k, d:d, x:x };
   }
-
   function itemPrice(key){
     var row = SWORDS[state.level];
     if (row.cost === null) return null;
     return Math.round(row.cost * ITEMS[key].mult);
   }
 
-  /* ───────── 저장 ───────── */
+  /* ───────── 검 그리기 ───────── */
+  function swordMarkup(lv, cls){
+    var sp = SWORDS[lv];
+    var id = 'g' + (++uidSeq);
+    var blade = BLADES[sp.blade];
+    var rule = HOLLOW[sp.blade] ? ' fill-rule="evenodd"' : '';
+    var guard = GUARDS[sp.guard] || '';
+    return '<svg class="' + cls + '" viewBox="0 0 160 330" aria-hidden="true">' +
+      '<defs>' +
+        '<linearGradient id="bg' + id + '" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop class="stop-a" offset="0%"></stop><stop class="stop-b" offset="42%"></stop>' +
+          '<stop class="stop-b" offset="58%"></stop><stop class="stop-a" offset="100%"></stop>' +
+        '</linearGradient>' +
+        '<linearGradient id="sh' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#FFFFFF" stop-opacity=".32"></stop>' +
+          '<stop offset="58%" stop-color="#FFFFFF" stop-opacity="0"></stop>' +
+        '</linearGradient>' +
+        '<linearGradient id="gp' + id + '" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop offset="0%" stop-color="#241C15"></stop>' +
+          '<stop offset="50%" stop-color="#4E3C2C"></stop>' +
+          '<stop offset="100%" stop-color="#241C15"></stop>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<g class="fxlayer">' +
+        '<circle class="ring ring-1" cx="80" cy="140" r="62"></circle>' +
+        '<circle class="ring ring-2" cx="80" cy="140" r="80"></circle>' +
+      '</g>' +
+      '<g class="sword-body">' +
+        '<ellipse class="aura" cx="80" cy="120" rx="54" ry="114"></ellipse>' +
+        '<path class="blade" d="' + blade + '"' + rule + ' fill="url(#bg' + id + ')"></path>' +
+        '<path class="blade-sheen" d="' + blade + '"' + rule + ' fill="url(#sh' + id + ')"></path>' +
+        (HASRING[sp.guard] ? '<circle class="guard-ring" cx="80" cy="203" r="30"></circle>' : '') +
+        (guard ? '<path class="blade-guard" d="' + guard + '"></path>' : '') +
+        '<circle class="blade-gem" cx="80" cy="203" r="5"></circle>' +
+        '<rect x="71" y="211" width="18" height="63" rx="5" fill="url(#gp' + id + ')"></rect>' +
+        '<path class="wrap" d="M71 223 H89 M71 235 H89 M71 247 H89 M71 259 H89"></path>' +
+        '<circle class="blade-guard" cx="80" cy="286" r="14"></circle>' +
+        '<circle class="blade-gem" cx="80" cy="286" r="6"></circle>' +
+      '</g>' +
+    '</svg>';
+  }
+
+  var LOCKED = { a:'#3A342E', b:'#5A5249', edge:'#756A5E', guardC:'#2E2823',
+                 gem:'#241F1A', glow:'rgba(120,110,96,.14)', size:3, aura:0 };
+  function paint(svg, lv, locked){
+    var sp = locked ? LOCKED : SWORDS[lv];
+    svg.style.setProperty('--blade-a', sp.a);
+    svg.style.setProperty('--blade-b', sp.b);
+    svg.style.setProperty('--edge', sp.edge);
+    svg.style.setProperty('--guard', sp.guardC);
+    svg.style.setProperty('--gem', sp.gem);
+    svg.style.setProperty('--glow', sp.glow);
+    svg.style.setProperty('--glow-size', sp.size + 'px');
+    svg.style.setProperty('--aura', String(sp.aura));
+  }
+
+  var MOTES = {
+    embers:{ n:11, min:2, max:4, dur:2300, spread:900 },
+    frost: { n:9,  min:2, max:5, dur:4200, spread:1600 },
+    spark: { n:7,  min:2, max:3, dur:1500, spread:700 },
+    runes: { n:8,  min:2, max:4, dur:3400, spread:1400 },
+    void:  { n:9,  min:2, max:4, dur:3800, spread:1500 },
+    prism: { n:12, min:2, max:4, dur:2800, spread:1200 }
+  };
+  function ambient(lv){
+    var wrap = $('ambient');
+    wrap.textContent = '';
+    var stage = $('swordstage');
+    var fx = SWORDS[lv].fx;
+    stage.className = 'swordstage' + (fx === 'none' ? '' : ' amb-' + fx);
+    if (reduced() || fx === 'none') return;
+    var cfg = MOTES[fx];
+    if (!cfg) return;
+    for (var i = 0; i < cfg.n; i++){
+      var m = document.createElement('i');
+      m.className = 'mote m-' + fx;
+      m.style.left = (6 + Math.random() * 88) + '%';
+      m.style.top = (18 + Math.random() * 60) + '%';
+      var sz = cfg.min + Math.random() * (cfg.max - cfg.min);
+      m.style.width = sz.toFixed(1) + 'px';
+      m.style.height = sz.toFixed(1) + 'px';
+      m.style.setProperty('--dur', (cfg.dur + Math.random() * cfg.spread).toFixed(0) + 'ms');
+      m.style.setProperty('--delay', (Math.random() * cfg.dur).toFixed(0) + 'ms');
+      wrap.appendChild(m);
+    }
+  }
+
+  function buildSword(){
+    var slot = $('swordSlot');
+    slot.innerHTML = swordMarkup(state.level, 'sword');
+    paint(slot.firstChild, state.level, false);
+    ambient(state.level);
+    builtLevel = state.level;
+  }
+
+  /* ───────── 저장 1 · 브라우저 자동 저장 ───────── */
   function save(){
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+    cloudQueue();
+    touchSaveState();
   }
-  function load(){
+  function loadLocal(){
     try {
       var raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
+      if (!raw) return false;
       adopt(JSON.parse(raw));
-    } catch (e) {}
+      return true;
+    } catch (e) { return false; }
   }
   function adopt(data){
     if (!data || typeof data !== 'object') return;
     var base = freshState();
+    var st = data.stats || {};
     state = {
-      gold:  typeof data.gold === 'number' && isFinite(data.gold) ? Math.max(0, data.gold) : base.gold,
-      level: typeof data.level === 'number' ? Math.min(MAX, Math.max(0, data.level | 0)) : 0,
+      gold:  num(data.gold, base.gold),
+      level: Math.min(MAX, Math.max(0, (data.level | 0) || 0)),
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -962,11 +883,137 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       },
       sound: data.sound !== false,
       log: Array.isArray(data.log) ? data.log.slice(0, 40) : [],
-      stats: Object.assign({}, base.stats, data.stats || {})
+      stats: {
+        tries:  num(st.tries, 0),  wins:   num(st.wins, 0),
+        booms:  num(st.booms, 0),  spent:  num(st.spent, 0),
+        earned: num(st.earned, 0), peak:   num(st.peak, base.gold),
+        best:   Math.min(MAX, Math.max(0, num(st.best, 0)))
+      }
+    };
+  }
+  function num(v, fallback){
+    return (typeof v === 'number' && isFinite(v) && v >= 0) ? v : fallback;
+  }
+
+  /* ───────── 저장 2 · 저장 코드 (기기 간 이동) ───────── */
+  function b64enc(str){
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/=+$/, '');
+  }
+  function b64dec(s){
+    var pad = s.length % 4 ? '===='.slice(s.length % 4) : '';
+    var bin = atob(s + pad), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function checksum(s){
+    var t = 0;
+    for (var i = 0; i < s.length; i++) t = (t * 31 + s.charCodeAt(i)) % 1296;
+    var out = t.toString(36).toUpperCase();
+    return out.length < 2 ? '0' + out : out;
+  }
+  /* 기록(log)은 길어서 코드에 담지 않습니다 — 진행에 필요한 값만 압축합니다. */
+  function encodeState(){
+    var st = state.stats;
+    var body = b64enc(JSON.stringify({
+      g:Math.round(state.gold), l:state.level,
+      b:(state.buffs.bless?1:0) | (state.buffs.protect?2:0) | (state.buffs.master?4:0),
+      t:st.tries, w:st.wins, k:st.booms, e:st.best,
+      s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak)
+    }));
+    return CODE_TAG + '-' + body + '-' + checksum(body);
+  }
+  function decodeCode(code){
+    var clean = String(code || '').replace(/\s+/g, '');
+    var parts = clean.split('-');
+    if (parts.length !== 3 || parts[0] !== CODE_TAG) throw new Error('형식이 맞지 않는 코드입니다.');
+    if (checksum(parts[1]) !== parts[2].toUpperCase()) throw new Error('코드가 손상되었습니다. 전체를 다시 복사해 주세요.');
+    var d = JSON.parse(b64dec(parts[1]));
+    return {
+      gold:d.g, level:d.l, sound:state.sound, log:[],
+      buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },
+      stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p }
     };
   }
 
-  /* ───────── 소리 (WebAudio, 외부 파일 없음) ───────── */
+  /* ───────── 저장 3 · 클라우드 (아티팩트에서만, 켜져 있을 때) ─────────
+     capabilities 에 db·user 가 선언되어 있지 않으면 use() 가 null 을 주고
+     이 기능은 그냥 꺼진 채로 남습니다. 게임은 그대로 동작합니다. */
+  var cloudRef = null, cloudBusy = false, cloudDirty = false, cloudTimer = null;
+  var cloudStatus = 'off';
+
+  function cloudQueue(){
+    if (!cloudRef) return;
+    cloudDirty = true;
+    clearTimeout(cloudTimer);
+    cloudTimer = setTimeout(cloudFlush, 1500);
+  }
+  function cloudFlush(){
+    if (!cloudRef || cloudBusy || !cloudDirty) return;
+    cloudBusy = true; cloudDirty = false;
+    cloudRef.set({ code: encodeState(), at: Date.now() }).then(function(){
+      cloudBusy = false; cloudStatus = 'on'; touchSaveState();
+      if (cloudDirty) cloudFlush();
+    }, function(){
+      cloudBusy = false; cloudStatus = 'error'; touchSaveState();
+    });
+  }
+  function cloudInit(){
+    if (!window.claude || typeof window.claude.use !== 'function') return;
+    Promise.all([window.claude.use('db'), window.claude.use('user')]).then(function(pair){
+      var db = pair[0], user = pair[1];
+      if (!db || !user) return;
+      return user.id().then(function(uid){
+        if (!uid) return;
+        cloudRef = db.doc('data/users/' + uid + '/save');
+        cloudStatus = 'on';
+        touchSaveState();
+        return cloudRef.get().then(function(snap){
+          if (!snap.exists) return;
+          var d = snap.data();
+          if (!d || !d.code) return;
+          offerCloud(d.code, d.at);
+        });
+      });
+    }).catch(function(){ cloudStatus = 'off'; });
+  }
+  function offerCloud(code, at){
+    var here = encodeState();
+    if (code === here) return;
+    var note = $('cloudNote');
+    var when = at ? new Date(at).toLocaleString('ko-KR') : '';
+    note.textContent = '';
+    var p = document.createElement('div');
+    p.textContent = '클라우드에 저장된 기록이 있습니다' + (when ? ' (' + when + ')' : '') + '.';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '클라우드 기록 불러오기';
+    b.addEventListener('click', function(){
+      try {
+        adopt(decodeCode(code));
+        builtLevel = -1;
+        verdict('ok', '클라우드 기록을 불러왔습니다.');
+        note.hidden = true;
+        render(); save();
+      } catch (e) {
+        p.textContent = '클라우드 기록을 읽지 못했습니다.';
+      }
+    });
+    note.appendChild(p); note.appendChild(b);
+    note.hidden = false;
+  }
+
+  var savedAt = 0;
+  function touchSaveState(){
+    savedAt = Date.now();
+    var el = $('saveState');
+    if (cloudStatus === 'on') { el.className = 'save-state'; el.innerHTML = '<b>자동 저장됨</b> &middot; 클라우드 동기화'; }
+    else if (cloudStatus === 'error') { el.className = 'save-state warn'; el.innerHTML = '<b>이 브라우저에만 저장됨</b> &middot; 클라우드 실패'; }
+    else { el.className = 'save-state'; el.innerHTML = '<b>자동 저장됨</b> &middot; 이 브라우저'; }
+  }
+
+  /* ───────── 소리 ───────── */
   var actx = null;
   function audio(){
     if (!state.sound) return null;
@@ -994,8 +1041,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var c = audio(); if (!c) return;
     try {
       var n = Math.floor(c.sampleRate * dur);
-      var buf = c.createBuffer(1, n, c.sampleRate);
-      var ch = buf.getChannelData(0);
+      var buf = c.createBuffer(1, n, c.sampleRate), ch = buf.getChannelData(0);
       for (var i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / n);
       var src = c.createBufferSource(); src.buffer = buf;
       var flt = c.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = cutoff || 1500;
@@ -1005,7 +1051,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     } catch (e) {}
   }
 
-  /* ───────── 불꽃 ───────── */
+  /* ───────── 연출 ───────── */
   function burst(count, kind){
     if (reduced()) return;
     var wrap = $('sparks');
@@ -1024,16 +1070,23 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function flash(kind){
     var el = $('flash');
-    el.className = 'flash';
-    void el.offsetWidth;
-    el.classList.add('f-' + kind);
+    el.className = 'flash'; void el.offsetWidth; el.classList.add('f-' + kind);
   }
   function quake(){
     var el = $('forge');
-    el.classList.remove('quake');
-    void el.offsetWidth;
-    el.classList.add('quake');
+    el.classList.remove('quake'); void el.offsetWidth; el.classList.add('quake');
     setTimeout(function(){ el.classList.remove('quake'); }, 520);
+  }
+  function verdict(kind, text){
+    var el = $('verdict');
+    el.className = 'verdict v-' + kind;
+    el.textContent = text;
+  }
+  function highlight(kind){
+    var map = { success:'valS', keep:'valK', down:'valD', boom:'valX' };
+    ['valS','valK','valD','valX'].forEach(function(id){
+      $(id).classList.toggle('hit', id === map[kind]);
+    });
   }
 
   /* ───────── 그리기 ───────── */
@@ -1048,13 +1101,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('hudTries').textContent = fmt(state.stats.tries);
     $('hudBoom').textContent = fmt(state.stats.booms);
 
-    $('tierband').textContent = TIERS[Math.min(TIERS.length - 1, Math.floor(lv / 3))];
+    if (builtLevel !== lv) buildSword();
+    $('tierband').textContent = row.tier;
     $('lvText').textContent = '+' + lv;
     $('swordName').textContent = row.name;
-    $('swordBody').parentNode.setAttribute('class',
-      'sword tier-' + Math.min(6, Math.floor(lv / 3)));
 
-    // 확률 바
     var parts = maxed ? { s:0, k:1, d:0, x:0 } : o;
     $('segS').style.flexBasis = (parts.s * 100) + '%';
     $('segK').style.flexBasis = (parts.k * 100) + '%';
@@ -1065,7 +1116,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('valD').textContent = maxed ? '—' : pct(o.d);
     $('valX').textContent = maxed ? '—' : pct(o.x);
 
-    // 강화 / 판매 버튼
     var fb = $('forgeBtn');
     if (maxed){
       fb.firstChild.nodeValue = '최고 단계 달성';
@@ -1085,30 +1135,21 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       $('sellPrice').textContent = row.price > 0 ? gold(row.price) : '판매 불가';
     }
 
-    // 풀무질 — 진행이 막혔을 때만
-    var stuck = !maxed && state.gold < row.cost && row.price <= 0;
-    $('bellows').hidden = !stuck;
+    $('bellows').hidden = !(!maxed && state.gold < row.cost && row.price <= 0);
 
-    // 상점
     ['bless','protect','master'].forEach(function(key){
-      var btn = $('buy' + key.charAt(0).toUpperCase() + key.slice(1));
-      var price = itemPrice(key);
-      var held = state.buffs[key];
-      var label = $('pr' + key.charAt(0).toUpperCase() + key.slice(1));
+      var cap = key.charAt(0).toUpperCase() + key.slice(1);
+      var btn = $('buy' + cap), label = $('pr' + cap);
+      var price = itemPrice(key), held = state.buffs[key];
       btn.classList.toggle('held', held);
-      if (held){
-        label.textContent = '적용됨';
-        btn.disabled = true;
-      } else if (price === null){
-        label.textContent = '—';
-        btn.disabled = true;
-      } else {
+      if (held){ label.textContent = '적용됨'; btn.disabled = true; }
+      else if (price === null){ label.textContent = '—'; btn.disabled = true; }
+      else {
         label.textContent = gold(price);
         btn.disabled = rolling || state.gold < price || (key === 'protect' && o && o.x === 0);
       }
     });
 
-    // 적용 중인 효과
     var buffWrap = $('buffs');
     buffWrap.textContent = '';
     ['bless','protect','master'].forEach(function(key){
@@ -1119,16 +1160,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       buffWrap.appendChild(chip);
     });
 
-    // 통계
     $('stTries').textContent = fmt(state.stats.wins) + ' / ' + fmt(state.stats.tries);
     $('stRate').textContent = state.stats.tries
-      ? (state.stats.wins / state.stats.tries * 100).toFixed(1) + '%'
-      : '—';
+      ? (state.stats.wins / state.stats.tries * 100).toFixed(1) + '%' : '—';
     $('stSpent').textContent = gold(state.stats.spent);
     $('stEarned').textContent = gold(state.stats.earned);
     $('stPeak').textContent = gold(state.stats.peak);
 
     renderLog();
+    renderCodex();
     renderChart();
   }
 
@@ -1145,39 +1185,64 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.log.forEach(function(e){
       var li = document.createElement('li');
       var tag = document.createElement('span');
-      tag.className = 'tag t-' + e.kind;
-      tag.textContent = e.tag;
+      tag.className = 'tag t-' + e.kind; tag.textContent = e.tag;
       var txt = document.createElement('span');
-      txt.className = 'txt';
-      txt.textContent = e.text;
+      txt.className = 'txt'; txt.textContent = e.text;
       var r = document.createElement('span');
-      r.className = 'r';
-      r.textContent = e.roll || '';
+      r.className = 'r'; r.textContent = e.roll || '';
       li.appendChild(tag); li.appendChild(txt); li.appendChild(r);
       ul.appendChild(li);
     });
   }
 
-  var chartDrawn = false;
+  var codexBuilt = false;
+  function renderCodex(){
+    var grid = $('codexGrid');
+    if (!codexBuilt){
+      grid.textContent = '';
+      SWORDS.forEach(function(sp, i){
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.lv = String(i);
+        cell.innerHTML = swordMarkup(i, 'mini');
+        var lvl = document.createElement('span');
+        lvl.className = 'cl'; lvl.textContent = '+' + i;
+        var nm = document.createElement('span');
+        nm.className = 'cn';
+        cell.appendChild(lvl); cell.appendChild(nm);
+        grid.appendChild(cell);
+      });
+      codexBuilt = true;
+    }
+    var found = 0;
+    Array.prototype.forEach.call(grid.children, function(cell){
+      var i = Number(cell.dataset.lv);
+      var unlocked = i <= state.stats.best;
+      if (unlocked) found++;
+      cell.classList.toggle('locked', !unlocked);
+      cell.classList.toggle('now', i === state.level);
+      cell.querySelector('.cn').textContent = unlocked ? SWORDS[i].name : '???';
+      cell.title = unlocked ? '+' + i + ' ' + SWORDS[i].name + ' · ' + SWORDS[i].tier : '아직 만들지 못한 검';
+      paint(cell.querySelector('svg'), i, !unlocked);
+    });
+    $('codexCount').textContent = found + ' / ' + SWORDS.length;
+  }
+
+  var chartBuilt = false;
   function renderChart(){
     var body = $('chartBody');
-    if (!chartDrawn){
+    if (!chartBuilt){
       body.textContent = '';
       SWORDS.forEach(function(row, i){
         var o = odds(i, { bless:false, protect:false, master:false });
         var tr = document.createElement('tr');
         tr.dataset.lv = String(i);
-        var cells = [
-          { t:'+' + i },
-          { t:row.name },
-          { t:o ? pct(o.s) : '—', c:'c-s' },
-          { t:o ? pct(o.k) : '—' },
-          { t:o ? pct(o.d) : '—', c:'c-d' },
-          { t:o ? pct(o.x) : '—', c:'c-x' },
-          { t:row.cost === null ? '—' : fmt(row.cost) },
-          { t:row.price > 0 ? fmt(row.price) : '—', c:'c-p' }
-        ];
-        cells.forEach(function(cell){
+        [{ t:'+' + i }, { t:row.name },
+         { t:o ? pct(o.s) : '—', c:'c-s' }, { t:o ? pct(o.k) : '—' },
+         { t:o ? pct(o.d) : '—', c:'c-d' }, { t:o ? pct(o.x) : '—', c:'c-x' },
+         { t:row.cost === null ? '—' : fmt(row.cost) },
+         { t:row.price > 0 ? fmt(row.price) : '—', c:'c-p' }
+        ].forEach(function(cell){
           var td = document.createElement('td');
           if (cell.c) td.className = cell.c;
           td.textContent = cell.t;
@@ -1185,7 +1250,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         });
         body.appendChild(tr);
       });
-      chartDrawn = true;
+      chartBuilt = true;
     }
     Array.prototype.forEach.call(body.children, function(tr){
       tr.classList.toggle('now', Number(tr.dataset.lv) === state.level);
@@ -1193,19 +1258,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   function pushLog(kind, tag, text, roll){
-    state.log.unshift({
-      kind: kind,
-      tag: tag,
-      text: text,
-      roll: roll == null ? '' : (roll * 100).toFixed(1)
-    });
+    state.log.unshift({ kind:kind, tag:tag, text:text,
+      roll: roll == null ? '' : (roll * 100).toFixed(1) });
     if (state.log.length > 40) state.log.length = 40;
-  }
-
-  function verdict(kind, text){
-    var el = $('verdict');
-    el.className = 'verdict v-' + kind;
-    el.textContent = text;
   }
 
   /* ───────── 굴림 마커 ─────────
@@ -1222,19 +1277,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     function frame(now){
       var t = Math.min(1, (now - t0) / dur);
       var e = 1 - Math.pow(1 - t, 3);
-      var pos = (e * (laps + r)) % 1;
-      el.style.left = (pos * 100).toFixed(3) + '%';
+      el.style.left = (((e * (laps + r)) % 1) * 100).toFixed(3) + '%';
       if (t < 1) requestAnimationFrame(frame);
       else { el.style.left = (r * 100).toFixed(3) + '%'; done(); }
     }
     requestAnimationFrame(frame);
-  }
-
-  function highlight(kind){
-    var map = { success:'valS', keep:'valK', down:'valD', boom:'valX' };
-    ['valS','valK','valD','valX'].forEach(function(id){
-      $(id).classList.toggle('hit', id === map[kind]);
-    });
   }
 
   /* ───────── 강화 ───────── */
@@ -1244,8 +1291,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (row.cost === null || state.gold < row.cost) return;
 
     var o = odds(state.level, state.buffs);
-    var r = Math.random();
-    var kind;
+    var r = Math.random(), kind;
     if (r < o.s) kind = 'success';
     else if (r < o.s + o.k) kind = 'keep';
     else if (r < o.s + o.k + o.d) kind = 'down';
@@ -1270,33 +1316,28 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       anvil.classList.remove('is-rolling');
       $('rollText').textContent = '굴림 ' + (r * 100).toFixed(1) + ' / 100';
       highlight(kind);
-      resolve(kind, r, row);
+      resolve(kind, r);
     });
   }
 
-  function resolve(kind, r, row){
-    var anvil = $('anvil');
-    var from = state.level;
+  function resolve(kind, r){
+    var anvil = $('anvil'), from = state.level;
 
     if (kind === 'success'){
       state.level = Math.min(MAX, from + 1);
       state.stats.wins += 1;
       if (state.level > state.stats.best) state.stats.best = state.level;
       anvil.classList.add('fx-success');
-      flash('ok');
-      burst(20, 'ok');
+      flash('ok'); burst(20, 'ok');
       tone(660, 0.13, 'triangle', 0.075);
       tone(990, 0.24, 'triangle', 0.062, 0.1);
       verdict('ok', '강화 성공! +' + state.level + ' ' + SWORDS[state.level].name);
       pushLog('ok', '성공', '+' + from + ' → +' + state.level, r);
-
     } else if (kind === 'keep'){
       anvil.classList.add('fx-keep');
-      burst(7);
-      tone(180, 0.17, 'sine', 0.085);
+      burst(7); tone(180, 0.17, 'sine', 0.085);
       verdict('keep', '실패했지만 단계는 유지되었습니다.');
       pushLog('keep', '유지', '+' + from + ' 유지', r);
-
     } else if (kind === 'down'){
       state.level = Math.max(0, from - 1);
       anvil.classList.add('fx-down');
@@ -1305,14 +1346,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       tone(160, 0.28, 'sawtooth', 0.055, 0.1);
       verdict('down', '강화 실패 — 단계가 하락했습니다.');
       pushLog('down', '하락', '+' + from + ' → +' + state.level, r);
-
     } else {
       state.level = 0;
       state.stats.booms += 1;
       anvil.classList.add('fx-boom');
-      flash('boom');
-      quake();
-      burst(30, 'boom');
+      flash('boom'); quake(); burst(30, 'boom');
       noise(0.5, 0.13, 1200);
       tone(90, 0.55, 'sawtooth', 0.11);
       verdict('boom', '검이 산산조각 났습니다. +0부터 다시.');
@@ -1324,12 +1362,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     setTimeout(function(){
       anvil.classList.remove('fx-success','fx-keep','fx-down','fx-boom');
       rolling = false;
-      render();
-      save();
+      render(); save();
     }, kind === 'boom' ? 640 : 380);
   }
 
-  /* ───────── 판매 / 구매 / 풀무질 ───────── */
   function doSell(){
     var row = SWORDS[state.level];
     if (row.price <= 0) return;
@@ -1345,8 +1381,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     highlight(null);
     tone(880, 0.1, 'triangle', 0.06);
     tone(1320, 0.18, 'triangle', 0.05, 0.08);
-    render();
-    save();
+    render(); save();
   }
 
   function buy(key){
@@ -1357,8 +1392,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.buffs[key] = true;
     pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
     tone(520, 0.09, 'triangle', 0.05);
-    render();
-    save();
+    render(); save();
   }
 
   /* ───────── 이벤트 ───────── */
@@ -1370,9 +1404,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (row.price <= 0) return;
     if (row.price >= 30000 && !sellArmed){
       sellArmed = true;
-      var sb = $('sellBtn');
-      sb.firstChild.nodeValue = '정말 팔까요?';
-      sb.classList.add('armed');
+      this.firstChild.nodeValue = '정말 팔까요?';
+      this.classList.add('armed');
       $('sellPrice').textContent = '한 번 더 누르기';
       clearTimeout(sellTimer);
       sellTimer = setTimeout(function(){ sellArmed = false; render(); }, 3200);
@@ -1385,8 +1418,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.gold += 300;
     pushLog('buy', '풀무', '풀무질 일당 +300 G', null);
     tone(320, 0.09, 'sine', 0.05);
-    render();
-    save();
+    render(); save();
   });
 
   $('buyBless').addEventListener('click', function(){ buy('bless'); });
@@ -1409,9 +1441,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       clearTimeout(resetTimer);
       var self = this;
       resetTimer = setTimeout(function(){
-        resetArmed = false;
-        self.textContent = '초기화';
-        self.classList.remove('armed');
+        resetArmed = false; self.textContent = '초기화'; self.classList.remove('armed');
       }, 3200);
       return;
     }
@@ -1421,28 +1451,88 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var keepSound = state.sound;
     state = freshState();
     state.sound = keepSound;
+    builtLevel = -1;
     verdict('keep', '대장간을 새로 열었습니다.');
     $('rollText').textContent = '—';
     $('marker').classList.remove('on');
     highlight(null);
-    render();
-    save();
+    render(); save();
+  });
+
+  /* 저장 코드 */
+  $('exportBtn').addEventListener('click', function(){
+    var box = $('exportBox');
+    $('importBox').hidden = true;
+    box.hidden = !box.hidden;
+    if (box.hidden) return;
+    var ta = $('exportText');
+    ta.value = encodeState();
+    $('exportHint').className = 'hint';
+    $('exportHint').textContent = '메모장이나 메신저에 붙여 두면 어디서든 이어할 수 있습니다.';
+    ta.focus(); ta.select();
+  });
+
+  $('copyBtn').addEventListener('click', function(){
+    var ta = $('exportText'), hint = $('exportHint');
+    ta.select();
+    function ok(){ hint.className = 'hint good'; hint.textContent = '복사했습니다. 안전한 곳에 붙여넣어 두세요.'; }
+    function fail(){ hint.className = 'hint'; hint.textContent = '자동 복사가 막혀 있습니다 — 위 칸을 직접 선택해 복사해 주세요.'; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(ta.value).then(ok, fail);
+      } else { fail(); }
+    } catch (e) { fail(); }
+  });
+
+  $('importBtn').addEventListener('click', function(){
+    var box = $('importBox');
+    $('exportBox').hidden = true;
+    box.hidden = !box.hidden;
+    if (!box.hidden) $('importText').focus();
+  });
+
+  $('loadBtn').addEventListener('click', function(){
+    var hint = $('importHint'), raw = $('importText').value;
+    if (!raw.trim()){
+      hint.className = 'hint err';
+      hint.textContent = '저장 코드를 붙여넣어 주세요.';
+      return;
+    }
+    try {
+      var data = decodeCode(raw);
+      adopt(data);
+      builtLevel = -1;
+      hint.className = 'hint good';
+      hint.textContent = '불러왔습니다 — +' + state.level + ' ' + SWORDS[state.level].name +
+                         ' · ' + gold(state.gold);
+      verdict('ok', '저장 코드를 불러왔습니다.');
+      $('rollText').textContent = '—';
+      $('marker').classList.remove('on');
+      highlight(null);
+      render(); save();
+    } catch (e) {
+      hint.className = 'hint err';
+      hint.textContent = e && e.message ? e.message : '코드를 읽지 못했습니다.';
+    }
   });
 
   document.addEventListener('keydown', function(e){
     if (e.key !== ' ' && e.key !== 'Enter') return;
-    var tag = document.activeElement && document.activeElement.tagName;
-    if (tag === 'BUTTON' || tag === 'SUMMARY') return;
+    var el = document.activeElement, tag = el && el.tagName;
+    if (tag === 'BUTTON' || tag === 'SUMMARY' || tag === 'TEXTAREA' || tag === 'INPUT') return;
     e.preventDefault();
     attempt();
   });
 
   /* ───────── 시작 ───────── */
   function boot(hot){
-    if (hot && hot.save) adopt(hot.save); else load();
+    if (hot && hot.save) adopt(hot.save);
+    else loadLocal();
     $('soundBtn').textContent = state.sound ? '소리 켬' : '소리 끔';
     $('soundBtn').setAttribute('aria-pressed', String(state.sound));
+    touchSaveState();
     render();
+    cloudInit();
   }
 
   var hot = window.claude && window.claude.hot;

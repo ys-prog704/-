@@ -2484,6 +2484,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('resetBtn').addEventListener('click', function(){
+    if (rolling) return;
     if (!resetArmed){
       resetArmed = true;
       this.textContent = '정말 초기화?';
@@ -2534,6 +2535,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!box.hidden) $('importText').focus();
   });
   $('loadBtn').addEventListener('click', function(){
+    if (rolling) return;
     var hint = $('importHint'), raw = $('importText').value;
     if (!raw.trim()){ hint.className = 'hint err'; hint.textContent = '저장 코드를 붙여넣어 주세요.'; return; }
     try {

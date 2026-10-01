@@ -145,14 +145,14 @@ img{max-width:100%}
 }
 @keyframes slide{to{background-position:240% 0}}
 
-.swordstage{position:relative;width:100%;max-width:300px;aspect-ratio:260/380}
+.swordstage{position:relative;width:100%;max-width:300px;aspect-ratio:1}
 .swordcanvas{
   /* 검 상자보다 넓게 그려서 빛줄기·후광이 네모 경계에 닿기 전에 저절로 사라지게 합니다.
-     (380×400 캔버스 중 가운데 260×380 이 검 상자와 겹칩니다) */
-  position:absolute;left:-23.077%;top:-7.895%;width:146.154%;height:105.263%;
-  display:block;pointer-events:none;transform-origin:50% 66%;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 20%,#000 80%,transparent 100%);
-  mask-image:linear-gradient(90deg,transparent 0,#000 20%,#000 80%,transparent 100%);
+     (380×380 캔버스 중 가운데 260×260 이 검 상자와 겹칩니다) */
+  position:absolute;left:-23.077%;top:-23.077%;width:146.154%;height:146.154%;
+  display:block;pointer-events:none;transform-origin:50% 50%;
+  -webkit-mask-image:radial-gradient(closest-side,#000 90%,transparent 100%);
+  mask-image:radial-gradient(closest-side,#000 90%,transparent 100%);
 }
 .tierband,.nameplate{position:relative;z-index:2}
 .sparks{position:absolute;inset:0;pointer-events:none;overflow:visible}
@@ -212,7 +212,7 @@ img{max-width:100%}
 .fx-boom .swordcanvas{animation:shatter .62s cubic-bezier(.3,.1,.5,1) forwards}
 
 .spark{
-  position:absolute;left:50%;top:46%;width:4px;height:4px;border-radius:50%;
+  position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;
   background:var(--ember);box-shadow:0 0 6px currentColor;
   animation:fly var(--dur) cubic-bezier(.16,.72,.3,1) var(--delay) forwards;
 }
@@ -386,7 +386,7 @@ img{max-width:100%}
 .dex-cell{
   position:relative;border-radius:var(--r-sm);background:var(--ink);
   border:1px solid color-mix(in srgb, var(--rc) 38%, var(--line));
-  aspect-ratio:5/9;overflow:hidden;
+  aspect-ratio:1;overflow:hidden;
   transition:transform .18s ease,box-shadow .18s ease;
 }
 .dex-cell canvas{display:block;width:100%;height:100%}
@@ -452,6 +452,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 .mult-note b{font-weight:700}
 
 .note{margin-top:16px;font-size:11.5px;line-height:1.6;color:var(--ash);text-align:center}
+.note a{color:var(--ash-2)}
 
 .flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:9}
 @keyframes flash-ok{0%{opacity:0}18%{opacity:.55}100%{opacity:0}}
@@ -510,7 +511,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <p class="tierband" id="tierband"></p>
 
       <div class="swordstage" id="swordstage">
-        <canvas class="swordcanvas" id="swordCanvas" width="380" height="400" role="img" aria-label="현재 검"></canvas>
+        <canvas class="swordcanvas" id="swordCanvas" width="380" height="380" role="img" aria-label="현재 검"></canvas>
         <div class="sparks" id="sparks" aria-hidden="true"></div>
         <div class="reveal" id="reveal" hidden aria-hidden="true">
           <div class="reveal-card">
@@ -663,7 +664,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <p class="mult-note" id="multNote"></p>
   </details>
 
-  <p class="note">밸런스는 소스의 <code>LEVELS</code>, 뽑기 확률은 <code>RARITIES</code> 배열만 고치면 됩니다.</p>
+  <p class="note">검 그림: <a href="https://github.com/crawl/tiles">Dungeon Crawl Stone Soup 타일</a> (CC0, 퍼블릭 도메인).<br>밸런스는 소스의 <code>LEVELS</code>, 뽑기 확률은 <code>RARITIES</code> 배열만 고치면 됩니다.</p>
 
 </div>
 
@@ -721,66 +722,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     { name:'혈염', word:'핏빛',     a:'#3A060C', b:'#E8304A', c:'#FFB8C0', glow:'#FF2A40', fx:'blood'  }
   ];
 
-  /* ═════════ 생김새 ═════════  160×330 좌표계, 칼끝이 위, 보호대가 y≈200 */
-  var BLADES = {
-    dagger:  'M80 74 L93 104 L93 197 L67 197 L67 104 Z',
-    straight:'M80 16 L96 60 L96 197 L64 197 L64 60 Z',
-    broad:   'M80 18 L104 62 L104 197 L56 197 L56 62 Z',
-    leaf:    'M80 14 C94 46 103 92 101 132 C100 164 99 182 99 197 L61 197 C61 182 60 164 59 132 C57 92 66 46 80 14 Z',
-    curved:  'M70 18 C96 40 108 90 102 140 C99 168 97 186 97 197 L63 197 C66 170 70 130 66 90 C63 60 62 36 70 18 Z',
-    flame:   'M80 12 C88 34 100 42 97 62 C94 82 104 92 99 114 C94 136 104 148 98 170 C94 186 97 190 97 197 L63 197 C63 190 66 186 62 170 C56 148 66 136 61 114 C56 92 66 82 63 62 C60 42 72 34 80 12 Z',
-    katana:  'M93 16 C79 56 68 112 65 197 L93 197 C97 140 101 70 100 34 C100 24 97 18 93 16 Z',
-    cleaver: 'M80 16 L107 54 L103 197 L57 197 L53 54 Z',
-    shard:   'M80 10 L92 48 L86 70 L100 108 L92 140 L102 176 L98 197 L62 197 L58 176 L68 140 L60 108 L74 70 L68 48 Z',
-    fang:    'M80 14 L96 58 L96 197 L64 197 L64 160 L57 152 L64 144 L64 128 L57 120 L64 112 L64 96 L57 88 L64 80 L64 58 Z',
-    twin:    'M80 14 L98 58 L98 197 L62 197 L62 58 Z M80 62 L88 86 L88 186 L72 186 L72 86 Z',
-    hollow:  'M80 12 C96 52 104 100 100 148 C98 174 98 188 98 197 L62 197 C62 188 62 174 60 148 C56 100 64 52 80 12 Z M80 68 C72 98 70 130 74 162 L86 162 C90 130 88 98 80 68 Z',
-    prism:   'M80 8 L94 44 L99 110 L96 170 L94 197 L66 197 L64 170 L61 110 L66 44 Z',
-    great:   'M80 6 L111 58 L108 197 L52 197 L49 58 Z'
-  };
-  var HOLLOW = { twin:1, hollow:1 };
-  var ASYM = { katana:1, curved:1 };
-  var HALF = { dagger:13, straight:16, broad:24, leaf:20, curved:18, flame:19, katana:15,
-               cleaver:26, shard:20, fang:17, twin:18, hollow:20, prism:18, great:30 };
-  var NOUNS = { dagger:'단검', straight:'장검', broad:'광검', leaf:'엽검', curved:'곡도',
-                flame:'파도검', katana:'태도', cleaver:'참마도', shard:'결정검', fang:'송곳니검',
-                twin:'쌍날검', hollow:'공허검', prism:'신검', great:'대검' };
-
-  function starPath(cx, cy, ro, ri, n){
-    var d = '';
-    for (var i = 0; i < n * 2; i++){
-      var r = i % 2 ? ri : ro, a = -Math.PI / 2 + i * Math.PI / n;
-      d += (i ? ' L' : 'M') + (cx + Math.cos(a) * r).toFixed(1) + ' ' + (cy + Math.sin(a) * r * .62).toFixed(1);
-    }
-    return d + ' Z';
-  }
-  var GUARDS = {
-    nub:       'M56 195 L104 195 L104 208 L56 208 Z',
-    bar:       'M36 195 L124 195 L124 212 L36 212 Z',
-    curve:     'M30 194 Q80 185 130 194 L130 211 Q80 202 30 211 Z',
-    quillon:   'M24 213 C24 194 42 189 60 193 L100 193 C118 189 136 194 136 213 L126 213 C126 203 114 199 102 203 L58 203 C46 199 34 203 34 213 Z',
-    crescent:  'M26 188 C34 214 126 214 134 188 C124 200 112 204 100 205 L60 205 C48 204 36 200 26 188 Z M40 198 L120 198 L120 211 L40 211 Z',
-    wing:      'M16 199 C40 184 62 189 74 195 L86 195 C98 189 120 184 144 199 C124 206 106 203 92 211 L68 211 C54 203 36 206 16 199 Z',
-    spike:     'M80 190 L118 195 L132 184 L127 203 L142 212 L116 209 L80 214 L44 209 L18 212 L33 203 L28 184 L42 195 Z',
-    ring:      'M38 196 L122 196 L122 210 L38 210 Z',
-    horn:      'M80 200 C64 200 50 196 40 186 C34 178 34 166 40 156 C42 170 48 182 60 188 L100 188 C112 182 118 170 120 156 C126 166 126 178 120 186 C110 196 96 200 80 200 Z M44 196 L116 196 L116 212 L44 212 Z',
-    dragonwing:'M80 196 C66 186 46 176 16 178 C28 184 34 190 38 196 C26 194 14 196 4 204 C22 204 36 206 48 213 L112 213 C124 206 138 204 156 204 C146 196 134 194 122 196 C126 190 132 184 144 178 C114 176 94 186 80 196 Z',
-    halo:      '',
-    star:      starPath(80, 204, 40, 14, 8)
-  };
-  var HASRING = { ring:1, halo:1 };
-
-  var BLADE_TIERS = [
-    ['dagger','straight','leaf','broad','curved'],
-    ['flame','katana','cleaver','shard','fang'],
-    ['twin','hollow','prism','great']
-  ];
-  var GUARD_TIERS = [
-    ['nub','bar','curve'],
-    ['quillon','crescent','spike','wing'],
-    ['ring','horn','dragonwing'],
-    ['halo','star','dragonwing']
-  ];
+  /* ═════════ 검 그림 ═════════
+     Dungeon Crawl Stone Soup 의 CC0 타일 그림입니다 (assets/swords/CREDITS.md).
+     아래 구역은 tools/build_swords.py 가 채웁니다. 좌표는 그림 픽셀(32×32) 기준이며
+     P 손잡이 끝 · T 칼끝 · g 손잡이 끝에서 코등이까지 거리 · h 칼날 반폭 · s 칼날 중심선 오프셋입니다.
+     SPRITE_POOLS 는 일반·희귀·영웅 등급에서 뽑을 그림, SPRITE_SIGNATURE 는 속성별 [전설, 신화] 그림입니다. */
+  /* SWORD-SPRITES:BEGIN — tools/build_swords.py 가 만든 구역입니다. 손으로 고치지 마세요.
+   그림: Dungeon Crawl Stone Soup 타일 (CC0), github.com/crawl/tiles @ a6ea165 */
+  var SPRITE_DATA = {"dagger":{"P":[7.5,23.5],"T":[23.5,8.5],"g":11,"h":2.62,"s":0.21,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABFklEQVR42u2WsWqEQBRFj65YbWHAdmsR9h+2srey8wMW/Iit/A5hOkurFPZCEFKKgUCqDIGpEkLSiKlSpRnH2RSJp39zHsOd9wY2Njb+O84VzpyXOFzbciEEUkqEEFoFnk25lBKAtm21izyb8qIoiKKIOI4ZhkGr0LUtH8cRgLIstTLmrgzZD3mapuR5rh3wpQ3MVVV9N7FaDrBb2MDF931OpxNN06yWm86BOcsywjAkCIJVcpMbALgc3h+Zbg64rkuSJMZyowycj3sAXu8alFJ0Xfdro3g+H/eoj4m3aeb26ROALMsAqOva6BacNXIbe8UxlFtbYjudd//shbw83FuXa4Ww73uUUleRLxm98/Z12tj4s3wBJcyMfBGYWW0AAAAASUVORK5CYII=","ko":"단검"},"short1":{"P":[5.5,25.5],"T":[26.5,5.5],"g":13,"h":2.62,"s":0.21,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5UlEQVR42u2Wv4vTYBjHPzkzFFKklFaUQkHStMuN4uTgIJyLa/cKBW9ylcxS/AvcpB2OUuzW6YaADgcJ9LwxNKZw18HaXwTaBrzB43WqyEFzl9hUkH7nl/fzPt/n+77PCzvt9I8lbYEhgnh7ccMty0LX9bUL9uKGNxoNNE3baltFu90WlmWJarUq6vW6uNaGWDMgbNum2WzS7/c5ODigUqkEcuRNggFM02Q8HlMoFG5VpLwpuGmadLtdPM+jWCyiquqq+kD9TQiFruvCtm0Mw6DX6zGfz0mn03/Cb2yxHPVeryw3DIPhcMhgMCCXy6EoSqh8SVHsns1mOI7DeDxhOPyG53mkUikymUyo6iM5sFgsaLVayLJMIpFgOp2SzWZDWx85A51OB13XeVs+x/d9NE1DURRUVcV13dCuhjmAWJy8wHVd7l4cctZfUn5s4zgOyWQSgFqtFjpQoRw4PvnOh9eXnPWXABSeHVEqlcjn86Gtj5SBT0c97t1PMhn5tL88RPv6Hk3TfjsQ5zgWh/tJzv2fALx8tQ9A+c3pag8R9WmXbguf/bhieSU4vrjc6DyRbnpw1sA3NsTurIN/fPeIzGgRKzzwFjx/8iB2eNCG4nPjKZORfz1s2/3ZSJIU+JvZaaf/Qr8AAq/Z48z7YqMAAAAASUVORK5CYII=","ko":"소검"},"short6":{"P":[0.5,30.5],"T":[22.5,8.5],"g":13,"h":2.97,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADJElEQVR42q2WPXabQBCAv9FzkZJSnfYI3MCrLp1wl07kBFGZTqsuJTcw7lKSLp3RCYxPkHXnkhN4UqzASAKEEo8ebwX7883Mzsyu0BERQVXpk7G+qSIi451FUSAiZwO7ff8KFhHKFHAa2o0PbR8oy7IW9hFwnILTVpHuM+iJRomPgA/BRITZ2AKLxYI8z1mtVlcrISLo9g3ZzVDVo/hpFNLVPTI0ebFY8PLywnq9xhgDwG63mxSIIsLjWlk+yBkYQFf34f3X1/7JcRwfxUCWZTjncM5N8kTX9UffDoE3uv9deF9cXFKiifY+eB941h10e3vL8/PzqJujKGK73Q4GlW7fsDmqp4tEi+D+k8+zLny/3/fCVZW7u7s2FkYKleJEq6qiqiqAdrHS93ttdgne54E+L6iqVlVFXdcAeO+P5lmjvdVwNhXeeKFR4LS7qiqMMXjvz+CqGtJx+xZSsxMLN1MtH9OtKIoW3kiSJMB7mjdKADyuFUuJPCy5uRbeWO+cU4CiKLDWtvBT6089AbB8EIQlun5Erq1uT09PxHHcWt21vGmTJEFE5JJxInK9AqqqjdUNtCzLNkOSJAHrRPbTqubsqs2eAHcWITLcr3RS1ZxdG2yjlie5OBw5KSn5NK9OhTdpNgT3m7CWr8F6B5GB2nNpK27GoAcFL8JFREz0hisFhwtZUofrzu6CjUNboGW4L/XCh3LdHX6lce3/S7EwGgNlmVLXGcWP6AhujDmCt0XGblsPNGKicP4PKTG0BWJtrgDzOfxIoa4zIO61/FSsD17wNdg6h9pzv1K+/jq/WY9tkFoTLPA1uDylqmI2m83gvOY4bmMhMpRRiq8JWREZ5GHZeyyfwedzNI1Ra1BA8++h7TwXxW+AJAfrcBacPbyn5fuNawDO53mwvDyU9vw7+E/vg5wb96CI8OebYuoSah+8gW3X2+37FThy+2GwjFgsE0r3pEKk4dIQ4L9f4fX1qkI1KE3lHCtEWpYpX77kHwpvwE0NiaLo7ErnvX9Pw58/U1yafxjcGEMURWRZNjjOORf2txtgl4JrKjzPrzuM9B8Pqf+WvwKd3RP4/PYrAAAAAElFTkSuQmCC","ko":"소검"},"long1":{"P":[2.5,28.5],"T":[28.5,2.5],"g":10,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACVElEQVR42u2VP0gbYRjGnxQ7CA4NpDQ1SkOFYMElxaFuHbo7dmyGVtLa6tAWOtUMFkMls4bIXTpY2uZCyBASoeF0slCnqmBBbZBLLrkm0S2IeE8Hjf8o+Xve5Asf3wd39/6ee773/T7gKswNHo+TuGYmWJZl6LqOiyIuHS6KInVdZ7lcZiwWo5kCKIoiDw8PqWkai8WiuXBZlnlwcEBRFKlpGgVBME0A0+k0C4UCBUGgqqrmwqPRKHO5HEOhEBVFYSqVMg8eiURYKpUYDAa5trbGZDJpHjyRSHBj4zdnZmb5c2WFodBcXbjFKHg8HscdpxMLqQUMDT3A9vYfeDxP6jKMEEBJktDd7cDS0iLc7vvY2dnByMizhvK3K4Dz859ht9/C8vIPDAwMIJvNYnT0RcO52xHAcPgTurq6sL6+jv57/cireYyPjzWVt9W7gB+np9FxvQO/Vldxt68P2WyuaXirDnBqyg/7bTu2trbR29uL/f19jL162VK+Zh3g5OQH2Gw2bG5uweFwQFXVluGNCDjbxyxl3qJSqSCTyaCnpweFfB6+ifdt1VItAVQkFwJe68k67J/Dc/c3ADiC+yba7qRaHzPgtcLz7ikqK3EAwNfvf08evp7dNeQcqZeAiuRC5+Awwv45w+ENFZ3HDga8ViqSiwGv1fCLpaMW3OcEFveAzJddAMDjRzdBEm+Ce7xsB+hzgg9vHI1qN1SdMNIFy3/aDtU/B07n43dp8C16rg2pSK5a8OpsqPXnzoHOweGLcItZ1Y6ze3wZ1d5UDRi9z1dRK/4BYZw2kxAcJhMAAAAASUVORK5CYII=","ko":"장검"},"long6":{"P":[0.5,28.5],"T":[29.5,1.5],"g":10,"h":2.62,"s":1.25,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABX0lEQVR42uXXK3LDMBAG4N+eHsDQrD5CYKFhoG8QH8Ew0EfQEbasUDBwYaGOILNA3WAL/ExjpwHWTqfdGY2Ax/OtVo+RgH8YMjQAQKoNMzNEBMskVGAiEhGREIJYa0UrASGiCSciCSHo4cwszHyDE5FKAhM+olt4GgkHABwOB1hrUVUVnHNQm3Nr7U3ZmVml9Js4M+vN+3LOrbX6uDFGtey/E/9+3kfFvfdrOP42TkQT7r3XW+lruHNOBzfG3OGxV/q0mmPiyRYuDLxfgJAbZFmGsiyBzwJ482Bm1HX96P+n42XrQ3ft+ypvwA54LYBuwEMIu5X50QikrYEiB07HuRoA0DTNLqP/8T7gL4C/9vjpiN3xh2ugLQAeKl1WcyWSErsmsH7QnCFl1rdxJ7R136Jvu7bo4RUsLi4844uRR4903PPddZ7zoU+gGEJniP/oK6H5bLpLQusy8dTLVSO+AHmdwEZVHbmGAAAAAElFTkSuQmCC","ko":"장검"},"great1":{"P":[0.5,29.5],"T":[31.5,0.5],"g":13,"h":3.33,"s":0.47,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB90lEQVR42u2Xv2sTYRzGn/fiYCdzgQ7BDs3gdenSf6B0EPSKUzq42Oq9CZg5NNQltnXKkOzKOaQFh8q9s0u5pfoXOLUQEuQkQgnXFhoQ1KdDzZGU/uKavA723Y57uc/3+X6f5wsnoP+w/8HQDCZJkITv+1oLoFIKJCFlDlLmtHaASilks1lImcPUlKV33kopkqTjSFYqFTqOpO/77HnB0KV8YuI+dnf3sLj4DDs7n/UqL5fLkfL19Tc8m4Rb+C38/4aLYeXcNJMIw4Mo56urr6/1feNfwuN0gAAwLPh1LrLvDl3XRSqVGlivQfA9NvxKtYFn9YxE13XZO44jWSwWI8MtLT2P7fY7l73c2t5H4Fn4FJaQz+dh2/NIp9MDba/XN7C5uRFb+WUFiBX3kADw4tUebHsemUwGY2N3B2Z+E/iVKfj1+49YcQ9Rr7zHh7fTaDab6Ha7aLfbCMMQjUZjqDO/0Atrk2CtYLLTKvHRY5vVarU3d2iBL4yDc8nTIgLPupHpYsFn750mIWEIVl8m+e3jgygdI4MHnhUp7wf1F5EwBEeqvFYwz1WaMMTQ4OLMxuPaJPD1GPjxE/hyhJG73PjbbgBgrWBqhQ/sgU6rhKcPxzHzJKkNHs280ypFEdMRr3M9EHgWtrb3QRLL7w60dUBc8Nusrf0nXEjCyfgCUNwAAAAASUVORK5CYII=","ko":"대검"},"falchion1":{"P":[3.5,28.5],"T":[27.5,2.5],"g":10,"h":2.62,"s":1.24,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB7ElEQVR42u2XsW7TUBSGv+t4Y0pwA0RIiWLLaRoLGQmTMkSKxAswhRfgFRhAvAAVQ5QByJ4nYPPIQHkCWsdlSgJiIK0EyEhgchmKIgF2mzi2p/6Sp3t0v/Ofc+wjw4Xyk/zz/CUlL7jv+5EHeSQgXdeNPVTygB96XmyAmmG/cV2XyXRGa2cn1wSWJZ9MZwghqFarmKYJIPKqAJPpDFVVKW9pFAqF2LhC2u6f7j1DCBAohL9CHOcWuq5Hus9kCK1Wky9fvxF8D7hS3kJKeWa8SNP9aDTiw8dPqKqK1Wqi6zqGYZzJSasCcjgc8u7AIwgCrl0to2naufC0ZkAOBgO88RFyseCmfYN6vY7jOCtVeNMKyH6/z8HhmDAMqddrVCoV2u32yu1VNnfuI6WkYRpYlkWn01lrtsQmzr3xESDZbpjYtk232137TpEc7iMl3Nm9Ta1WSwRP8iVcwgGa26fObdtOXE01KXy3fep8E/g6CUgAb+xTLJZomMbGztdJQPZ6PUqXNYrFEicnx6nBV34NlbevlvCXL56nBl8lAfnQvMQkWPB6uMfx/HPqO0ScB38z/wnA/vxHJktMxA1cDDzN7RnZAvno8ZMouMgCHjkDDdOIgmem/xIY+++x7z/g+t17ufyxxM5AVj2/0L/6DcLpt7zMC231AAAAAElFTkSuQmCC","ko":"언월도"},"falchion4":{"P":[0.5,29.5],"T":[26.5,0.5],"g":15,"h":2.62,"s":4.4,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEZElEQVR42rWXQWgcVRjHf29ZCqtJ6C2LTWUuRsTGvO6UHMTqFCQVNHgoNLRSOip42xIwBelB4qUUbGHs6kFBslWrTSBU9JSAZrW9KO5kGsGatMKUgNm0FMbttptTn4fZmZ3Z3WS3xnzw2N2ZN+//ff/3//7zViil+L9CCAFA45q160oIIRrvJRonBov8J/CNi1GO46CUUgFGMJJNM5WKVbJZQtH7xWIRXYim5xtj8nWF64G2E1wPP4EmQKXIOlWEEAy+9A4Vb3XDqrMLDzAfXkdf7ILJpToTtTWFEMqyrPAZ14OCC4bmfyYbq8kuPACnSs5ZYfj4p9z4+QzlcrkJfGff83DqawD0TAYyQH45xkQI6robspiIgiulyMlUbEIr8L49h5quZZ0qxecqPhN1PSnLsjBNEyklpkS0TCDYghNOFSBMYm5XN/prp+np6QlH355DVLxV/nr1CDylhwvlZAp9sYus3B2IUVmW1VS9ttMfQSRFhK4TTpVsLQnkbnI3iszt6mb4xffCB+Z2dftfIuBhmP2Ytk0u39W2a4JEkqHwJpf87IGcs4Iy+zm/94if2IKf1D/f/oH6QI9dW7K+JDt2rM5CJgO6CKsP6J8wEIUWUkhGNZCbXIqrvKYjJVK13zpfTAR3U2SdKk+PHWPt4hWmn9XAae8XrtciASEEQ4MD7L/6Pnf6TrJ+/y62XYFMpu2C5dUVvDsuwwWX7tIlZmbnY23XLolko6Hs50P+vn8L+ISibZNPPMPo+JWa0vdTXl0JH177sc5pI3iUfiGEcD3VMolkK1f79drvfHNJ5/D4LFNnU4hTdwE4fPEKU2eHGR2fA2B6x136Ly8y8OQvzMzOx/pe07SOLDzZylqDrhBC0LvwAKQvxmmg940qvfhMHEfjAsBlgPlQeJqmYRgGUkqUUiKR8F853nqc/tCKG5OIxnmZ8p2x5g05mUIB9sMKABeA5etnmsA7fcEl2lF00PzMT6w2AARwfq2Lj75TcPpoS8ORUvqN0+Z1v+mE6HYEJiqUn4ht2+i6HgOPVh8kEF1rsFch0+CUQKb9LWjLwOjJOUR+GRTYRRuEUOJcoWPwdgwkOj1wRCtm/MAjVb6ZEW24BdFzAUBu72MxoXUCHu2mIAzN74aOtmAr4J1acmKj6g8dPMCOj9/sGHxocEBs1s6twltvw8C5z6dU+eoIb+37YVPwoyMvd1z5T7dEZyKcmZ1XRs1N7Zv3eGL9KyzLagJ/9+1RoR6vbGhmbU/ZSqmmAShDQ5nS/5w+sy/wIeU4jnIcJ+pLDA0OPBL1QggMzRdiW/B02gc2TTM438fAt/InRqZrR7IoIel0/cz+5zqUSmCaptA0jUKhIKSU6lHUvhnz19ZETAMqnYZX0vUWiYIbhhHs/ZbBW22XKl8dCWk3tDrtExMTbGeIGjj2zXvcLlU4Yf1GqRS7v62RAETPC99zu1QJad9OcKXyFPKR84KUEs/zcF1XNTCzLVHIG4xZvsg8z+Nfu3uGnLtfQRMAAAAASUVORK5CYII=","ko":"언월도"},"scimitar1":{"P":[5.5,29.5],"T":[25.5,0.5],"g":8,"h":2.59,"s":1.77,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACZUlEQVR42sWUP2gaYRjGn5PccEOtNgbUu3i5ore6NFicgrhnaMG1Q0IOtw6FDqF0LG2PGk2hSMH+gZSCprW4pZI4pItBTGkTkEIdvixGYwahk307NBYbev6pp3nhm+77+D3v8z73ApMpMvpgmQQ8m/1gKGLcAmhj4w1cLicuwgGKxWLweGahqqrhpalxwVdX7yEYDILn+Z4Xx+EArWhRBALzAABFUVAoFCYmgFa0KK4H5iEIAjiOAwBUKt8MH3BmC0ilUuB5Hn6/HxzHoVarIRQKGbJMHwHP87BarRAEAZIkodVqTTYD7Z8Ep9MJh8OBUqnUc/5mj4BevnoNu+0yFEUBYwyMHWF5eaknx1QHms0miAjtdhuMHSGbfd/3jVl7gHT9CdxuF2RZxu7uJ+zvl5HL5fq6bDELPuuRoPp8f+DJZHKgEY/swNpaAqLogtfrxdZWHoXC9kCdmyWARMmNq4qCYnEPh4dfh4KPKoAS608xfWUa+fw2Dg6+IJVKDf1nTY0Cl0QR1er3oW0fNYT08NFj+HxenDRPkMlk/hve6xEZ3KNEYh2y7MFxvY53m5sjwY0cIF2zg6VVsLQKXbN3BFE8HocoiqbBe2ZAulmBrtlx6+4SIuEs0iwKWZ5DsbiHcrlkCrzfCDgAxNIqhGuLePHgOT7/WESjUTcNPlDgFmwgXbMTS6t0+8Yl6soHTQR+f+5vEbpmp7OcmCKg5x5YsAE7p2fnWRMAEAnPIBKewduPx+PtvtP5Oavp3Bm5DBfRzulvB/4R2u4zPgEdEeMuS78MdC2iiRextEqN6h26KAEwM2xG9QsSbfvQiXDutAAAAABJRU5ErkJggg==","ko":"곡검"},"rapier1":{"P":[5.5,24.5],"T":[26.5,4.5],"g":10,"h":1.21,"s":0.53,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABFElEQVR42mNgGAWjgD7gPxRjACZ6WH7u3DmckrR2wP/bt28zHDp0iIGBgYGR7sF++/bt/xMmTMAZ/DS1/OjRo6OW09/yHTt2/C8pKRm1fHha/n9ALT+zyA7dEroH+/+7e5Jhlg1MnIe4q/y/uyf5f22S4sAluNokxf939yT/D3FXoZrlxNZQ/ws0BRieyIkwaEr/ZUiIcmJQdplLtxruf4GmwH8LEY7/DAwM/xfW6/6HRQc9ogHFclg0wOT2TbekqSMwLMdi4X+aJjgkC2E+/8/AwMDw6YgvfVI9IyMjikNWdZjQx/IDCxwYPh3xZcgIV4K3aD8d8aWJ5TizESMjI8PHwz5w/rk7nxkcEg6MdjBGAdUBAJ3rzmY2X68eAAAAAElFTkSuQmCC","ko":"세검"},"cutlass1":{"P":[5.5,25.5],"T":[25.5,4.5],"g":8,"h":1.91,"s":1.17,"src":"data:image/png;base64,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","ko":"해적검"},"cutlass5":{"P":[1.5,29.5],"T":[27.5,1.5],"g":8,"h":1.91,"s":1.65,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABRElEQVR42u2WoU7EQBRFbzcYRJNJULgXVq1rgkHuBkNQI5HdBMs/vC8g47BdX9FmFSj4BVLfkRiSSgx5GGgIhWW3nZkKGNk2OadvzqQF/tiSrxcmIeHGmI7EJCSciDDaBIhoNAFhZhARrLXBBYSZoZQCAGitASD6/MCe730/pifENEeSJB24zwmIMQZVVSGmix/hvgSEmVHXNZqm2Qj3ISDMjNPkBdZa5Hm+Ee5aoA3uGScoy/JXuMsItwrO1wS2Ds6HwE7BuRbYOTiXAr2CcxVh7+BcTGBQcEMFBgc3RMBJcH0FJNUEpRRe1dmg4HrVLpKJvTuXVJN891PpFb6cTeU+m0uqSR5vr4JKyHI2lcXhgRzF+/K+DcEkOnAA/3D/8I/aQ8Pbb8HDKkNWWBT5ZXvz+maNrLDBzr1EUdS+fegzP9p6A5ER41aCacoGAAAAAElFTkSuQmCC","ko":"해적검"},"claymore":{"P":[0.5,29.5],"T":[31.5,0.5],"g":12,"h":3.33,"s":0.52,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABy0lEQVR42u1WPUjDUBi8FCdRpIhQKIiDZG0LgpOQoXsnkW4dHLI5iNLBIW8TpLuCQ9dChdfBzeGtQsHRSRBaIVJKcNCM52JCGpvWn9c42AchJCHf3XfvLl8MpL8YvcikDEySIAmlVKoEKKUESQghIIRIVQFKKVGpVCCEgGVZ6e63lJIk6TgOlVLhOfBCJq3Oi8UilFKwLCvc/9Q6l1KOKBBPwhx8Dv6/wQ1dOc/lcnBdN8y54zhfqp/5S/AkApw20XSBjyPAhp1NIsHh4xF0ggPAQvzGXnkNAHB47jFezO92sLMFPF0dY9kdwMXBr8CR0OUk9/Jit8CGnWW/bWqJ2icPNE8v0W+b47aB1VIePc9H93YRALR2Pk0FXuwWeFI2Wcqv8MMr09T6OYFA4sD11VKeJ2WT1VI+CqgF3JigApqnl1garqPn+bi+f8bd04t2uRM/RH63g1p9Hz3Px8PwdSbgEwm0bgbwux3YNrC1/TazYWIkRA09z0d2c4BafT98sLpxFn2POhVhJGpxwxEA+22Tw8ej0JwNO6stASNFo1EbNweC+PXbpjYSI919oShjh54PTyz7qS0jogJaN4NgEM0kctNSQE1/St9a78s95f2wY/CRAAAAAElFTkSuQmCC","ko":"양손검"},"short2":{"P":[5.5,25.5],"T":[26.5,5.5],"g":12,"h":2.62,"s":0.21,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABq0lEQVR42u2Wv0vDQBzFX2LHksFFCp2KJA0U/QOyF0Tr0EKHgFA6tauTFDIJokuHDgoOpVAQMtSOIq6tuKqDWoujtJvECA7i10HuoNofSZtUhzzIklz43Hv3ve8dECjQH0uYA4PG8US/4abZQzpfHzlA9Btunl8gLsfmuqyUztfJNHuU0EpU2m/Tj2XwtQbINHsAwJ3v7WhjOaLHrgEAu5UK4nIM952niSZDXrvuPNxhM7UOADitbk38WfTKNYPLigoAE6OfJQECAAZmkcuKCllRHUc/zQR+gZlrJrbdnETvdgJkX28jvFrmjgHg6vAdVreGZLnA4U6jd10DVrcG1lguD275u/CSxse4id5tHyBDl1DMhCAt5/D5+ohcNQsAA1Xv1r3bwQQAVisFu9/mznPVrKOG48k2jESbiG5EcNT4gN1vc/gsclyEkWgTb/bZdxGeWAAkxFe486nbuugWbr0c8w8LN2swdMm3Cwmx2IfBvTrURiVAVisFQ5eGwYUhj/dnekIr0XNjkQxdYuc5+QEaWQOyoiJZLqCYCc3z/jiYgiAIvjkPFOjf6Aso67rmmon5agAAAABJRU5ErkJggg==","ko":"소검"},"short3":{"P":[4.5,25.5],"T":[27.5,4.5],"g":12,"h":2.62,"s":0.45,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACE0lEQVR42u2WP2gaYRjGf8YOJRCwJSKWDKLcUkiW4JahkqIRAuJc2pCCYOZSrp1CIUPGbCfckD+TnUqnyC1O6RIC0tXIZbCkl0qg0H4UWny7eOKBDadRM9QHbrkP7vc+z/d+73cw1VSTk3Qej2YmAa7ZtjSV6rs41gJyui5NpdgulWg5DkBgYnF3XEtO16Vm233jHxu8qZSYltWF53R9InApGoY0lZKiYUhO18W0LNf9PzWqPRHTskhqGqVKhcuLC9ZXV8murLAwO3sj594IXLOcSHjg0VjMF/w2BQiA6xrwwItra+wcHvpKODAMuGbbzEcitByHUqUC4IGf1usU0umRFyDtapiZ1DeaSrkOPfDlRALAN3yQQdSFA7Qch9RWnr2rIqmtPNFYDICkpnHWaIxl4Eh1b07a1bB0Ol5+vRN5z1d5Gk1L0TC6g2fQD/sexQfHis3da0zL4qzR4OO2gxl9QeHyCIDTet3t+oEUGCABDo4V+28ekq+89Ox5UtOYj0R8Hbuht2AxtCQbmaC0q2FpV8NiWpb0XLFDz3rfcyD9KMN61mZz97rzJovbmL0NOqiCftw/iz/n09UJXz4/oXbe5m3hJ7Xz33z/8YcPOw9c+Eijlx64LIaWJD4X7xf5reK/6cwLIK8ev+4HH/+1apdDdwYHkH39vtjl0J3APUVsZIJil0NjLSDgoxEn+jM51f+nv4JEJ4evp+scAAAAAElFTkSuQmCC","ko":"소검"},"short5":{"P":[2.5,27.5],"T":[29.5,3.5],"g":16,"h":3.7,"s":0.62,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEIklEQVR42tWXQWgkRRSG/85EaYSwxV4mp02puSgKbRAPe7H2Iszk0qcJ8dQnTwnKnsTL9l7EU1gkeE3dQsZA5pIMZC8NapDZZelTWGHZfVlEJh5MaSSMiUl56KmarpmemZiVBR80Pd3M6+/9773qVw28oIWhhNYacayv5D+B/8Du3gXi2MsuIgDiJQUQhhJShr0bCQACoF5CAGEo7e849oC4C+cA0kIX3XcAALwXyYBSCowxIOjeCADIQjCSJLE3hBCWPTkO0u+ot2fstcdYD5wOwB2wlBKccwO3NjkO3O9Ybx7a/5zrRUzs7MGbPxhQbfyTJAERIU2L6zI5DDzM8fU3XgEA3Lh2is3lLRtIyVt34Hl/pRSEEIiiyEn/QADjHFsrUxb+/PdX8eF72XliZ28AfucOx8H9FkgwfHbPFVn/6n3UPn/oBlAEZ6bGOTPwG9dOUZ6eRnnalsVRfnC/BfHJPhhjCILAikik8OZmMyFElAUwDJ531NszuKjeBACUu4pNPyysdiw8utlCnO4j/gb2GZxzK2BudgqPnhyDiHD952VMjoLnHevNQ6C55WSjVinDmz9wlBM/QZK6cCGErf2jJ8dZEEmEVvvPLIBhcOO4seSjVinbDEzs7OHBT78NwNM0hRzyDNN4JgNzs1NYSQleFEUj4Sb1puON5dNORIg//hX0ywlkgwAmCuESIQgKt7/PghBRAi8IgpFwU+d8Bkreuh5XumHwbGRQdiQJSr7vD3PE29f/Qq1SxluffoRvv36I/eZjvDufOvC1NYHKm8/R+O7sUnCCQgOPbeN7QRAUwgEMZGCg4YgQR4BsEEj1/EfBJVJn1U0yxlx40Bsq9eahTX292wN5OBEhlhxAMdyYCaAfTkSYcBxlbrB0Vdebh9hc3kKtUrYvj7U1AfnFa+CcO8EXwSM0QFC9+vcJ6E07ozxnG0s+9PYMzvUiAGjarWohhE6k0FHItRBCx3GskyRxZvwoi6IIWkvQbhVCiNH7AdMDC6sdzTmHUgpHR/dw65a043mY8iKj3SqiL0+cvhlpG0s+AGjOuQ6CQHPONWNMRyF3djfd//0rE0IgjuNc1Cb97vS1ys3ZHK2VKe/Z0zM7oj+4fXxpeBTy7IUFoGQejDaAaWTnHNxMxHa7jU6nA6UUNpZ8Tx1doFYp4+TiFM+enmGz9fel4Iwx/Jj2ICWlclvY9qByxhg6nY6Fn+tF7x0c4eTiFD88+APq6AILq52RUDPUfN+HwxvSOFa5SbfZgG4s+V7fPBgJLSrduC2Zozy/+9XbM15uFoxVbPyJyD5j3HeBpt0qGGNgjIGIbNTnetGrNw9R8tYH4K2VKeRXge2pvu37ZU1rLe1y6/+IKALn4bRbtXPFCLmK9a/zgXdDP9hVIJ0SXNUu/Wodts7/N/YPuO8RNuEQLhgAAAAASUVORK5CYII=","ko":"소검"},"long3":{"P":[1.5,28.5],"T":[29.5,1.5],"g":13,"h":2.62,"s":0.96,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACt0lEQVR42uWX20vTcRjGn1c63ClRdLqRKJj/gSk1zAyyVIJuiuiiyMLU0uk0ETZzWYqa4mANcSzoZF7MDp6ZRbLMnEJodMbfFhIlXdSCIMM9XcypSKix7beLvlfv1ffz8OV9nvf7Av/bERGKCKMG7rFaSVJdESLCUqOBiqKQJHusVvUEiAhLqirp83hoN1VSURR14WUVRv6YnKS9sZHeoSFmF+nUESAitBsMJEm72UySPFtxUT24Xl8UgNfWkiQbSvXqwesKCkiS+sumgIjiYvXgd8vKODU6Snt1NRVF4fW8PPXgHTUBaE5dDb0jI2wzGpeFS7jgnS0tmI7fhs6Bx8jYuw9rX79Cek4OSC7JWBUO+LlbN+HbvBH9T13I0KZgzfgY0vPzl4UDQEyo8NMNddi5YRMeuVzYn5SI1S/HcWCF8JAEiAiPl+iQErsOA64nyE9MxrfnbhwsLFwx/J+m1uL6UMl5vujrI30atjkcPGpuCl+3iwj9bjBLCwaF3L82Xx/W63ii6yHp07C/LZOnrtaH12oiwiwtSE8cb9djtl5PEWHSnRt0NIC/B8FsWxFtVZci43MR4Vg3SJ+GHTaQvu3ssCFQf9rCe2Yw1dIU2ZARETaXg/waT/o09LsDQiYGwURnd+Thfjfod4MTD0CZ+kg4Wul3g83l8/0Q8XjN0oJOCwhHK/FhivTE0e8Gf7rAY+kIWcSySbgnSY/ptQlwfj6ChFgAO+LQ3A7kXAlYPVTPxyz5ocjNRVpqGt6+e4OmVmBrHNDZ/x1ndPGwXGBkn95uMHC8t3dunIoI37cHnry5HPz1DMzcjfD7PwjvstloNxiCAC5Mw2BvzAyHLkAWwmeGA3f1jNnwxevFSZMJJP86toPgsOX+Yqup9XWea8KJSYCuQciu5OjtbE7LbOhEY3eL6uIYzfMHvF7OdCL+e0MAAAAASUVORK5CYII=","ko":"장검"},"falchion2":{"P":[3.5,28.5],"T":[27.5,2.5],"g":10,"h":2.62,"s":1.24,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABkklEQVR42u2WP0/CUBTFT6uTxYJdkFglGpJGUzFx8V/SBSe/AhtENhJWvgQTkwMjK2MTEkc+gEpISEiMxhmVoOt1qDSAPCj2vTdxk06v6e/cc89NH7AqeUW/z0SpsuD3jy8zD2QIoHK9xTxUZcCfX9+YL6wLnDdG8I3IllQBvuWjzrOOhUw6CQCKtBHMs328FN7d56pNfA/fMfgcQI/quL05Z3YvxIG4ofnwebMXkQEq11t4eOoAAPb3TFzb5tzueTpAuWrTh2/vJGGbxkI4rwxQrtpEr9tGJLKJk+Mj2KaBrHMY6PsqL/h450HhYQVMwFOWjUx6dyl4GAFc4P/NwAT86uJsadtDr2Gv20bKshE3tECrxmMEo8sEOcUKUpaNXrcdGh7YcurniVyNqJ+nWgnkFCvEuuEIEVAreSJOLz0hssC+gITZ8ES4GtVKkCqAEmaD9FiB9FjBF8FTgLIAjq+hCwAYfNwJ+ZUrrOsUA8497eqfxLvaLLgiatWUGSuH6MHaNFxe4mWnnZkBUTNf1XT9AGaFwKVAPXpWAAAAAElFTkSuQmCC","ko":"언월도"},"falchion3":{"P":[2.5,28.5],"T":[25.5,2.5],"g":11,"h":2.99,"s":2.12,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB/UlEQVR42u2Xz0sUYRzGn9dxJ9Yf6xtiBc6aWKIR07YMRCU5YHNqGTu11yT8AyRa9tqtvS508qinLiWGl/SyS1EXU1cEF9y8SRJaHSTaHXs85C5COELNvF38Xt/h/Xx/PM/7vgOchprgcQtNKuC75UXfJEKFFzMp/trf53EJhNkBZp0BdN+57/tRc1jzzjoDGOk/ByGasLP2Hqo0wGImBcuQOBvVUdr6jvaLg+i8ektdB+aWNvAgGcftwR7ER9K/q9Q0ABBhd4A518TC+ja62s5gbmkDbd2XfKsPfPaWIVnMpNjX2crK7CS/lN5Slf34Yuwmc65JGY004H72Cxwuo5FGErvlRbVwy5DMuSYtQ/4fuIxGODM+9Ffw5n8QHDZ39nDlQgxff9Rgjj6EvHzd13KBqr0uuJxrsjI7qV5w9SSUwIUQPDxoaBmSM+NDauF5AeYF6Oi6+srzAkymJ/jo+Rsm0xN0dD1Q+Il3weuIjuTwPdy9Fkf7+R64tSpern8LTO3aCetP+zQNqz89lLf38Ln8ETc+lfB4fj50qwEAbdtm5dUoHV1v6OCw7eHbbSrby0QiwalsLwGw7gQVz+dG5bZthw49KkI+aWnBdEcMAPDuQwmFQiH0WR/dnNMdMazUPCx7HhaqVSVC+8OGy56HZ12typ5RwucXSuA0FMQBgikfs9qasDUAAAAASUVORK5CYII=","ko":"언월도"},"rapier3":{"P":[2.5,28.5],"T":[28.5,2.5],"g":13,"h":1.21,"s":1.06,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABVUlEQVR42u2XMUvDUBSFT0P/QfbXJU4OIUOXZnATx/wIN8GlD1elU5EML+Dm0p/g4OCk0ws4FooObxMHHRwEKd2OU0Ia2io03oLkQoaE8L57zzk3EKAt+WL1xpMgvs7nJZwLt9SEJzk5Fw7Pd3uyeu+PRgWcTzdg3QKpyfn12MJbuCB8p2n/l/CfDv1buHOOSZKsO1xEdjrnqLUmAGqtd+J5XQm+TY/FA8fJZEIeHZC+z+sL+bTTOUf6Pu/Rrdshp0CRh8IOqSaIwyueDM8JgOPxeCmYInCEZ1UYoyiitXbTijby8VkFB4ASbK3dqoHOKrjWGkopnN56wPsLML2svktjDPr9PuI43nTO9qtW8bi8jDHM87wx2bv1B3EcA8MhHj4+oZRCFEXo9XoIggBKKYRhiMFg0NjUndqeAwCstZjNZkjT9DeWNRe8LMvqku/2t6ktifoGyacih+5mvVYAAAAASUVORK5CYII=","ko":"세검"},"cutlass3":{"P":[4.5,28.5],"T":[25.5,3.5],"g":12,"h":1.91,"s":2.39,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFSklEQVR42p2Xb2gTZxzHP9c/sTRtl2Aa4rDuLGu7rWAC4kCkNlLmJm4jrGCywbBssLExXCZxjtJhcawWKZhK33SvIoNNEba8cCsDNzNKrU7FiFXaHtPDiatdxEO0CNo+e5E8l1z+Wf3CQ+/63N33+/v/pBLA7/fjcDgYnJsjThr9PZBIUgBVVenp6cHj8fDw4UN8Ph8AhmEA4PP5mJubM69DoRAej4eamhpqamrM5yzw+/34fD5iOeTFEA6HAQgEAgQCAVRVRVVV8xt+v59SkM/lQ/H7/RiGQTKZNlc/CmqoOLmu6xiGYS5d101Bqqqi6zrJZBJd1wkEAunvZd6Rz+ajIpecEh6Q5NLVuR8Mh8MmeS6JFJO5FgA3FxYKBeSSi0Ta+v5YoQhVVU3yfOi6XuBiwzBwOBwkk0mTeHVtbaEAloFoNFpyLx6PYxgGiUTC4pkcDwhpX9EQ5N78mSydfPF4HF3XcTgclr1AIGDGWXqqqqrK3G/fv7+scVW/fNbG9pEZIFt2xRJREuUnU7538kIhatesKSugYmwqG9P+WOkqkHF2OBwlM1o+9/jxY9P65rY2s+KKvvBG+3PWDxy1JmAsFjMty0+0xdSwuZb+bmUxNWyxPjg5KW4uLIhS8QdgZ+4bieKlGA6HzbrOJXY6uyzLbm+XIkRwclJsiMWkAJ5aQLEOKMnt9naczi7c7hAnRitwu0O43SGczq5i5GUFlKwCSaqqKvF43CRveOE7bDYP1dWN1NWtY1v3Ierq1rFq1fvcvfu7CE5Ocm1mhp937JB1r5QVcCTnJn/4yJ6fm3Q2m4eU9jZ1deuor/fy2o4g9fVeLl3aXkBut7crJ0bLtxrLbn8MElFrSUlyaX11dSMtrz6gvt7Lt5++xe7g8yb5LcMwyZ3OrgLLFUVZfieUNS8zv9L1ubDZPPx7daNJvq37EG9+vGSS/9jZaZLP/voHNpuH4O6XkV4Qonw+WqzPG7FieHhYJpRobh6wZHvH2JiZcM3NA2ZCyspYdhXkCsgbRkLTNBGJREQkEjGFSPKJVEoAYmgvJrnbHVrOmKGKMkmYG76WlhaxT+xhmvNEiPBPdze3DIPBDRvY5HKxmBpWVr0yyaNH/1Fd3cj8/NFlCbB4gPFx0/oipyIRFFuE94xbaJpmsXwxNczQXmQfeDpYBBw/XorcjHk40itisZgZEun6p8bMTHrloxh5pg0Lto4IvF+KcKRX7BN7RFBskSKeTQBQYVGRCUGRs4Bg6wg8SE/O6NAA05xn+uwVyh02nojx8UwfmJlJk7vdBeTRaDRLfv8eXDqI3d6uHFNO8cX0QVwuV1mO3sEJ6z9SqfTftjbo6KCK7LxOIxsCEY1GOXz4MLuOZckBRT95lcaN6XNfR0dHAenNhQVW19bSOzjB9Oy1LLHLBXfuwOws3L4NlZXA5ctw8SKcPAmnTpnksVgsP86WFY1GxenTp0tOu97Biaz1fX1Zy/Prm9lZaG0tKDlN0+h78SOmz17hw7/6aGhoYGpqiqamJhRFwev10tnZWXTavfPB97zU2szAV5usG9evw9q1eY3o/v10Dty4AStWwObNQtM0ALYd2UnT1BS7hnYVCi8BSZ41RcDSUtrdeeRpjI0VWJ/b9zP3ZRNNnvu/fq+hMOmeUIoK585BQwPMz6erIJ2UAlBeB34DNE1jdHQUgKGhIQDkBJStWAqQ+OaHe6WJk0nI/KhVzOwsgk+A28BPgJwDTXvWF8yBZWP9erhwAbq6YOVK8PtzWuL4eEFrHAXezVwHxRa8Z9xomkbH2BgTMqtHRuDAAZ4V/wO5E9x5+VIJZAAAAABJRU5ErkJggg==","ko":"해적검"},"cutlass9":{"P":[2.5,29.5],"T":[25.5,1.5],"g":11,"h":1.91,"s":2.62,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACJElEQVR42uWVMWgTURzGvzvjpbFGvFAMRUECKZwZNBpQCnJEyBKLSjAhgwaHTildHLLUiqGgkw4uCYROBbeiKEVuqPVcBDPYLHKJpSKK4YiCaFVqKX4OpbEOvVO4u4C+9Q5+v//3vvce8J8sbvdB9AJer9e3lXBdIJVKQZIk9CoBptNptFqt3ghks1kEBo7BMAzvBSRJYiwWw+FDB9DpdLwXyOVyCIVCaL9eRKVSAQDBM4FgMMhoNApJPgJd1y3/FdwoXqlUAvccx8UzQ4jH45YcxxMoFAroSCM4oQC1Ws32f0cFVFVlIpEAAEQiEcu931w+p+DhcJiZTAaL7+O4nNtrG73TCbBYLKLx4ehfwR0rXblc5qUrOhuNBq0eHtfgo5Pz/z6cPYW/mlW2QhyF250CLs2dxr2F1tbJ8Xb9JAopnyNtt70H3jQXcOFcEoCOlX3XuvBkMunNURMF8PHNHTS1YY5OzlPXde/bfvZgP+9OCTS1YcaHdjkKt+1AVZGxc+0bHj4NYsl4hkfTI3AyASsB5mU/2p9W8WIFmNY+4/kyIYo+eJEAq4qM9b41vFz9geaXjYH3DwDfv75zf8/zsp9XBwNUdgubheNYpp8fn+R5e1xwtYSsKjLPDwrMy/4u/M6ERFNTOTvlMpzLp2jcR3fymQmRpqbS1NSujKvRNx+AMzcCBMC5637PwL9JCMLG9LfG+mhqKtu/JFxZwh++gK5duT8BqncIL6xxsugAAAAASUVORK5CYII=","ko":"해적검"},"great3u":{"P":[0.5,30.5],"T":[30.5,0.5],"g":14,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADX0lEQVR42q1XsW7bMBB9NDwXHLNZfxCi6NBN17WAYWUpOvIDiiZAh3bo4LFLm/QLrHxBEmTJSAEei4Jjhw70lpFwP4AdrGMoWYotJwcYhmlJ7+694ztK4JlDCNG5HkJo/Hy4vL6hdcHBwLPZDFLKxn/OOVRVhVCDeO8BAFJKjD8vFngtJU5OTg5OQgiB09NTWGthjIkP5yAiGGMCA1tr4ZwDAIyOsgwAcHV11UvfPuD8cA7vfVwryzJWxuBaawAQI+lczGaxWByURF9IKeGcC5xMCs7ajzhbKeWWdvtWzwVIKaGUSrXfqrwdIwbNaimeygI/x3vfWbnWGkqpCDBqUzaUhbSj+dt731u51loAQJ7nEEJgxPQ755DnObz3g1ngJLz3uLi46K2ciESaaGRASglrLVar1d4MCCGQ53njemNMb+VnZ2ciZZpj3DaM2WyGm5ubwdpz5R1bDUQkunZIowmZNgbfRwYGfKxy1rwvxty5zrnBDTik8rRPmIHj4+PmLsiyLDKxTzLW2r00b7vkFgNKKRhjMJlM4JyD977TNFrTrbdyKaXYBdzwAWstAGC1WjUm2iN9sFPzNuXt+cDfY6add8F9luFnVUFJiaIogtjOoLfy1OH6GrbXigHgPsvwpyzhjQERhfVyGmf4rsqLohD7Aqdr48lkEiU4mkxwX7tiF+2HVL6zB1h3KSVsVW1dsF5OD6p8FxOxB9JFlefxRGNCEC+ECOvlFMYYKKWetfIoQZqZraqY2d3lZVx/Of6O3/ZTo3JuznZXP7b10iHFsjcYuK8BivNzvBltPOrH11uQJgBzADoepYZ0OoPyTtvyASKClBJH3iMrCtxdXiKEEOYEOA/M5xtZMpQwJbEPhV2dzofUrqYmIiilNgmw7gDgjcE3rSO484BxAGkD0nV/lARTUsOK2+DX19edbBBRemraGJG1lk8ymM/nYb2c4uOH2wieUk76YfJlWSaSs0AnxTxjeOBt7QLWph4gYU7A77//8Pb9K7z78qtLb5GeHx6bGV3AnbOg3s8NzXvAdwYRQQgBItrLD8bee+gOzYeCE1H6CoaqNrX0wNMONsGwXk6DVgiUIaSu95SX0fT/9NO+bwQ8aG7ccCfb9T4ZQmh82Iz4vjEAkXb2IboPmQXtWfIfCnWv0oWhCsAAAAAASUVORK5CYII=","ko":"대검"},"double1":{"P":[1.5,27.5],"T":[26.5,1.5],"g":11,"h":3.33,"s":2.61,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABzUlEQVR42uWXvWvCQBjGn4iDm5S4+FWcMhRbOzgLThUKQqF/gEIHN5Ua6FS6G/du6Sq42ElBWikdswkOXRJE6iBBOtnt7aABE1u/koulPbjh3iP87t6P570A/2TQfC4NjxtwIvpx07NPuFsegKZp+4m7qqqkKMpi/Mky4WWUcFBVFd1uF/l8HgA4ACTLMgAgGAwhkzmDseH0raHrOnq93hI8GAwhEOCRTCZZsGcHUBSFWq22ye2SJC3aiFnMW632OjiYwmVZ3hrucQiO0ejdFHNJkhCPH7MvtQ1uTq7DLTYwy3YrvFgqM4WTm3CrZJKuiWTI6wKI7MK5VV3MaCKGsmXTfTw+HyGb7gMA+FgVxVIZp4mTxQpw5ACGW5eMtyUvpkoTAFB9PUc0EkalUtlZWrkN445a4QC5mytMlSbqnTEGvpxt+DYfkq6JJvjh5wOu7ye2m8omSkh3MeAiUTUZB74chg0BdrPeuwn8aTJbRC7fAADFEhCNhI01Mw+Y4C8f5pDxPO+IuHh2gRulyertTsOGQCk/KOX/tpnQ/IXjqOTSsCGQromkayLVCgc0bAjrAI4cgLPW+zyzHUkwW95g3U5XJmG9M/6dP5J/cnwBV4JE0kx62FUAAAAASUVORK5CYII=","ko":"쌍날검"},"katana2":{"P":[0.5,30.5],"T":[29.5,0.5],"g":9,"h":1.91,"s":2.76,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABKElEQVR42uWXyw3CMBBExxYF5MgxJbgESkgJHCmBY0qgBJfiElzCHjkmFSwH5+NAgHz8kcCSFSuK8mZm13IC5BncL2QOeNM0ExGp4czM3AuQ+KMxuM+egBACAER291ngzwLkr8fPRPQxehkZjqIo0Lbt24dkbPi36GUKeLcWKRJga+1iOAAcQp5ua+GhBLC11gf6Ir5uNxE68rIsV713Tw+wMWYXfI+AIPAtPcAA4MM78OZyirWu/SZTSu3uI7nQNaszAJxAdAoGX+RancHGuOtRuVnXiH6ms4t8BGs9AceF92CtR9dHFQcs52pN5G5cb8ClAu7WzZg1f6l1qrgnu4AIqLptXdeD46idLvrYu4iHa9LvNmPiNdmiBLQeS+BFn0zA3J9qMgEPhHXMigliH/cAAAAASUVORK5CYII=","ko":"태도"},"dagger3":{"P":[6.5,24.5],"T":[24.5,6.5],"g":11,"h":1.91,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABJ0lEQVR42u2WsUrDUBiFT0uhm2uhhbpmcBOKbkom4xs4xtHBLTiE4qrQ0RcQx26l6eRQcHHq4hNYiPUdpJ9DGhsHTdXc63LPFLiE7/7/Of+9V3JycjIvvlusGwbDfFq6CTP0u32YT/kPODxe8XAuIr8cXjfid3tPknR9b7HqyBd52yN/s+or9ztv+8WhjHrPV54HnoyHjuXoJIfw0fpV220kHgZN0lgkoUjjNTyNZW3kSEIBoNmCNM7gK98tzfnwGM0W6LKfff+h8sZP4b2uNEnGIjjV5Hmslzd7Fwq9bha69tY6hAyaxWCaS37kZ94X4J82Zzx0y6dbI6NWK4MHnrTTkQ62paPdlmpnr5v8V40CT3DTKp5wVq9WktDO8frr55STk1MVege8j7sm+i+wbwAAAABJRU5ErkJggg==","ko":"단검"},"great3":{"P":[0.5,30.5],"T":[31.5,0.5],"g":15,"h":2.62,"s":0.24,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACbElEQVR42u2XsWsacRTHPz+bNbQpCBkqRIdAB0uHQuh0Cg4u3ToKIVyG4OQhacRAINjFgiiZCo3U7A6ODoWeYxyTdOmiQ4aGNKb9A5LX4bzzzibExPO69OCGp/I+731/7/f9/VQE/4g7UEHDm80mAJFIhJWVFUL/Cn54eAjAXJDwVqtFOBwmGo0GK/ve3p4M114ymYw7DhY+Fv+Hzw5erVY9cFc8e3ilUhFAxLTgdhwIvFwuezp3xbOH7+7uigx0p/NSqRQcvFgsOrI3Csj29rY/cKWUjL9jh4rkcjmP7Pl8fnq4DRPT6koGuvPaIE3TxDAMz8Bls9l7w9VN8OuvVo6D9ujzpUVI5MAwDKLRKL1ej2q16ny/vr7O/v7+dCes3bVZs9ayURgpYJtJOp32qAA4Skwtu5g4a23WRkPVKHAbSAzDcAp5CNe5D4iICiUVIqIAtJcQSiqWFmE1DZqmcX5+/leC+fl5Op3Og6X3XEhsuF3Mo5AiaSh4obP2ugNYhdhLsLOzQ7fbnU75SZbm85aw+k7n4EOdL6cZYrEYAN1ul3a7rWSgi3pan9kVT4rFojOQjYIzfACYNdzb0394KpWSeDwu8Xh8tCuGhchAl2kLmLsDztnZGQAnJyfo3xQ/Lx/z6vkv6xdHdfo/QDuqP7jD2wqQi/4miTeWEx0fHwNwJbD16TdX1yCm16hmIvtpc9nt86PN4jIr24b9UsAj+7O332+264QzgL79VZKh7M7A3dGV5xCadgfIRX9TTpvLUtlYkPdrTyZJ6Btc2QkqGwsA5D9eTmoo4ofxhAAu+ps22FcXvU8SmUXySZ4/PcevxArd254AAAAASUVORK5CYII=","ko":"대검"},"long5":{"P":[0.5,30.5],"T":[26.5,0.5],"g":11,"h":2.62,"s":2.62,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACKElEQVR42sWXr48TQRTHv++CuBDEKkIwTO2pET2D6SAwJaSDwXaxFwQSd6NIJQq9GETNYc7UsCTkQnKEHXWKpPMfdAPmVB+i3clerz+2e53tk9vNft585s17HaCZYABMRNhHsDHMzLw0iQPsOYImsEz5TEQDCRARxuPxfgwUcCEEG8Nr370XAj6ZTBBF0Ub4zg0QEabTKaIoYq0TAICzrWYMFHAiYq0TSNnH0eExIMfhDSzCAeDo8BhX15ew9jNOT/2JoCAFNz9arHXCxjC7UZe1TljrxDegIAaWrTx++gLJxTkA4Oysv3blRFS/BopqL+/5tvA+c314nudeu9YJu1GXjeFK2otvuDpbUD7nhfaPJ0O8+/S60sqLb3SY0dp2OhIRnHO1C27TnKgF30Z77UZERMiyDEIIr12JZ0guvlXWXtnC4kMigrX2VsHV0b4xASKCUsr/sAg3hnk4aN9Z+9pG5JxDr9cDAM6yDFLKG4Pl6vryTtqrauFYCy5rHw7a3sIuVr7SADNzrAViLeBGXQBABIMvP98CwM4HC91qEJ0O0jTl4aCNh48eQDy+79triKlGi/A8z2GtZQXgpJTEk+fnQfb8oAyXUnq4APDh/S//4ptXrXD/XpVSkFICACuAY4Dl/DZTLshdFd6NUEr5q9MyePlqFezq9PfHS04TtQoezDyn8xr4/eff7KkWsCtOSIj4bmcQjrUAACRfXWPwwgKV9rhReBH/AZiZXdGtpNn1AAAAAElFTkSuQmCC","ko":"장검"},"long7":{"P":[0.5,28.5],"T":[29.5,1.5],"g":11,"h":2.62,"s":1.21,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACIklEQVR42tWXrY7bQBSFv1kVlNVw2RoW5hEGV6pk1mXrvoFhgnJDWppHsFmWBVZFA/YB8ggTFugtKL0Fznjj/Dn2xpF6JSPb+s45c+d6DP9zWSt9XtPthf/9hbv3wjuIUEBFFFUF0PTH334C9qEtIhrgLHtlNgvvWcw1Y3fu4J4mSc5o9MR0CrPvhmxeEkURImKcc90SaIvbWtl95ih8Pv+0FevoLAB3+XoHeJa9Ukze4CIGa61xzgFcLsACKVC2iHBOGvB5FpGMK/hqVQAQR75+3nSBz4HVmeXYhU+nUExMA75cphczG/AcGJ1Z860YTZJcRVRVVfMxWpaliqgmSV7v/f266+r8XIXY188DOz+yM1REtSxL9YtD52kSMwg8dHyAqzuER1F0e3iYfjeBe+8bsQMaxzE3g+92e3DdGf7n5SvS07n3/v3OXW6RrLVTdd/5LryXc07Hvj84VNLT8F7O6+FxBK4qmo9rEfWEy8eouiYcoPM+B8RCOjo+ndQv4OEeil/gN0CspJ8ND9+EYiL4j4qI6T7dQuoJOA9xdHwUm/gR1ht4+inE99Tw9XMFxxv6ltg3uC9bmi4fU31ZVNQvaP2w9KkPZ3fICKA6wLkVsDEsl/SOvuPRWRRs5Tw9aMxh4epQsNurgvrF8CJ017mkh7MgiBhCwNa17Ds/NaCu2oSqrtp24MLp7lSjDdZ81XhdhCSGb7STIq4dce8/11vVP+S14GoOG+z6AAAAAElFTkSuQmCC","ko":"장검"},"claymore2":{"P":[0.5,29.5],"T":[31.5,0.5],"g":14,"h":3.33,"s":0.49,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABj0lEQVR42u2XMUvDUBSFzw0VwczuuvkfHISuLv6BihLEDiIBl0LBLXtxcmhiN93sFnDQDE7+gCxiadFBBDO4vxyHNjFNUwXJS5e+JeRB7nfuuecOEVR/mH0xKgZTqRhKxXD7g0oF0HFDKBWj3gxQbwaVOkDHDdE62EK9GWB/d6PaeTtuSKVi7hzd0+0P0mc+C9rhjhtOidAtYAlfwhcH92wsBu7ZIH1zsXDPRmlw/nE3DY+scuGejXwRMrKSO63wMWxiZ6ZYCtNpe1G3M8IYWelTB/ynW98sFNEWYdcwSN/UmvYiF/giwkZGgM5Vy7uQdt4QYTYTOnc9nXO283wwv0YNfS4kYesaBrdXVwozodWBZAwFa1nakXnwtgg2RWCcxjg8twAASsWorV9lv+UvNf7fecHMmR3Jx/UaAfDypERXZJLufNqLZp5sAH2TF8cliBARDm/GRQvSPvcvp5QQigiDDnj78Ma9s0cysjhxo5JTA4DhO9ALn/H5+oTRnQtWhs+40GuBQQeVdj8jYhHwb0/MLtKmKlEAAAAAAElFTkSuQmCC","ko":"양손검"},"claymoreB":{"P":[0.5,29.5],"T":[31.5,0.5],"g":14,"h":3.33,"s":0.49,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABfklEQVR42u1XP0vDQBx9J9LBOChIJ4dCJ3cnP4VfwEEzuCgk2MEPYaE4CWLopiDFSQouVnDKXFwE26KDGEzB2eQ5tDmu6YlL7grSW47c8Ht/Dy4C9hfVjwXLwGSagGmCYbdulQCj0AfTBL1WFb1W1aoDjEIfa5sn6LWqWN04tJt3FPpkmvDlusJhty73fBeMg0ehP0HCNIE5+Bx8NuCBBwYeZgfOtsPAw/8A5x9nk+CxWyx44CE/hIzd7Mwo+AhsbKcyTILZyFxVO0WMsSt3U4WT6nQklivnXNm6JduO0bbrXOD63gNL5ZokYPKq5V2QykvlGtVOmLzrMmdVeb6YX4Mdcy5kZVOV6x6axhzIYtBcS/NvuSzzLGvGLr+jXeZUm7FekznVSD4ulwiAZwcFuiKE0LZdl7l0pe3wdL8AEkII9q9GQzVt//Uvp5ASCiHYaYA392/cPnokY5djN6ysRQDovwPNp2d8voYY3F2A1uAVF5rHYKcBq+qnSMwC/Ad9mE5uWbj9ywAAAABJRU5ErkJggg==","ko":"양손검"},"falchion5":{"P":[0.5,29.5],"T":[26.5,0.5],"g":15,"h":2.62,"s":4.33,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACv0lEQVR42sWXoW8UQRTGv9lUoMj8CaNRI0qCQAxJFck1k+AQ7f4BFZsqXEeRioacIOipqTjTDTiKGJITFYSuQiGmhjRVm6PBPsTtTGa5veNadsuXnLm5vd9737yZ95Y55+CcQ1mW4JzDew/vPQBASolVqqoKtxABYOF/Ly4KXJ5NkDnn4L1vwaWUf4WnAa7xWyKiEATqusbnYwvz7huYEAKcc9R1Dc45qqqCtRYAMB6PAQBFUQAAvPcQQiDP86XBLHGFiAiMMQghmBAiJr0hhIBzDlJKaK3BOUee57DWRjCATugqV5JAyBiK68HpwGXpw0opcM5RluXaGxvc8t4vPNcEQVpbnJ7ugjEGpRRL66w3WWtj7SQ1RMYQNQVAWuuFesn6DCLdsqqqyBhCVR0vuGKMwSCy1sJaG+qFjCHS2kYHcI9aG57hPysbKHs8evC49WXvVb/K+snhZst+pdTSALIhMj8534OUu3HBOTdcys3RI2OIZtMRaW1bZ38w64uigFIqwp1VLfi6R2/jrpeN9x7OOTKGsL+1jZ2jdq9gjCG031tp1X6FrLXWC7bfJftOaa07gyiKIt5wfcJbW+CsQm4W+7lSCnVdw1obW6sSz6LtUu7i4OBu1mdpvx+XvDNz732EV9Ux9re2MS7/HR4DcHaeYaHrUNkRXtc1vPcR/vLJW+wcvegFDgCZMQbjshnFnIAQIi6mtgf4yfleb3AAYEQWl2cT+B+/4LyCUvNPM7fRbDoCALz59D729r7g8/P88TnyPIcxJlZ/qHYF0Gw6ImcVTQ43KZ1weuvxuRad8Nl0RHkTRIA3022/A0YKb/afFEB5A5YNOBmv+51uumwPmf8BT99w+tUt4L2KMda95/cFV0qBNXB8/f4T11c3eP3qC5LLmA0dRAaAPXz6AddXN/O5/Z7gTUW3IKnlg8ODfgMF0ByXwqsxzwAAAABJRU5ErkJggg==","ko":"언월도"},"falchion7":{"P":[0.5,29.5],"T":[25.5,0.5],"g":11,"h":2.62,"s":3.51,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB+klEQVR42r2XLXbjMBSFr3uCBgkVvyUIF2kJ2kG0hKDSeglGgyUyoEg8RKEhFSpWSLFQqQbYTuPGdhLLtojtc3z83Xff1Y8L2C0WG9Kk873dFn2vPGHh4ZyDc64rZjUBdlsIIVBV1aCIxR0AgJ2M0JXqFbGKAG0DlCSs3wJpktMCERzarS1AmlSWJSrL4L0HUb+AzZLwtzfCaX9E+CK4gJUENHDvPU77I8p/zyAiCCEghLhaD56WgKuXIxg8yr+fo/B5HbioPNA3wMRN+HwCLuDee2gAxMVN+DwCegKnbbgLni9gIHBqdx88L4QTAjefAxMDN4+AjMDlC8gM3GMC2m2z/WizsZTaQb38mRS4vlH0HsmkSSlpHIyGUA4AQERgjIFTrJ+5yqr85iw4GI1dFcE5BxGBiBBjhA9sNviwA40LnHN8fOxw2r9Dvn6BMYYQAkIIowfNkbbiN280hDFGHIyGtgGM0Q/8EbA0oyI2Q9W3tqsygDGGGOvrJOhDs0CaJKU8V0tEcM6hbcfBaAhp0pUL90B72r35DRdCnAMXY6xPsnZbeGlS245caH8IG3iMEUR1v7333X53j9TFVOi1Aw2cc15XDHThP5UWucBrB4BO5QBgrb1d5UwCNgBQKkCVFz0fgi/wI1tnQJqkJF0GrFgSOhjCSatb5vgPeTpheYw51voAAAAASUVORK5CYII=","ko":"언월도"},"triple1":{"P":[0.5,29.5],"T":[31.5,0.5],"g":17,"h":5.81,"s":0.42,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACR0lEQVR42u2Xv4vaYBjHH48OLYUOVjiodCrcEso5HPQPuBs7XjmHwwz+QlBBFERv8B/QRZQcuDi4HIIuPYh4mkHHgg4pzVJEAqUHNiWFclSRb6eUJKZiuSS39N3ePPB8vs+vvO/rIfcX9Js9t+GCIBAAAuB4lDBFC0EQoF/mbNgGBwBBEPSADTjHcY4IAACUSiVLuKqqVuLcgYui+HBwjuP+ww12u4RAURQUi8V/gtuVCUiShEwmY3A+HA63wkulki3zj/F4jFgsZnDO8zxWqxXq9TrW67Vz8H6/D5ZlDc47nQ5UVUW1WsVyucRgMHAG3uv1cH5+bnDebDYxn8+Ry+Wgqip4nrcdDiKC3GY24LVaDdPpFMlkErIso9vt2g+X2wwWszzKcZ/BeaVSAc/ziEQiEEURrVbLYC8UCvakXW4zkNuMwXk57oPcZsCyLKrVKhqNhsGezWahKMpO8J3uA1c3t7SY5TVBdHayT0+O3tLrx9dERBSNRomIPESEVCpF6XSavF6v9s2es70c92ExyxtKYi5LIpGAJEnOnfOaCK0Eeng4HMZkMnEWLrcZS3goFMJoNHIOfnl6iIvjgz8p14swCbJVAIgIwYAfF8cHCLx4ZjkJi1n+XvC9LeNHwYCfXj1/Sp+//aTplx8bXX11c0t3H95rW48jDWeK3OrWe6+0W6lGMOAnIqKjN7/o7GSfXr77aHuEfxOAy9NDkr/f0fWnr1raHYMTET3SP5eCAb+rcK0JtzWco/BdG45cE2H6wz3Is9l1+G+YLZo5r7XSLAAAAABJRU5ErkJggg==","ko":"삼날검"},"triple2":{"P":[0.5,29.5],"T":[31.5,0.5],"g":14,"h":5.81,"s":0.57,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC6ElEQVR42sWXz08TQRTHZ4vJeiCpBy79S0w8NByMB4OAmhBMGsADBTWwgkoTE4qEoB60PRKBjYlCTNTEBGFVBMsPoaWIhh+tkR8iNGJBNqF1LdTCfj1gl063HKC79SVz2Hmb93nfN7PzZhmSeUPigyHT8GbeRwAQALqrRJJaNPM+xC0QlJL92sEDQQnNvC8RoIIn+bWF55b3qeDzy2EEgpK+cAC4eMutgq+Jm+gUZgFAX/j5G0MqeFj6g0t3vPrCY7FtlDWMplxz3eFb0RhK7SMUvKl9Bjs7O6i8PZYKrlki6PesoKSehje2TmMrGkNB7SDCUjTl16BFAvjoW0WxzUUFt7dMIixFkV8zgJU1CU3tM5Q/t7wPQxOraSeAYW9ABa9zerEm/kbeVRe80z/R2Dqtgs8thdOHd3TN4VTFayp49V0POoVZ8ByL9xM/YG+ZpPyX74xpA29/7sfJyh4qeH61AJ5jIQsm1Dm9qHN6KX9ZwygGPwQPDEfyeNa7gOOWLir46SsvwXMsIh4zeI5F9f0xyl9qH8HA+CHgcUURjxmhqSKsL9rAcywVPK+qe/c90QqeY3G25hXlL6kfgX9h49BlV5THk0kMXnT9DQU/U9VN+YttLmxuxdJfc7fDCFkwgedYrC/aQAjBvYocuB1GpeyFXI8KvhHSptUmlh2yYIIsWhHxmCGLVrgdRlywvaXg52r78T0Y0vTIpS4UFoaBhWEU9YnwgppefF3e0O+ScdPAYD7LAAvDqPbEiVIBj7u+6NNsCCEKuC3LoNqYPMdi+NMKtGwyClwWTArYwjCU6ngSsmjVBb4HEa2K8uTkeI5FaKpIH3i87KnOAZ5j4XYYQQhBxGPWvvQpyo79Dir/g5y0EjAkB23L2pvq2P15YP6NRFPm3P5f2qhefHIMsmhVvvUDbKz0TzyXMxsv3gVQeG0ocVdnxI4QQsi34DZ59HmWrAfGyVLvU/I/DA9tR+FyZmdU/X4tOKP2F34lyDo8xsuYAAAAAElFTkSuQmCC","ko":"삼날검"},"double2":{"P":[1.5,27.5],"T":[26.5,1.5],"g":11,"h":3.33,"s":2.61,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB1UlEQVR42uWXv0scQRTHP7NoQHAVIxIwJ5dCp7Az7dnYHQELQTDdtRZLsJHUlsbYiP+ANvFgOcVrz71cQFBP/APOxsBanGIRErAIyUtxF9n1vB/izp3oFwaWmeIz773vzNuBZyKpjhpZ7YCLSN1Fq5PwdmWA/PFFZ+ruFcuynfeD9Zdbgy5DhsMrlsl456x/fAugAHGWTwDQcZsP78f4vxB11Pz49Zu9o4sauI7bjLzqYWYqZoJd2cB23pe1rdNQ2pNOITgnxmq+tnXaDI5RuLN8cm+4FRGc0vefoZonnQLvJofNH7V6kQfmpJNwc43FK5Zr4IlU1jxcRNoCl7vGLXAkcNWoi+18PQegv7ebjFf5Xpr7AsDgmxUAEqksE+OvgyfgXqrXC5RSShKpbGhyd+kbL+OfOHyh8F1NbLb0IHizZqT2N6ZvUro6P8D18RCHYyu4f2EBSDqF9rXWq7NFWZ0fEN/V4rs6suPWStrkoJtK1GlNOndJ5noTgP2N6Qd3ta5W4QCx2VLVeGDbfZGk1moV/vlPOGOjI7bRDTSERynrrsvHd3VDeLX20brcd7VcnS2G3N7E4ZFcuyr4IwnguzpoOEUH1Er0Rjxwo3Tu8nE+JJ+k/gEmPzxwF0hifQAAAABJRU5ErkJggg==","ko":"쌍날검"},"power":{"P":[0.5,31.5],"T":[31.5,0.5],"g":18,"h":4.04,"s":0.0,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACBUlEQVR42sWXMWvbQBTHf+fYdEmG4gzZbAjdPGTJaHxrIIM8db21mz1l0BfIGugHuLWbNk91Uzq2Q4eKDsJwkNWlhZQiKOF1kOVKtrDjRJIfCAsj6ffe//3vnaTYT0h60tgDWKy1OOcAaNZZsbUWAK01o9EIAFUnOAsPggBAVamArII7nQ7D4bAeya214pwT55yk4fu+eJ4nWRM2q6pcaw3Am24XgNfWEobh2sXNquApeKDgXOBucUHa+yoSyMEHC8S5wJ21RFFUeFOjCtnTuFp0OooiwjBcq750w12AXIBcK+Q9yVFkvGyoqmWvrfJrhQjJ8ZjKd9409gJ/uLdFDykVvmkVqIMjQ+xMVolCtwNMganv79zzTXNAYmdotTVgc7N9dcg8Fb51ELXamoMjQ3ZHe2dMzu1T3wd4sts3DqK/P24BeLhPllQKv5L/Q+Y58G03SOwMv7/OODw7pdXWy4RedO2zZN/p9QmQedAXWTg+dqbUpfaoRCbj3nK5zYO+eJ5XGnybbBI7w4ebL8yiOaevjhPzDV5y7H0qe6wXTDsPMWdJ1Wk73l6e5FozGfck067y4bqbe7hMxj2ZjHs5eCbB8nq+ApdVYxb8X27lGakrDZV7f/fg1oH7lfzW8N1AI3X6POjXDl/Kng6aumRf24w+f/zJ7PKEb9//1P6ZrAoqVnUm8A9F/p0ueBWNsgAAAABJRU5ErkJggg==","ko":"작열하는 왕검"},"flamingDeath":{"P":[1.5,30.5],"T":[27.5,0.5],"g":21,"h":4.4,"s":1.54,"src":"data:image/png;base64,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","ko":"종말의 화염도"},"chillyDeath":{"P":[6.5,25.5],"T":[25.5,6.5],"g":8,"h":2.62,"s":0.0,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB+UlEQVR42u2Wz0vTYRzHX8/YmIY2xcpttSwtFrUIW+sSgwikOgT9ATt07NYhKLxK4KWDUmR8K9TKQ3Ro0SCiLhYOR0U2hcqW02jZvptIB0U09+kgeQhyP7+79H2fn+fzep7P6+F5HjBj5n+PMri+5GNZDARL3yOdp+9+bjjQasSOhyJzNDVbuTwU5/B3T9UUyI1+HY/XxvuPGZ6MTHM26KPznHtDjrVi8MdpDmxXDH/KMP7iJQuJNJOtrVU5hNIX0TnT3khv7zDJ7DwzqSy2lgBR7UheRrmHUO5EMnT4G7h++wtTbyeZi42zsNyEd8+WggqUo0DuP8ty3OdgcFBHX/zMB32JXO1+jp7y039pV0EdViU7j+js3WYlGvnK65E48cQsm5xeAicPca9rd8G1LSU5f6Czz1XDq4lZppMxVuaTOGpdBDoOFgUvWUFLo53oc53MzBt+5ZZZrGuj/Zifu1faiu5q0QoG7HVyzddF+ge4XW5WHXZsnh2MDgRKqlfsBElYFBMiXNgZZrVmCmkQUrGL1XhXkGBwVMIK6Qa5ublZ/tz5fz06xsATFrUOryYYWIPW158Wp/NqxaH5vImmZTlxfisPc4JSIAKdVfANIN9SKxIKjYnb3bO+826QsFpTYvgCNC0rodDYP9t+qwI6VDnfKTNmzFQivwEeK8QR2uCNlQAAAABJRU5ErkJggg==","ko":"서리 송곳니"},"winter":{"P":[0.5,30.5],"T":[30.5,0.5],"g":20,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABi0lEQVR42uWXsUvDQBTGn8Ui6NAOztEpuEgGwa1/hf9BlwbEoUNdu4mETt0jtHOgoLMUSodMBc3mYoZoCZH2MsSWLJ9DvbPVCg69u8GDR5Lpd+97733hEek5+Awq6ABbTkiuz/i3OrjrMwTjHJN3wHJCqLwAXJ/hKVnAXZ8pLQFcn9HpwS7t7xWp95hSe8D0yF7vxUqlF3BAM9xyQtR7sR642ejj7OZFD9yoduDcv/1DeKli64XLajhohS/b5281l9ntSLIVDxfw1zSXPmqwnBBJtjAUo9pZsVez0ZfucALKVQjGOdLZQnYV9voDnmRfcK6MVAU4iIfrs43BC38dvdsgFc/2gFF4d00nF116uDyUJ/101ESrVkbkmULyUsUW77w0vDk3XQa0amVMR03M4+HKJXgZ1sA3e4HIMzGPh0KJJci6ICnwyDOFEsp+LnzMIs+Unun3TQXBOEepYuPo6lltxryx0hmW4eoWB26vKjPnRoQkAxnlIh2fd2lne0v9psqtVbXsa9dl1ecDgwQ7/o7nyu8AAAAASUVORK5CYII=","ko":"영원한 겨울의 검"},"great4":{"P":[0.5,30.5],"T":[30.5,0.5],"g":14,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADQklEQVR42rVXu47TQBQ9N2wPBQXaBu8f5AMQmQKJyqtISHSIyS9QbYd7mvxBJj2FEQ0dE8klyrqgoNjCNAhRjbzUXIrM2DMTx48VjDTyUz733HNfBv7BIiIQUe87xhhoraGUAgC2u/tD8R4ClwCkPe8CduAO2BjDxpjQCCICC0DZjwkAlT2eMoSIUPWA+8x94CxjXi5VawARNcAO3O3MMyYGceynMO8ElwBYhKAJgHlkjIjAfMNjL41iDmDmTlb6AAAcZAAAY3cC4LN9+Ja5AWJmrIiwEcCCGczcMC/LEkKIBmi9vo+y3B7L6Jgs+PBuYh+UFhwAvlvA18yo7L0dEZhbL7pzH9wYE4DnuQxwGw8wM3ZEDXgF4IEHzpbd1nsHnhwTmVNvSjmtZY/uLl7UtGjnLsyZf+E8AQuc2P1nwYERLl6kF+13Zh4XHN8Lfl2IvTCFeV9BO9swQ9uLLREeM8PYGFhpNEEXe8oF2BBzIqINMwSACy9YmyWtlq6izb0a0FeOxzL3PSi6i1mbYvBSsOxpKjFzY0zAPM8lpNV8I4DZ7sCcujwQZwDbglMX6ZHep5hrJQLm6kQGdcZAnAFbHVq4sDHSxXz29RX2N7dQeRAptCJCo/vUXu7OrQe4j3ldpJ157mfSkAfAGlBXnWnGcpm4LhZ0tbpIWSvBcpkcNRcHXo0BBwC9PjagsU0JBsBDmvtMXeSLsQY4CbLjtOO6SLkuUvb7eV2kAfN4cEnsTTnFCGdIZnMWALJDNnBdpJxl3Km58FyuPLfLCfPkWSCH3ZkAKtPef/PsEvvcRfuLxmbXkndE2HnZpCYYMIsNqIsUlWkNuHzyEfubWzugZK6nk4hKs9vxGpIheJIJQEiBXz9/4+XVF3YdsQSwVi2kkHq4t4+Q/Pr6uv2Ac3tlAF0hAPfLslaiKTz2SHc1IGAu54BI2sCTAM+7B4mjwiMGwE7JQESY+Zo75vubW2CZOObUIRv593UPsPQG2q62fu/503OcJw/x7v2Pxu0qr/DpmwmGVtbAxSMgL/rZKjtLLG1aGgBUAR8G6gELoM/tg6uK/h/c3Djm925I8/HB5P1JjQEOar5rPHdhP/WHtqsO8Ki5/T+sv3vmknTUJW5eAAAAAElFTkSuQmCC","ko":"청뢰 대검"},"arcBlade":{"P":[4.5,24.5],"T":[26.5,5.5],"g":19,"h":2.62,"s":0.46,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABM0lEQVR42u2WMW7CMBiFnylSh2ycgMVTLsE90jWrr+BwAp+gipDgAlzAC2vbjSVnaJesoNcBkoYooaXwO0veEimy9Pk9+/0yMCqkvE/avyZDwgd3DwDTgLA1gE0Ip7QkD4dj/SVJS1LGZcttF4gkxe5ADfQ+gfcJOzZgJTeAPGcVO3tivpbA/TWcz1/sYoGlOqlrSSZdr1+cc0h4Itfv4PAG2F7p9a3wf13CDMCy48KRZFZNPbEE4nhrjCEAhou9wUnTtAlnmGFzhjnnLuDGmJ85L1q3M1BrzZUC6yTieFuNYOQ5JVPgSp2gWuv2MYg/POic48dEUWtdgR8W9/QPzrHb7zEjURQFAKgQDyj2OH+4nnqqhrIsEUURnt/f8Pr5Fcz5xblLnPnNtRsKjvakGzVKSt/CBwSK3DfkZgAAAABJRU5ErkJggg==","ko":"번개를 가르는 검"},"doomKnight":{"P":[0.5,30.5],"T":[31.5,0.5],"g":17,"h":2.62,"s":0.24,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACgUlEQVR42u2XT0sbQRjGn9iaS+IpCFFY8NhWtF41yWb/JDEmfoNUpfpJxhpr+h2SUmFsBa9C0W5b0f69l6rrYYWAeJAclEC9PL1ocNNUq27WS1+Yw+7h/c287zPPzATgb7D5R4efcCklSDaG30GS1HSD0WiUq6urBMAOH+EwzBR2d7YxMDiEer0OALjvF1w3TNi7Oxh8PITYyDBOT0/9K3tC1RiNRpnLj3NursgzMdIXeCyuMhQKcSyXZ7E47wvYBe/s7GQsrnJ5efnu4FLK/3C/TMZkMBj0FM6rvBwA9/f3mUqPsqenhwlV8w5eq9UaicLhMB3HaU7MarVKTTcYiUSY1Iz2wM8OkpbwsVyevb29nsIBgCsrK64JCCFc30tLS9R0g93d3beC//Uwsu09V7Kv374jnkgCAHXDROXlK+zZu3jUPwBdU1EoFAAg4JmqE6r+q1wuX/RtJjWDQghKKakoClPpTHNlvN1as7PPGvDFxUU6jsNYXKUQ4qwF5q3hl90HAp8+f8HCQgkAMDE5CcuyAABr6xZs28bHD9bFst9oIlf1jLn8OI6PT2AaGtbfvcf00ymYpoknE1MAgK3NDQCA4zjo6+u7tg6uvBHFRobx5rWEoihIpwxMz8zAsixsbW4gHA5BCAEp5Y3g/6SDdCZLRVF4cHDAhKq5RNlieKoBpjNZbP/8gQcP+1GpVNDVFUaxWGxuYaAtO+B85elM1rXK0ewYS6XSRaMiAB4eHnrrgrVarRkO90RyFEKwXC6zWq16Bz9fean04rLeetL/PxK2KHvb4975k+n4pN4Q3PraW7RLXC13QTAYvBN4o/xHR0ecn3/u6x2u2Yp5DXv2NH4DhVLKT3MFagIAAAAASUVORK5CYII=","ko":"멸망 기사의 검"},"zonguldrok":{"P":[1.5,29.5],"T":[29.5,0.5],"g":11,"h":3.33,"s":1.81,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB4klEQVR42s2Xz0vCYBjHv+4vSWFeo45alCGevAkiDLKL4MFrEKPBLiIYgoF/gIgSRGmQdIhAovIibKw6JeipOlV/wtPFyTZfTd3ceuG9vJfP8+P7fJ8NcP/Q6AIAOLfhqqKZHjgv4W4GwIS7GYBvY3Pd0wAAAC/Pr94G4GYFTKOmn/5b3x3B1aoNawCUTAikKhozMMfh4VDECHIPLony/4Mz2rG0oMjtzGnkYKQq2rRMpvbcbuZjsJBKT6sAEx4ORZyBS6JshGNeuCTK9uC1aoMkUZ6VhaOZcyy3GgyG+P76wWiDkVETtWoD7esbPHU7AOAbwbG3u4P9A0F/szdOOqxcqoyVrAsxmRAmMre8OeLjpnIbxsnxns8lSNYErCLzeRcL9Paw3r1cxySJMpzWAsWicWMVaFZbltHDzArEonEE/Guo189QLlWgKhpURUMhX0S5VDGNqJBKO9v7bCZHpZNTikXj1gkgALQViowrIaTSS08DxxAQZTM58EEezdYVbu/aurmY7mO3g/vOA1RFQyDgBx/kbX0T0tHh8QTc4HbM0+v10LxogQ/yS7ugz/jjUMgXAQDvnx9/wXXF24JPGIuqaNYlY+dDZaEK6EFgOxzGYDDE+WXDdlaLBmA1kZXDAeAXVFiUaxOtqukAAAAASUVORK5CYII=","ko":"망자 군주의 검"},"golden":{"P":[1.5,29.5],"T":[29.5,1.5],"g":14,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABiElEQVR42sWXLXLDMBBGnzw9gMvC6iPsEQwLDQt9BMHAwsIcQWGFgYEqK/QRHBaYG2yBa8f5aSM7iq0ZzXhGmnnf7qddWUaZdzxNCTPQxatgAJIp4XVt8Stwy6OYZEo43yvqPWSLCS3ow30FucBLT0DyaLiqu4Cb/HgG0AdNGriqR90SrT9R9c3yyb454Q8RMASusQ9h6/luV+G3f3h+PuaKvJ1J1FL7Kllvmzq/GXmsPtCv83XVwLNAOIDRez33sNuD+/U8W0D2Fga/qxHFgI8WcA5v0z4UHiygf4324e/uPniQAAO62WwwoOfwNu25HQcfbEELLz/iwIPLsK5rrLU8Fw7JDpSvceDBnRBQa60WRaFpmqpf3e5wwR00VECaplqWpYpItxRDwM1GZEBFhKqqABARRAQA59xoC0yIBXB5ofS3DLyshp0BQPM8H53q0LMXFT4q0JC0XwNphOo6EdB+/hd5DOBVAc3fDF2JDfVRowjwdA0mBBZLQNcHzCnYTPVqNnM/z38AEloilfgKBSYAAAAASUVORK5CYII=","ko":"황금 성검"},"order":{"P":[0.5,30.5],"T":[30.5,0.5],"g":10,"h":2.62,"s":0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACmElEQVR42sVXMWvbUBD+4iYYQkDUpS6dRTLVNIPBIDq4KEP2DqFg0XTo2DWTUxQy+hdkaiCKwIM7FWKeEelQnLp0SAM2gRJNCW+woAgCoVEe18GRKsVpGmI994EGScPdd/fd990D/s+hyweZMQVLBK7ZNo77/av/5ASs2XaIliqmSRZj5Pk+lQyDZCRALudUMc0oqMUYVUyTarZNO53OUPDJlBOYeLmyQp83N7GoaWi229AKBQDAA0XBQrGIuuNgVlXRkdnzimlSIARZjFEgBO10OhQIQRXTHCr9pIQEJn4cHVHdcfCiXIZ/ehohX9Q0AJCKPlEFl3MKhCDP98nzfXI5J4uxODHlBA+EoJptk8UYuZzT2fl5RMa4BshqAaYe/4T7/Tkau7t4t7GBRU3Dkq4DAKzLNskTHaVKuP+RoFTJYowAUMkwImJekjA1oUl+z3uEqeVBAldKHSbicj5S/yNUQxKrVAc9nlr+V4DRKhCiSCSS9wbvf5CPZ8TCkQqEuA3ydJMITSVGrDsFv7MdN9ttKDMz+HZ4iLeGMeZlIu9FyOO6P5b+R/OtVBM+P+p43WZECHlvMGrDbKeSYYxcBXI5v45QlFC4m9k+WgXCfsZ9OxDiOoWTO14hqcJVyuVc2pzfu1q+aVXFr4sLLOk6HuZyICJ87fXw6k0JH7a2AGBNCvK4f+91u7TX7RIR0af9/biPQ1YF1lqNhjmtqshms8hkMijPz+NLr4dnhQLOggAnAE4ODlJHn1DCp3Nz0fa63WoBALZbLSzpOmZVVcpFIhMzGDxRVSwUi3i9vg4AeJTLodluo+44eL+6ipJEyY3MxWIskti45aaxTNxIwPDGEl8c49eqVITmbwkc9/txBaTUlO0u1+Vxn99cbRJSH/LFbwAAAABJRU5ErkJggg==","ko":"질서의 별검"},"scimitar3":{"P":[4.5,29.5],"T":[24.5,0.5],"g":7,"h":2.59,"s":1.77,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAChElEQVR42sVW32tSYRh+nNo2m82543QTlzEhHc1Vbv24CYkJ0Z0YbGBdDLrwIiRvKqK/YLsIoZsgGOT6zYYWtbpIWhBYbdV041gEmmeIhozVhReDeruoiQ7ncXqOfXA4cM73nud5n/d5v/MC4i+q9LJJbPDoy8mKJMQkQItPr2EPY0IjFSjJVKU7gC7jsYYRoMisb5MEvbrtxq5WFW+Q4CUI+UcAAMbBM+jUD+LrwnTF/TIhwbNcDFrDAEJ+QNIkBQDkUu8aRwAApLJmDJ26AolECo6dw8nxRwAgaVgJWtoYyJuVUGnN2MivNdYD3cZDUHb2oa2jFxw7h6XIE94YoUpAIf8IWpVayFuUSC7NYD3L4uzV+YryC6pAu7obRAT6/QvrWRZ3Z8JVxQmhAIWnRtHetR/qHisSHx9g8dMKbtxnebMXQgEKT42io2cAmt7hAvjFibdVgdetwIRvGGq9FYxhCF8itzD7YrnqzIVQgI4cNkOtP4jU8mN8iCV3DL7jzcXgr++MQ9d3AqvsMyxEk7h0/X1N35PVCq7SmrGWjtYkO18JqOgqC67ZexT5nxlMP3xeF3g5AuRNOeEOOmD3WLf+38nmMuHm7lX8+P5ZEPCy8rqDDtq82z3Wgho2l4kmN7xkc5nowpiF+Ga9ekxI/56TO+hAPJAAAJjP7UM8kMBxuVzQzGWVSMUDCYzdOw0uw+GNLyY4OO858G0+DS7DwaAzAIAoNd/WCwyjIEu/hhhGQXaPteCNamZ9wczIMIoSExYbVEwS5A46yNKv2QpSUMKbcopLwO6xliPAd0gJ14YMo/g70ebyoptu2y64nD4Pb8opuuHKEZDkcvmS9vtfixrRbn8A6BEHDx14nz0AAAAASUVORK5CYII=","ko":"독뼈 곡검"},"plutonium":{"P":[1.5,30.5],"T":[27.5,0.5],"g":15,"h":6.19,"s":2.24,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADTElEQVR42t2WX0hTURzHv3cJtqSwf0ylMLeQkgjFrT2kL6W70GNFMNFRhKjrgg97GIQwlr6M8sGYf5AIcZJ76aEXwSYRFsXQdA8xQtoN/4AJW1MCF72cHu7/u+u8k7mHfnC57HfOPZ/vOed7fmdAsSLGNMJpI4gxjShqxJgzAjy0u0SKK0IG9+9EyIc/Pwhm3AoRJQVfZi5W+Xc1AtHF3uE+AEBT6QUu22EDAtFFxBgrVbCZ8jAAgNduBQA53Hr0PNqNDZjKLCOSWQEATDKDBVgBGdwV9GCSGQSAcgSic73DfUiTDCwlp9FubAA14QZM/JxDC4DXbjUUEt5ZZgc/cxF+kjLiRulFDt5wBKgyiHDUB78YCgWX77Er6EGaZAAAd49dRfO7pxycEyds0erBTMiBTwE4Lod3ltlBtV2D8BsAWo21HLzKkA2vDybzFyDMmjeYAGs11qL5wT1F11ZjLTrev8gJB4B8t0BwerkC9LAL8NrvKHIrL9XwFq0BDXmdcWHWgeickObhLQhEX7uCHgkuRCAqGpMXX30w0zltxJUKi+XUlQpLFU3eFmO4PP+EdpdIaHeJ9P56k1cZJqoH8lquBffvRCR4jLkt9p9xy/O67wDS3eMmPn8/8fn7FSLUbw34TTht3IzVcM7EuoM4aFopQGNbVPBGER5jpLznejvOnXiuNUTOY2g2W3JLnF6gfHjMiWu71CTU/qG1iGTAZHoc09+nAEzxE6F0CzBVVKp9oQ4K0wuU2O61Y+jRgNT6bSOO5c0uGZjKHiC3DzRF1ZgtuN/RJn3vtBF47dKRS2/PY33Hht9/jVjb3o+j7yS4UmHxqHX3uLN9Id97p43g8lmC8qN7+ydfMa5UmBBCCGbcxEHTyoHV8CumpN6B9dwFpK6uDovNT0A9m5fKq8qMQxjgBCXT4/i61VUoAcRB0wCAjfV14NYIl+VzilWQzJhXlOTYfwgmZNkE4vG4YCZFmxBjoyPkIGbTEkB8/n5s/dyEqaISnz99xNvZWc2PWTahr17kazgHTZOJ0Ktss2nfE3v10xXUXmefZRMwmy0YGx3Rc46JjrqyrwDS3ePWWnYKhxiUet9ZNiHADxWc9Y+ohjdSMeGKFdB5P/x/8Q+FzvjFGwDrGAAAAABJRU5ErkJggg==","ko":"맹독 수정검"},"galeCutlass":{"P":[2.5,29.5],"T":[23.5,1.5],"g":12,"h":2.3,"s":3.2,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACo0lEQVR42t2XT0iTcRjHP+9cvrrtdS4tZIQYSSPdECJ28E8NFh6Wwg6mTHZrl+Ul6BpIVF6U8BTsGHQQI1A6GATi3RAU3Zh5GNiaGJF/stRkT4dqWDI32bsJ/S4vvL/nx/fz/T4vz48X/vMluQoMxRQXkZwQxQRgZmbm9KIPhULyO4LTSeD8xRtsbGxwGt+ABINBdtMayWQyZ7GxGO6dTidfz1RisVhKD+Dz+TCbzVx21GO1WkvbAk3TpLu7m9RWNUDJWyBut5svXxXc7mu4m63Y7XYApSQJeDwe/H4/69/OcVb9xP7+fl7n9EpAAoEAHz6X42ltor6+koaGhpzu9UpAenp6SG1WYKtrxmpcQ9O0vA8XDNDW1obX62V1y84FSwKXy0VNTU1e7gsGMJlM0t/fz7tkI0Gvkbm5OWpra/MWz6dQjqmRUCiE1PVx6+o2Y2NjjI+Pn0g8Z2+XX3dlu0xkcHBQ7jx4K4lEQtrb24UiLJkerpKRsPovREY8Go2KxWIpivhfKRyCkPRKp4T9mkQikZxXrS4AYb8mqTc3ZSSsivTeliEFef7EVhJxABkdUGV6uEpSUx0ypCBSZiiZOICkpjrEYVbk1UOzpKY6JOzXdAXIaw40awqr6we8j83z6J6PsF9DL4jjAKS3WgWgCZW+Ljee+1u8eDlB4LrC6ICKQSkcIhuAPHPYOKj4AcDjte+ZjT8g8WQ5T+8WDmHM5vzj5i5L20JscR6DArHFeVyXTMQW5wGITG4DkJbCJp8hm/Pl3TTxHeGKswUg81xI7GWECxU/4jy90inRCZs4zIoAYlB+TcOWRpNMD1dJ2K+JHn3P2oL40iyzSxDfEVoaTZn3rc4yFhJ7RCb30Nv1kRQURZHDU3B0QBWDgu7OT/J3W1Thn95/Gk9kyJpsAAAAAElFTkSuQmCC","ko":"바람 해적검"},"gyre":{"P":[1.5,28.5],"T":[29.5,2.5],"g":18,"h":9.35,"s":-0.71,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAClklEQVR42u1Xv4vaYBh+LMWhQa+gS6FwzWQWscNtUuTav8Dplk7SIQ4Oxc4O7iVjt3Rz6UEHOxRsPGoplFZKUQviYk85DrQcx50OFerTIWc0avRLlF6HfhD4ku/9/b7P+34Brnn5PPBwCzI8MRMA8qkw4tEAPtYvEY8G8Ohp26ssV4YznwrT0GReMVuPoclkNcklkXGUxR/P3dBjXvEyb2ZptmoA86mwuGCxSJA/i0Iy3XglSs98KkyO+mIGuPBeNAJkNWkz4MaW4ExDk+Hbe70WDdzN2N5XGvC9PVoHJcvbhw/uixm5EwUuP7uD35KwEo9zRFZ3gwAr/C5hCx7sB+34z+r8nSZP0TMNcYanrUA5qJNnR66UWwKkBukvNomszsQXmt6vUE5FWmhWHPXJY028B9j2V15PjFjRmEwD1AQNTeawFCOrSXZqBY7PaxyWYmIQnCMk1BxP0aNk0Em59Z1qglQkDksxnlQypvJBi6ynF/iWoYDdwwhuKSoMTQYA+otNAMCd/BvsBU2ig/3gbJSohwAqEqgm8PLVewDAp8YFbv+q4O49Bb62hvK7t2LdjPU0xxdfOSzFaGgypQaJvJl7f7FpeTpbnFQkPmOaegjM7YDNXf80/90X7B5GxELPeprjQYudWoEnlQyHpRilBs3CWww9r7wn1QQjPXvxOaRzdd7H5zV2agWymrQi4JRzKpKlXA9N3x3qQ6CXH2tWo1g3gqlIjPRghX3unuCtn/PsiBzU13U263ySbw+Dy3ObnD+37b0YMYWh/AQAUP7wbSXD3LlvdvrFowHv45SjPsf9stA8d6qLTdLgZko5Xk43q4FR3/X9bzJkNlXu6qK4rPdvovymtRu0/sZf1QoU/AOL+L+uYf0BakxMVOglbaIAAAAASUVORK5CYII=","ko":"회오리 쌍월도"},"morg":{"P":[2.5,29.5],"T":[25.5,2.5],"g":13,"h":2.61,"s":3.48,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB6klEQVR42u1XO1LjQBTsVhEoQ5mVrTLINNluhnwDbiBxEpsbcAPsG7AnsHwDdAK0GWTejMi9wUiWDOjjj+zaKl6Vy+WasV53v/d6RsB3nCBIqmnNOUXyeKRGEM4pFEj85jVnaPY3l0LgngkAAEQekL+fAQBJLUIhXQHp6kwKzF6BadC+xxmy88va3/8hJPGkCiS+rf2N1wF2KPYliHHWzB4ALoYYu7auH6wEJPV4ZZkHrm2+Lva9AJBUm5eXe15+2pGLPJu8q/a9WaUJlCZoBEFS+S8o8aHIg1IDKUIn6M4mJKn1RLh7KhwtAO5+b0ta1rweCwM4y27pe7MvS5AYSNPq90fm02A35r2mIC8sVBLnGRUFwnoijB+KRsvtrAeu/RyFedNFolRhdmuViDxodl1978p8ZyMiqTgUosLbYwOMH4DlX25U2gfARW+D+SE8v1YNCdjkh0rOvswBbAAYvwLxcTJ2DacreTgS8pVNbnwgeyPmGZHmds96Iuxb/04fCEfbz83eKralMomx07KvEk5bcs+1rD13O3ltNAFgo8bBCpRSxqGVffX+mfnWlStWnf1hxztJaWp93/hQYirXa/hLfV1Ha8I0B26vgXlxlLbUlbX140zB/Lm4wy03kg7/2vZVDxxcz/8p/gGn7RNN5eikWAAAAABJRU5ErkJggg==","ko":"대지의 곡도"},"ancient":{"P":[1.5,29.5],"T":[28.5,0.5],"g":14,"h":4.03,"s":3.0,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABaklEQVR42r2X65HDIAyEF08KSAmUcCVQQkpwKS7FJVwJlJASKOE60P3gNME6mZcxmmE8cUK+1UoGYwhzwwBEgOHPy2y4X+N1ugCGh5/j/WU2fLoACbfPiQIkXGZ/qwAN7iywfgO3PwVnDafFcjf8zHqOx0gwAEg4h2b/MAGcdQrVRNzigFZvCT3L/pIAzXIZNU34GGW5hPI1l32XgKvwVAW1CEgt74GbKyVIs66Bi7lqUK2AnOVncM4eBXhRQE29C3CTg2eXYgOQs2PhTXsBAcYHYPNHWG7BKZWeWpuQAGNCnMdulFa7mrqjpQf2V4T58P9tprfuTdvx/o5X+9Qt76l7dRPurwjwId7zob3piucOUgYinJwFbQ60fh1/4mz8/jil7r/lMKQst1x3HuzAX5bU2/HZJkz39f39aTgBL9a5+ajHlvv148zmos0li3ssl2M5e5FQMsfQzKVqzlw03KXsupuQV8EZ58ZfDZ4tA798AuEAAAAASUVORK5CYII=","ko":"태고의 대검"},"katana1":{"P":[1.5,29.5],"T":[28.5,0.5],"g":10,"h":1.91,"s":3.53,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABNElEQVR42t2W7XGEIBRFj0wKsYQtgRIsgU5CKZZgCa8ES6AEOnj5kU0WXTYrq8JO+OOgMpdz3+UD6jdNO6a2eIxxMQlTW1xEaOnAXTM16UMIzUA1xqjTNGmLEL4v/VuIm/9qvcYYN1l/agib0s/z3CR4xeLmjNCVWG/OEh+GAaBrZXuVuusRgetaW94VEgOwvljsqffWQToOYHuIbl5T7wqb2Upue/BCzvLu5KCJglUQHQfUXY5Nuflb3CZdqXpv/yUGf3WAZ2v8JWdMRphvckHCD7mk9c7VXP1N+6XyXGltQmy37mrqELV4dUixC4sMuIskxJKzNzupgGD5JOzIiVr8nUhKlj5Xk9DV+KL2kXvpEALCuFgFt28Wj+AX9e4z/xa78IAwm/YHruzeirVga9UjDrYvFe8mDUcHEhsAAAAASUVORK5CYII=","ko":"별그림자 태도"},"claymore3":{"P":[0.5,27.5],"T":[31.5,0.5],"g":10,"h":3.32,"s":1.11,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACNUlEQVR42uVXMW/TQBT+rurEhBgQEigiYmGJEiFVIJajk9miyI2cxV2qMPAPmHAGlJFfAEsl5ARVujEpQ85TU0VIQZXaDkBRxFB1iMKCqgx8DGDXdRwCreMMvM323fve+957n+8E0jeGH5ZSBiZJkITWOtUAqJQCSbyrALtr6TJApRSKxSIa68D7nTa+XEmRdqUUSdK1yXqmRdcmtdb0e2E5jcx314CjXhurKwZON7yg/gvJ3HEcRidh7uDbFknyPwEfvSa75i/wrrmAzH3whdQ8nPm8wX3HEzXvmuTx0/nSTq01ffv2Jt3MA8odx6FSitvWWc0v0nCXUsLTrSIOds4UrlbTcBwHAMTf+hBT6jvtPZRS6Pf7uPvpOY68NrLSwI0ND1JKCCH+CTzub8iuScRQSJIBOADc/g5kpYHDO7VLaftECTq9NlybqGyKc0w01oGHL+5hPB4j0yhjYL3F4f4+CoUCAMDzvOSazO/oCBO0SlV2TbLZbAZNGB7JxMBdexI8l5eUssxcXlJrHQZPfswiDNAqVSllmTdvZQmArk0OBoNEAhB/CAKrKwaqHx/h2tXrGI5OsPfB8/dwxv5kmfAznwfI8pT5p1WqojV8BfSArfuf8eCrmKUTF7KlmPlnLi9xPBxhODrBs8FjdHpt+N/D65IIQPhOO78PjS9/PAnAwzWvZ1rISiNQv8qmSKwHWM+0GB7BXF7GZXhuXYxOJHJfm+WckfMA0tCBdG+uiwRHGvRG7SdMsRvwzc9OkwAAAABJRU5ErkJggg==","ko":"성운 양손검"},"bloodbane":{"P":[1.5,28.5],"T":[29.5,2.5],"g":11,"h":2.62,"s":0.5,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACA0lEQVR42uWXsWrbUBSGv7qCiOAhVKVLIBkc0GI0ZtBQefITCLxpyGDoUxjhR/CaIe1W6i1rh6iDSKPBYOJOySCDIQ714njI4OR0kYyS1JHtSM6QC0JCR+i757//OVeCtz7erRNmgsTXfsRW1gkumSbbkwm/ut1ZTFkH/LNhADAAOqr6IF7IG34QXQ+KRa6nU27Ozmby56qACfINcE0TgD/jMQAbj54r5Ak/NAyup1O2JxM+bm6ycX7+IHuA93nBT4APwyF/d3f5fXvLXafzBJ65AvGaH0ami6X/X+aZ94Gk2/e6XS4Mg0GxyKXvz4VnpoAJUjJN9qL69iLjpcEzUSCZ+XPllosCseHizOPzovAXKZB0+0WkQEdVl4KvXIYOSNkwGA+H/Njf50pRuFdVrk5Pl4KvugTyVYQvx8dstdsAfFKUhQyXxQSkXq9TqVRwHGd2c1V42l4gj3wiIkK/3ycIAlqt1tKGW1qBMAzjiUgYhk8yt237RfDU3TAIAtrROjuOg67rs5jneZn0kbQXCEC5XEbTNHRdp1qtYtt2Zm081YQ1QNM0RqNR5vBUEzaBe9eFRgMP6PV6mX87zFNAasBPy6LQaPA9EXBdN1khuQxpgliWJbWoAuYc+cBrIK7rSjNn0KKZ5z7izUh83+dyZ4fS0RGtV/hriiexdtnn9f+3M/4BC/XfPOU1cWYAAAAASUVORK5CYII=","ko":"피의 저주검"},"cerebov":{"P":[0.5,30.5],"T":[31.5,0.5],"g":10,"h":4.04,"s":1.46,"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACGElEQVR42sWXsWrrMBSGfwnRJVn8BKEeLmQL3BcI1GOGoLdIpgacoY9waeBeCMhvEdw9EEMpXbtlSzD0tnOhHW4xPndILazETqmj2gc0BMv6/nOs/yhiaC4IAHhT8NVqhSYF6OBNZt+EAA1fr9e1CaBsZPB+v18P8AOqRxZKqew5hE1LAUD++xZlOp1O4bqu/s1sgPPQxyjC090dnu/vjYliNAIAuK6L8Xis2cLWbr4ZDCotUrUCRESIokiDO0IgThKdKQAkQXA0+6oCPoXPZjMAgO/7+qUieBUbajgA/PT9MjjLg8vgVUtvWOyy1aJfnke+71PODaSUytuNyhb88iZkjGWZUFb+v73ewbyPjD/NmlfYtMaCcZIUlZ4Vzf2Ww6gjTutl/JQe8DAc6grUJUAfKnkLnhKirKcXRdb5bgYD9M/OsE3TnQUtCsDOZbsIggDdbveg3Rrw0Ug3HhsCGGOM9sVM2m10hEBHCJxzjm2a4pxzxBbaOj9iNcYYQxRF+P36CgAGPHp/Pzn7Y5uQAFDoOHgYDjFpt9ELQw3fpqmtQ63wRQodBwAMUJwk+HF9jX9XV0XfnllzQeg4Gjx5eTEeKgC3FxdwXdcKfF+AhsdJgj9vb/nFDXvagucF0GWrlYcfLKyUwmazwWKxsAbXmUspiYhISll2dNLesH5ZICml8Xe51qvZfD6H53lYLpe139OKNhmrU8B/cUIzGYANLPkAAAAASUVORK5CYII=","ko":"혈귀의 파동검"}};
+  var SPRITE_POOLS = [["dagger", "short1", "short6", "long1", "long6", "great1", "falchion1", "falchion4", "scimitar1", "rapier1", "cutlass1", "cutlass5", "claymore"], ["short2", "short3", "short5", "long3", "falchion2", "falchion3", "rapier3", "cutlass3", "cutlass9", "great3u", "double1", "katana2", "dagger3"], ["great3", "long5", "long7", "claymore2", "claymoreB", "falchion5", "falchion7", "triple1", "triple2", "double2"]];
+  var SPRITE_SIGNATURE = [["power", "flamingDeath"], ["chillyDeath", "winter"], ["great4", "arcBlade"], ["doomKnight", "zonguldrok"], ["golden", "order"], ["scimitar3", "plutonium"], ["galeCutlass", "gyre"], ["morg", "ancient"], ["katana1", "claymore3"], ["bloodbane", "cerebov"]];
+  /* SWORD-SPRITES:END */
 
   var CREATURES = ['용','불사조','늑대','사자','독수리','거인','악마','천사','히드라',
                    '그리핀','유니콘','크라켄','타이탄','와이번','백호','흑룡','봉황'];
@@ -788,15 +740,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                   '어둠을 가르는 빛','폭풍의 왕','잠들지 않는 용','천 개의 태양','심연의 군주',
                   '새벽의 맹세','무너지지 않는 산','은하의 노래','피의 서약','바람의 왕관',
                   '세계수의 가지','마지막 영웅의 검','시간을 베는 날'];
-
-  /* 등급별 금속 — 아이들도 한눈에 읽는 관례: 쇠 · 은 · 마법강철 · 금 · 백금 */
-  var METALS = [
-    { a:'#3A3430', b:'#8C847A', c:'#CEC6BA' },
-    { a:'#4A5868', b:'#B8C6D4', c:'#F4F8FC' },
-    { a:'#2E2440', b:'#8A72B0', c:'#E6D8FF' },
-    { a:'#6A4608', b:'#E8B64A', c:'#FFF2B8' },
-    { a:'#5A6080', b:'#E4E8FF', c:'#FFFFFF' }
-  ];
 
   /* ═════════ 도우미 ═════════ */
   function rng32(seed){
@@ -811,27 +754,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function pick(r, arr){ return arr[Math.floor(r() * arr.length)]; }
   function hexRgb(h){ var n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
-  function rgbHex(c){ return '#' + c.map(function(v){ v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? '0' : '') + v.toString(16); }).join(''); }
-  function mix(a, b, t){ var x = hexRgb(a), y = hexRgb(b); return rgbHex([x[0]+(y[0]-x[0])*t, x[1]+(y[1]-x[1])*t, x[2]+(y[2]-x[2])*t]); }
-  function shade(h, t){ return t < 0 ? mix(h, '#000000', -t) : mix(h, '#FFFFFF', t); }
   function hexA(h, a){ var c = hexRgb(h); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, Math.min(1, a)).toFixed(3) + ')'; }
-  function tipOf(d){
-    var n = d.match(/-?\d+(\.\d+)?/g).map(Number), m = 999;
-    for (var i = 1; i < n.length; i += 2) m = Math.min(m, n[i]);
-    return m;
-  }
+  function lerp3(a, b, t){ return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
   function newSeed(){ return (Math.random() * 4294967296) >>> 0; }
 
   /* ═════════ 검 생성 ═════════
-     생김새·이름은 seed 와 등급만으로 정해집니다 — 한 자루는 부서질 때까지 같은 모습입니다.
-     빛·입자·크기·장식(빛의 흐름, 룬, 빛줄기, 별빛, 무지개빛)은 지금 단계(lv)에 따라 자랍니다. */
-  var SHAPES = [            // 칼날 [최고 계층, 그 계층만 고를 확률] · 보호대 [최고 계층, 확률]
-    [1, 0,  1, 0 ],         // 일반
-    [1, .5, 1, .5],         // 희귀
-    [2, .5, 2, .5],         // 영웅
-    [2, .7, 3, .6],         // 전설
-    [2, 1,  3, 1 ]          // 신화
-  ];
+     그림·이름은 seed 와 등급만으로 정해집니다 — 한 자루는 부서질 때까지 같은 모습입니다.
+     크기·속성 색의 짙기·빛·입자·장식(빛의 흐름, 룬, 빛줄기, 별빛, 무지개빛)은 지금 단계(lv)로 자랍니다. */
   /* 단계가 오르면 깨어나는 변화. 등급이 rar 이상인 검은 처음부터 갖고 태어납니다. */
   var FEATS = [
     { key:'flow',  at:5,  rar:2, short:'빛의 흐름', text:'칼날에 빛이 흐르기 시작했습니다' },
@@ -845,34 +774,43 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     FEATS.forEach(function(F){ f[F.key] = lv >= F.at || rar >= F.rar; });
     return f;
   }
-  function tierPick(r, tiers, top, onlyTop){
-    if (r() < onlyTop) return pick(r, tiers[top]);
-    var pool = [];
-    for (var i = 0; i <= top; i++) pool = pool.concat(tiers[i]);
-    return pick(r, pool);
-  }
+
+  /* 캔버스 380×380 의 가운데에 검을 놓습니다. 빛줄기는 반지름 180 안에서 끝납니다. */
+  var CW = 380, CH = 380, CX = 190, CY = 190;
+  var TAU = Math.PI * 2;
+
   function makeSword(seed, lv, el, rar){
-    var r = rng32(seed), sh = SHAPES[rar];
-    var blade = tierPick(r, BLADE_TIERS, sh[0], sh[1]);
-    var guard = tierPick(r, GUARD_TIERS, sh[2], sh[3]);
-    var E = ELEMENTS[el], R = RARITIES[rar];
+    var r = rng32(seed), E = ELEMENTS[el], R = RARITIES[rar];
+    var key = rar >= 3 ? SPRITE_SIGNATURE[el][rar - 3] : pick(r, SPRITE_POOLS[rar]);
+    var D = SPRITE_DATA[key];
     var power = Math.max(.06, Math.min(1, lv / 20 * .7 + R.boost));
-    var k = .42 + .58 * Math.min(1, power * 1.3);
-    var runes = [], nr = 4 + Math.floor(r() * 4);
+    var runes = [], nr = 3 + Math.floor(r() * 3);
     for (var q = 0; q < nr; q++) runes.push(Math.floor(r() * RUNES.length));
     var creature = pick(r, CREATURES), epithet = pick(r, EPITHETS);
+    var S = 6 + lv * .08;                      // 그림 한 픽셀이 캔버스에서 차지하는 크기 — 단계마다 커집니다
+    var L = Math.hypot(D.T[0] - D.P[0], D.T[1] - D.P[1]);
+    var ux = (D.T[0] - D.P[0]) / L, uy = (D.T[1] - D.P[1]) / L, nx = -uy, ny = ux;
+    var mx = (D.P[0] + D.T[0]) / 2, my = (D.P[1] + D.T[1]) / 2;
+    function C(x, y){ return [CX + (x - mx) * S, CY + (y - my) * S]; }
+    var G = C(D.P[0] + ux * D.g + nx * D.s, D.P[1] + uy * D.g + ny * D.s), T = C(D.T[0], D.T[1]);
     return {
-      seed:seed, lv:lv, el:el, rar:rar, E:E, R:R, M:METALS[rar],
-      blade:blade, guard:guard, power:power, f:feats(lv, rar),
-      ca:mix('#3C3A38', E.a, k), cb:mix('#9A9690', E.b, k), cc:mix('#E6E2DC', E.c, k),
-      name:E.word + ' ' + creature + '의 ' + NOUNS[blade],
+      seed:seed, lv:lv, el:el, rar:rar, E:E, R:R, key:key,
+      power:power, f:feats(lv, rar),
+      tint: rar >= 3 ? 0 : Math.round((.3 + .55 * Math.min(1, lv / 20)) * 20) / 20,
+      name: rar >= 3 ? D.ko : E.word + ' ' + creature + '의 ' + D.ko,
       epithet: rar >= 3 ? epithet : '',
-      runes:runes, tip:tipOf(BLADES[blade]), half:HALF[blade],
-      cx: blade === 'katana' ? 84 : blade === 'curved' ? 83 : 80,
-      scale:.84 + lv * .008,
-      bladePath:new Path2D(BLADES[blade]),
-      guardPath:GUARDS[guard] ? new Path2D(GUARDS[guard]) : null
+      runes:runes, S:S, ox:CX - mx * S, oy:CY - my * S,
+      u:[ux, uy], n:[nx, ny], ang:Math.atan2(uy, ux),
+      P:C(D.P[0], D.P[1]), G:G, T:T,
+      mid:[(G[0] + T[0]) / 2, (G[1] + T[1]) / 2],
+      blen:Math.hypot(T[0] - G[0], T[1] - G[1]),
+      half:D.h * S
     };
+  }
+  /* 칼날 위의 한 점: a 는 코등이(0)에서 칼끝(1)까지, off 는 칼날과 수직 방향 거리 */
+  function bp(sw, a, off){
+    return [sw.G[0] + (sw.T[0] - sw.G[0]) * a + sw.n[0] * off,
+            sw.G[1] + (sw.T[1] - sw.G[1]) * a + sw.n[1] * off];
   }
 
   /* 룬 문자 — 8×12 상자 안의 선분들 */
@@ -888,54 +826,179 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     [[-3,6,0,-6],[0,-6,3,6],[-2,1,2,1]]
   ];
 
-  /* ═════════ 렌더러 ═════════
-     캔버스 380×400 안에 160×330 검을 (110,60) 위치에 그립니다. 빛줄기는 반지름 180 안에서 끝납니다. 발광은 'lighter' 합성. */
-  var CW = 380, CH = 400, OX = 110, OY = 60;
-  var TAU = Math.PI * 2;
+  /* ═════════ 그림 불러오기 · 물들이기 ═════════ */
+  var SPR = {};
+  function loadSprites(done){
+    var keys = Object.keys(SPRITE_DATA), left = keys.length;
+    if (!left){ done(); return; }
+    keys.forEach(function(k){
+      var img = new Image();
+      img.onload = img.onerror = function(){
+        if (img.naturalWidth){
+          var c = document.createElement('canvas');
+          c.width = c.height = 32;
+          c.getContext('2d').drawImage(img, 0, 0);
+          SPR[k] = { canvas:c, outline:null };
+        }
+        if (--left === 0) done();
+      };
+      img.src = SPRITE_DATA[k].src;
+    });
+  }
+  /* 회색 칼날만 속성 색으로 물들입니다. 금빛 손잡이·보석 같은 색 있는 픽셀과 검은 외곽선은 그대로 둡니다. */
+  var tintCache = {};
+  function tinted(key, el, k){
+    var id = key + '|' + el + '|' + k;
+    if (tintCache[id]) return tintCache[id];
+    var c = document.createElement('canvas');
+    c.width = c.height = 32;
+    var x = c.getContext('2d');
+    x.drawImage(SPR[key].canvas, 0, 0);
+    if (k > 0){
+      var E = ELEMENTS[el], A = hexRgb(E.a), B = hexRgb(E.b), Cc = hexRgb(E.c);
+      var d = x.getImageData(0, 0, 32, 32), a = d.data;
+      for (var i = 0; i < a.length; i += 4){
+        if (!a[i + 3]) continue;
+        var r = a[i], g = a[i + 1], b = a[i + 2], hi = Math.max(r, g, b), lo = Math.min(r, g, b);
+        var sat = hi ? (hi - lo) / hi : 0;
+        if (sat > .28 || hi < 40) continue;
+        var l = (r * .3 + g * .59 + b * .11) / 255;
+        var m = l < .5 ? lerp3(A, B, l * 2) : lerp3(B, Cc, (l - .5) * 2);
+        var w = k * (1 - sat / .56);
+        a[i] = r + (m[0] - r) * w; a[i + 1] = g + (m[1] - g) * w; a[i + 2] = b + (m[2] - b) * w;
+      }
+      x.putImageData(d, 0, 0);
+    }
+    return (tintCache[id] = c);
+  }
+  /* 그림을 한 픽셀 부풀린 모양 — 등급 테두리와 잠긴 도감 칸에 씁니다 (34×34, 한 픽셀 여백) */
+  function outlineMask(key){
+    var s = SPR[key];
+    if (s.outline) return s.outline;
+    var src = s.canvas.getContext('2d').getImageData(0, 0, 32, 32).data;
+    var c = document.createElement('canvas');
+    c.width = c.height = 34;
+    var x = c.getContext('2d'), d = x.createImageData(34, 34), a = d.data;
+    for (var y = 0; y < 34; y++){
+      for (var xx = 0; xx < 34; xx++){
+        var on = false;
+        for (var dy = -1; dy <= 1 && !on; dy++){
+          for (var dx = -1; dx <= 1 && !on; dx++){
+            var sx = xx - 1 + dx, sy = y - 1 + dy;
+            if (sx >= 0 && sy >= 0 && sx < 32 && sy < 32 && src[(sy * 32 + sx) * 4 + 3] >= 128) on = true;
+          }
+        }
+        if (on){ var i = (y * 34 + xx) * 4; a[i] = a[i + 1] = a[i + 2] = a[i + 3] = 255; }
+      }
+    }
+    x.putImageData(d, 0, 0);
+    return (s.outline = c);
+  }
+  var scratch = null;
+  function scratchCtx(){
+    if (!scratch){ scratch = document.createElement('canvas'); scratch.width = scratch.height = 34; }
+    var x = scratch.getContext('2d');
+    x.globalCompositeOperation = 'source-over';
+    x.clearRect(0, 0, 34, 34);
+    return x;
+  }
 
+  /* ═════════ 렌더러 ═════════  모든 좌표는 380×380 캔버스 단위 */
+  function blurPx(ctx, v){
+    var m = ctx.getTransform ? ctx.getTransform() : null;
+    return v * (m ? Math.hypot(m.a, m.b) : 1);
+  }
   function drawSword(ctx, sw, t, parts, bolts){
-    var E = sw.E, P = sw.power;
+    if (!SPR[sw.key]) return;
+    var E = sw.E, P = sw.power, M = sw.mid;
     ctx.save();
-    ctx.translate(OX + 80, OY + 200);
-    ctx.scale(sw.scale, sw.scale);
-    ctx.translate(-80, -200);
-
     ctx.globalCompositeOperation = 'lighter';
     var br = .82 + .18 * Math.sin(t * 2.1);
-    var ag = ctx.createRadialGradient(80, 118, 6, 80, 130, 170);
+    var ag = ctx.createRadialGradient(M[0], M[1], 6, M[0], M[1], 170);
     ag.addColorStop(0, hexA(E.glow, (.16 + .42 * P) * br));
     ag.addColorStop(.45, hexA(E.glow, (.05 + .16 * P) * br));
     ag.addColorStop(1, hexA(E.glow, 0));
     ctx.fillStyle = ag;
-    ctx.fillRect(-70, -60, 300, 440);
+    ctx.fillRect(M[0] - 172, M[1] - 172, 344, 344);
 
-    if (sw.f.prism) rays(ctx, t, 16, 178, 15, null, .32, t * .3);
-    else if (sw.rar === 3) rays(ctx, t, 12, 170, 14, '#FFD27A', .26, t * .22);
-    else if (sw.f.rays) rays(ctx, t, 10, 162, 12, E.glow, .14 + .14 * P, t * .2);
-    else if (E.fx === 'holy' && P > .18) rays(ctx, t, 8, 150, 11, E.c, .08 + .14 * P, t * .16);
+    if (sw.f.prism) rays(ctx, M, t, 16, 178, 15, null, .32, t * .3);
+    else if (sw.rar === 3) rays(ctx, M, t, 12, 170, 14, '#FFD27A', .26, t * .22);
+    else if (sw.f.rays) rays(ctx, M, t, 10, 162, 12, E.glow, .14 + .14 * P, t * .2);
+    else if (E.fx === 'holy' && P > .18) rays(ctx, M, t, 8, 150, 11, E.c, .08 + .14 * P, t * .16);
 
-    if (E.fx === 'cosmos') nebula(ctx, sw, t, true);
+    if (E.fx === 'cosmos') nebula(ctx, sw, t);
     drawParts(ctx, sw, parts, t, -1);
 
     ctx.globalCompositeOperation = 'source-over';
-    hilt(ctx, sw, t);
-    blade(ctx, sw, t);
-    guard(ctx, sw, t);
+    outline(ctx, sw, t);
+    spriteDraw(ctx, sw);
 
     ctx.globalCompositeOperation = 'lighter';
+    if (sw.f.flow) flow(ctx, sw, t);
+    if (sw.f.runes) runeLine(ctx, sw, t);
+    glint(ctx, sw, t);
     var fx = FX[E.fx];
     if (fx.extra) fx.extra(ctx, sw, t, bolts);
     drawParts(ctx, sw, parts, t, 1);
     if (sw.f.orbit) orbit(ctx, sw, t);
-
     ctx.restore();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
   }
 
-  function rays(ctx, t, n, len, w, color, alpha, rot){
+  function spriteDraw(ctx, sw){
     ctx.save();
-    ctx.translate(80, 128);
+    ctx.imageSmoothingEnabled = false;
+    ctx.shadowColor = hexA(sw.E.glow, .45 + .45 * sw.power);
+    ctx.shadowBlur = blurPx(ctx, 5 + 26 * sw.power);
+    ctx.drawImage(tinted(sw.key, sw.el, sw.tint), sw.ox, sw.oy, 32 * sw.S, 32 * sw.S);
+    ctx.restore();
+  }
+  /* 등급 테두리: 희귀 파랑 · 영웅 보라 · 전설 금빛(맥동) · 신화와 +20 무지개 */
+  function outline(ctx, sw, t){
+    var fill = null;
+    if (sw.f.prism) fill = 'prism';
+    else if (sw.rar === 3) fill = hexA(sw.R.color, .7 + .25 * Math.sin(t * 3));
+    else if (sw.rar >= 1) fill = hexA(sw.R.color, sw.rar === 1 ? .55 : .75);
+    if (!fill) return;
+    var x = scratchCtx();
+    x.drawImage(outlineMask(sw.key), 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    if (fill === 'prism'){
+      var g = x.createLinearGradient(0, 34, 34, 0);
+      for (var i = 0; i <= 6; i++) g.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,62%)');
+      x.fillStyle = g;
+    } else x.fillStyle = fill;
+    x.fillRect(0, 0, 34, 34);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    if (sw.rar >= 3 || sw.f.prism){
+      ctx.shadowColor = sw.f.prism ? 'rgba(255,255,255,.7)' : hexA('#FFD27A', .8);
+      ctx.shadowBlur = blurPx(ctx, 10);
+    }
+    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    ctx.restore();
+  }
+  /* 도감의 잠긴 칸: 어두운 실루엣과 옅은 테두리 */
+  function silhouette(ctx, sw){
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    var x = scratchCtx();
+    x.drawImage(outlineMask(sw.key), 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = 'rgba(255,255,255,.14)';
+    x.fillRect(0, 0, 34, 34);
+    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    x = scratchCtx();
+    x.drawImage(SPR[sw.key].canvas, 1, 1);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = '#17130F';
+    x.fillRect(0, 0, 34, 34);
+    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    ctx.restore();
+  }
+
+  function rays(ctx, c, t, n, len, w, color, alpha, rot){
+    ctx.save();
+    ctx.translate(c[0], c[1]);
     ctx.rotate(rot);
     for (var i = 0; i < n; i++){
       var g = ctx.createLinearGradient(0, 0, 0, -len);
@@ -954,278 +1017,67 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     ctx.restore();
   }
-
-  /* 성운: 뒤쪽에는 옅은 성운, 칼날 안에는 은하수 */
-  function nebula(ctx, sw, t, back){
-    var cols = ['#FF5FD0', '#5F8FFF', '#B05FFF', '#5FE8FF'];
-    var r = rng32(sw.seed + 77);
+  function nebula(ctx, sw, t){
+    var cols = ['#FF5FD0', '#5F8FFF', '#B05FFF', '#5FE8FF'], r = rng32(sw.seed + 77);
     for (var i = 0; i < 5; i++){
-      var x = 50 + r() * 60 + Math.sin(t * .3 + i) * 10;
-      var y = (back ? 40 : sw.tip) + r() * (back ? 220 : 197 - sw.tip) + Math.cos(t * .25 + i * 2) * 8;
-      var rad = back ? 50 + r() * 50 : 14 + r() * 22;
+      var x = sw.mid[0] + (r() - .5) * 160 + Math.sin(t * .3 + i) * 12;
+      var y = sw.mid[1] + (r() - .5) * 160 + Math.cos(t * .25 + i * 2) * 10;
+      var rad = 60 + r() * 60;
       var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
-      g.addColorStop(0, hexA(cols[i % 4], back ? .13 : .6));
+      g.addColorStop(0, hexA(cols[i % 4], .14));
       g.addColorStop(1, hexA(cols[i % 4], 0));
       ctx.fillStyle = g;
       ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
     }
-    if (back) return;
-    for (var s = 0; s < 28; s++){
-      var sx = 54 + r() * 52, sy = sw.tip + r() * (197 - sw.tip), f = 1 + r() * 2, big = r() < .2;
-      var tw = .35 + .65 * Math.abs(Math.sin(t * f + s));
-      ctx.fillStyle = 'rgba(255,255,255,' + tw.toFixed(2) + ')';
-      if (big) sparkle(ctx, sx, sy, 2.4 * tw, ctx.fillStyle); else ctx.fillRect(sx, sy, 1.1, 1.1);
+  }
+  /* 빛의 흐름: 코등이에서 칼끝으로 빛 덩어리가 꼬리를 끌며 지나갑니다 */
+  function flow(ctx, sw, t){
+    var sp = .45 + .5 * sw.power;
+    for (var j = 0; j < 2; j++){
+      var a = ((t * sp + j * .55) % 1.3) - .15;
+      for (var k = 0; k < 4; k++){
+        var aa = a - k * .04;
+        if (aa < 0 || aa > 1) continue;
+        var q = bp(sw, aa, 0), rad = Math.min(22, sw.half * 1.4) * (1 - k * .2);
+        var g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
+        g.addColorStop(0, hexA(sw.E.c, (.3 + .3 * sw.power) * (1 - k * .22)));
+        g.addColorStop(1, hexA(sw.E.c, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(q[0] - rad, q[1] - rad, rad * 2, rad * 2);
+      }
     }
   }
-
-  function palette(sw){
-    if (!sw.pal) sw.pal = {
-      e0:shade(sw.ca, -.28), e1:shade(sw.ca, -.38),
-      m1:mix(sw.cb, sw.cc, .35), m2:mix(sw.ca, sw.cb, .5),
-      leather: sw.rar >= 3 ? mix('#3A2A1E', sw.E.a, .55) : '#4A3828'
-    };
-    return sw.pal;
-  }
-
-  function blade(ctx, sw, t){
-    var E = sw.E, P = sw.power, bp = sw.bladePath, pal = palette(sw);
-    var rule = HOLLOW[sw.blade] ? 'evenodd' : 'nonzero';
-    var x0 = sw.cx - sw.half - 4, x1 = sw.cx + sw.half + 4;
-
-    ctx.save();
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = hexA(E.glow, .5 + .45 * P);
-    ctx.shadowBlur = 5 + 30 * P;
-    ctx.strokeStyle = 'rgba(6,4,3,.8)';
-    ctx.lineWidth = 3;
-    ctx.stroke(bp);
-    ctx.restore();
-
-    var g = ctx.createLinearGradient(x0, 0, x1, 0);
-    g.addColorStop(0, pal.e0);
-    g.addColorStop(.18, sw.ca);
-    g.addColorStop(.42, sw.cb);
-    g.addColorStop(.5, sw.cc);
-    g.addColorStop(.58, pal.m1);
-    g.addColorStop(.82, pal.m2);
-    g.addColorStop(1, pal.e1);
-    ctx.fillStyle = g;
-    ctx.fill(bp, rule);
-
-    ctx.save();
-    ctx.clip(bp, rule);
-    if (E.fx === 'cosmos'){
-      ctx.fillStyle = 'rgba(10,6,30,.82)';
-      ctx.fillRect(0, 0, 160, 210);
-      ctx.globalCompositeOperation = 'lighter';
-      nebula(ctx, sw, t, false);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-    var vg = ctx.createLinearGradient(0, sw.tip, 0, 200);
-    vg.addColorStop(0, 'rgba(255,255,255,.4)');
-    vg.addColorStop(.32, 'rgba(255,255,255,.05)');
-    vg.addColorStop(1, 'rgba(0,0,0,.3)');
-    ctx.fillStyle = vg;
-    ctx.fillRect(0, sw.tip - 4, 160, 210);
-    if (!ASYM[sw.blade]){
-      ctx.fillStyle = 'rgba(0,0,0,.15)';
-      ctx.fillRect(0, 0, sw.cx, 200);
-    }
-
-    ctx.globalCompositeOperation = 'lighter';
-    if (!ASYM[sw.blade] && !HOLLOW[sw.blade]){
-      ctx.strokeStyle = hexA(sw.cc, .8);
-      ctx.lineWidth = 1.1;
-      ctx.beginPath(); ctx.moveTo(sw.cx, sw.tip + 8); ctx.lineTo(sw.cx, 197); ctx.stroke();
-    }
-    if (sw.f.flow){
-      var span = 197 - sw.tip + 70;
-      var y = 197 + 35 - ((t * (40 + 70 * P)) % span);
-      var eg = ctx.createLinearGradient(0, y - 28, 0, y + 28);
-      eg.addColorStop(0, hexA(E.c, 0));
-      eg.addColorStop(.5, hexA(E.c, .18 + .5 * P));
-      eg.addColorStop(1, hexA(E.c, 0));
-      ctx.fillStyle = eg;
-      ctx.fillRect(0, y - 28, 160, 56);
-    }
-    if (sw.f.runes) runeLine(ctx, sw, t);
-    var c = (t % 2.8) / .75;
-    if (c < 1){
-      ctx.save();
-      ctx.translate(20 + c * 120, sw.tip + c * (200 - sw.tip));
-      ctx.rotate(-.65);
-      var sg = ctx.createLinearGradient(-16, 0, 16, 0);
-      sg.addColorStop(0, 'rgba(255,255,255,0)');
-      sg.addColorStop(.5, 'rgba(255,255,255,.6)');
-      sg.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = sg;
-      ctx.fillRect(-16, -260, 32, 520);
-      ctx.restore();
-    }
-    ctx.restore();
-
-    ctx.save();
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = hexA(sw.cc, .55);
-    ctx.lineWidth = 1;
-    ctx.stroke(bp);
-    if (sw.f.prism){
-      ctx.globalCompositeOperation = 'lighter';
-      var rg = ctx.createLinearGradient(0, sw.tip, 0, 200);
-      for (var i = 0; i <= 6; i++) rg.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,68%)');
-      ctx.strokeStyle = rg;
-      ctx.lineWidth = 2;
-      ctx.stroke(bp);
-    } else if (sw.rar === 3){
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = hexA('#FFD27A', .5 + .3 * Math.sin(t * 3));
-      ctx.lineWidth = 1.4;
-      ctx.stroke(bp);
-    }
-    ctx.restore();
-  }
-
   function runeLine(ctx, sw, t){
-    var n = sw.runes.length, top = sw.tip + 26, bot = 186;
-    if (bot - top < 30) return;
-    var step = (bot - top) / n, hollow = HOLLOW[sw.blade];
+    var n = sw.runes.length, s = Math.max(.55, Math.min(1.1, sw.half / 12));
     ctx.save();
     ctx.lineCap = 'round';
-    ctx.lineWidth = 1.3;
+    ctx.lineWidth = 1.5;
     ctx.shadowColor = sw.E.glow;
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = blurPx(ctx, 6);
     for (var i = 0; i < n; i++){
-      var y = top + step * (i + .5);
-      var a = .3 + .7 * (.5 + .5 * Math.sin(t * 3.2 - i * .9));
-      ctx.strokeStyle = hexA(sw.E.c, a);
-      var xs = hollow ? [sw.cx - 12, sw.cx + 12]
-             : sw.blade === 'katana' ? [sw.cx + (100 - y) * .075] : [sw.cx];
-      var gl = RUNES[sw.runes[i]], s = hollow ? .62 : .8;
+      var q = bp(sw, .14 + .76 * (i + .5) / n, 0);
+      ctx.strokeStyle = hexA(sw.E.c, .3 + .7 * (.5 + .5 * Math.sin(t * 3.2 - i * .9)));
+      ctx.save();
+      ctx.translate(q[0], q[1]);
+      ctx.rotate(sw.ang + Math.PI / 2);
+      var gl = RUNES[sw.runes[i]];
       ctx.beginPath();
-      for (var k = 0; k < xs.length; k++){
-        for (var j = 0; j < gl.length; j++){
-          ctx.moveTo(xs[k] + gl[j][0] * s, y + gl[j][1] * s);
-          ctx.lineTo(xs[k] + gl[j][2] * s, y + gl[j][3] * s);
-        }
+      for (var j = 0; j < gl.length; j++){
+        ctx.moveTo(gl[j][0] * s, gl[j][1] * s);
+        ctx.lineTo(gl[j][2] * s, gl[j][3] * s);
       }
       ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function rrect(ctx, x, y, w, h, r){
-    ctx.beginPath();
-    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-  function metalH(ctx, xa, xb, M){
-    var g = ctx.createLinearGradient(xa, 0, xb, 0);
-    g.addColorStop(0, M.a); g.addColorStop(.35, M.c); g.addColorStop(.7, M.b); g.addColorStop(1, M.a);
-    return g;
-  }
-
-  function hilt(ctx, sw, t){
-    var M = sw.M, pal = palette(sw);
-    ctx.save();
-    rrect(ctx, 71, 210, 18, 64, 5);
-    ctx.strokeStyle = 'rgba(6,4,3,.8)'; ctx.lineWidth = 2.6; ctx.stroke();
-    var gg = ctx.createLinearGradient(71, 0, 89, 0);
-    gg.addColorStop(0, shade(pal.leather, -.5)); gg.addColorStop(.5, pal.leather); gg.addColorStop(1, shade(pal.leather, -.55));
-    ctx.fillStyle = gg; ctx.fill();
-    ctx.clip();
-    ctx.lineWidth = 1.7;
-    for (var y = 202; y < 290; y += 9){
-      ctx.strokeStyle = 'rgba(0,0,0,.5)';
-      ctx.beginPath(); ctx.moveTo(69, y); ctx.lineTo(91, y + 11); ctx.stroke();
-      ctx.strokeStyle = hexA(M.c, .16);
-      ctx.beginPath(); ctx.moveTo(91, y); ctx.lineTo(69, y + 11); ctx.stroke();
-    }
-    ctx.restore();
-
-    ctx.save();
-    [[68, 210, 24, 6], [68, 266, 24, 6]].forEach(function(b){
-      rrect(ctx, b[0], b[1], b[2], b[3], 2);
-      ctx.fillStyle = metalH(ctx, b[0], b[0] + b[2], M); ctx.fill();
-      ctx.strokeStyle = 'rgba(6,4,3,.75)'; ctx.lineWidth = 1; ctx.stroke();
-    });
-    if (sw.rar >= 3){
-      ctx.beginPath(); ctx.moveTo(73, 296); ctx.lineTo(80, 312); ctx.lineTo(87, 296); ctx.closePath();
-      ctx.fillStyle = metalH(ctx, 73, 87, M); ctx.fill();
-      ctx.strokeStyle = 'rgba(6,4,3,.8)'; ctx.lineWidth = 1.4; ctx.stroke();
-    }
-    ctx.beginPath(); ctx.arc(80, 286, 13, 0, TAU);
-    ctx.strokeStyle = 'rgba(6,4,3,.8)'; ctx.lineWidth = 2.6; ctx.stroke();
-    var pg = ctx.createRadialGradient(75, 280, 1, 80, 286, 14);
-    pg.addColorStop(0, M.c); pg.addColorStop(.55, M.b); pg.addColorStop(1, M.a);
-    ctx.fillStyle = pg; ctx.fill();
-    ctx.restore();
-    gem(ctx, 80, 286, 5.6, sw, t + 1.3);
-  }
-
-  function guard(ctx, sw, t){
-    var M = sw.M, E = sw.E, gp = sw.guardPath;
-    var bob = sw.guard === 'halo' ? Math.sin(t * 2) * 2.5 : 0;
-    if (HASRING[sw.guard]){
-      ctx.save();
-      ctx.translate(0, bob);
-      ctx.beginPath(); ctx.arc(80, 203, 30, 0, TAU);
-      ctx.strokeStyle = 'rgba(6,4,3,.8)'; ctx.lineWidth = 7.5; ctx.stroke();
-      if (sw.guard === 'halo'){ ctx.shadowColor = E.glow; ctx.shadowBlur = 14 + 18 * sw.power; ctx.strokeStyle = hexA(E.c, .95); }
-      else {
-        var rg = ctx.createLinearGradient(50, 173, 110, 233);
-        rg.addColorStop(0, M.c); rg.addColorStop(.5, M.b); rg.addColorStop(1, M.a);
-        ctx.strokeStyle = rg;
-      }
-      ctx.lineWidth = 4.6; ctx.stroke();
       ctx.restore();
     }
-    if (gp){
-      ctx.save();
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = 'rgba(6,4,3,.8)'; ctx.lineWidth = 2.8; ctx.stroke(gp);
-      var g = ctx.createLinearGradient(0, 176, 0, 216);
-      g.addColorStop(0, M.c); g.addColorStop(.42, M.b); g.addColorStop(1, M.a);
-      ctx.fillStyle = g; ctx.fill(gp);
-      ctx.strokeStyle = hexA(M.c, .55); ctx.lineWidth = .8; ctx.stroke(gp);
-      if (sw.f.prism){
-        ctx.globalCompositeOperation = 'lighter';
-        var hg = ctx.createLinearGradient(0, 0, 160, 0);
-        for (var i = 0; i <= 6; i++) hg.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,66%)');
-        ctx.strokeStyle = hg; ctx.lineWidth = 1.6; ctx.stroke(gp);
-      }
-      ctx.restore();
-    }
-    gem(ctx, 80, 204 + bob, sw.rar >= 2 ? 7 : 5.2, sw, t);
-  }
-
-  function gem(ctx, x, y, r, sw, t){
-    var E = sw.E, i;
-    ctx.save();
-    ctx.shadowColor = E.glow;
-    ctx.shadowBlur = 6 + 16 * sw.power;
-    var g = ctx.createRadialGradient(x - r * .35, y - r * .35, r * .1, x, y, r * 1.05);
-    g.addColorStop(0, '#FFFFFF'); g.addColorStop(.28, E.c); g.addColorStop(.7, E.b); g.addColorStop(1, E.a);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    for (i = 0; i < 8; i++){ var a = i * Math.PI / 4 + Math.PI / 8; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); }
-    ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(6,4,3,.7)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = .6;
-    ctx.beginPath();
-    for (i = 0; i < 8; i++){ var b = i * Math.PI / 4 + Math.PI / 8; ctx.lineTo(x + Math.cos(b) * r * .5, y + Math.sin(b) * r * .5); }
-    ctx.closePath(); ctx.stroke();
-    ctx.globalCompositeOperation = 'lighter';
-    var tw = .5 + .5 * Math.sin(t * 3.4 + x * .1 + y * .07);
-    ctx.fillStyle = 'rgba(255,255,255,' + (.45 + .5 * tw).toFixed(2) + ')';
-    ctx.beginPath(); ctx.arc(x - r * .33, y - r * .38, r * .22, 0, TAU); ctx.fill();
-    if (sw.rar >= 1) sparkle(ctx, x + r * .55, y - r * .6, (2 + r * .55) * tw, 'rgba(255,255,255,' + (.75 * tw).toFixed(2) + ')');
     ctx.restore();
   }
-
+  /* 칼끝에 가끔 반짝 */
+  function glint(ctx, sw, t){
+    var c = ((t + sw.seed % 7) % 3.1) / .55;
+    if (c >= 1) return;
+    var s = Math.sin(c * Math.PI);
+    sparkle(ctx, sw.T[0], sw.T[1], (7 + 9 * sw.power) * s, 'rgba(255,255,255,' + (.9 * s).toFixed(2) + ')');
+  }
   function sparkle(ctx, x, y, s, col){
     if (s <= .25) return;
     ctx.fillStyle = col;
@@ -1234,17 +1086,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.quadraticCurveTo(x, y, x - s, y); ctx.quadraticCurveTo(x, y, x, y - s);
     ctx.fill();
   }
-
+  /* 별빛 공전: 칼날 방향으로 기운 타원 궤도 */
   function orbit(ctx, sw, t){
     var rainbow = sw.f.prism, n = rainbow ? 9 : 6;
+    var A = sw.blen * .62 + 20, B = 50, ca = Math.cos(sw.ang), sa = Math.sin(sw.ang);
     for (var i = 0; i < n; i++){
       var a = t * (rainbow ? .9 : .6) + i * TAU / n;
-      var x = 80 + Math.cos(a) * 68, y = 128 + Math.sin(a) * 68 * .42 + Math.sin(t * 1.3 + i) * 6;
+      var lx = Math.cos(a) * A, ly = Math.sin(a) * B;
+      var x = sw.mid[0] + lx * ca - ly * sa, y = sw.mid[1] + lx * sa + ly * ca;
       var tw = .55 + .45 * Math.sin(t * 4 + i * 2.1);
       var col = rainbow ? 'hsla(' + ((t * 90 + i * 40) % 360).toFixed(0) + ',100%,72%,' + tw.toFixed(2) + ')'
               : sw.rar === 3 ? 'rgba(255,214,120,' + tw.toFixed(2) + ')'
               : hexA(sw.E.c, tw);
-      sparkle(ctx, x, y, 3 + 3.5 * tw, col);
+      sparkle(ctx, x, y, 4 + 4 * tw, col);
     }
   }
 
@@ -1252,23 +1106,32 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      spawn: 입자 초기화 · step: 움직임(없으면 등속) · draw: 그리기 · extra: 입자 아닌 상시 효과
      p.z < 0 인 입자는 검 뒤에, 나머지는 앞에 그립니다. */
   function flameTongues(ctx, sw, t){
-    var n = 10, top = sw.tip + 14, span = 192 - top;
+    var n = 9;
     for (var i = 0; i < n; i++){
-      var y = top + span * (i + .5) / n;
+      var a = (i + .5) / n;
       for (var sd = -1; sd <= 1; sd += 2){
-        var x = sw.cx + sd * (sw.half - 2);
-        var h = (12 + 12 * sw.power) * (.7 + .3 * Math.sin(t * 9 + i * 1.9 + sd));
+        var q = bp(sw, a, sd * Math.max(2, sw.half - 3)), x = q[0], y = q[1];
+        var h = (14 + 16 * sw.power) * (.7 + .3 * Math.sin(t * 9 + i * 1.9 + sd));
         var g = ctx.createLinearGradient(0, y + 4, 0, y - h);
         g.addColorStop(0, hexA(sw.E.b, .55));
         g.addColorStop(.6, hexA(sw.E.c, .25));
         g.addColorStop(1, hexA(sw.E.c, 0));
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.moveTo(x - sd * 3, y + 5);
-        ctx.quadraticCurveTo(x + sd * 9, y - h * .35, x + sd * (4 + 3 * Math.sin(t * 6 + i)), y - h);
-        ctx.quadraticCurveTo(x + sd, y - h * .45, x - sd * 3, y + 5);
+        ctx.moveTo(x - 4, y + 5);
+        ctx.quadraticCurveTo(x + sd * 7, y - h * .35, x + 3 * Math.sin(t * 6 + i + sd), y - h);
+        ctx.quadraticCurveTo(x, y - h * .45, x + 4, y + 5);
         ctx.fill();
       }
+    }
+  }
+  function bladeGlow(ctx, sw, color, alpha){
+    for (var i = 0; i < 5; i++){
+      var q = bp(sw, (i + .5) / 5, 0), rad = Math.min(30, sw.half * 2.4);
+      var g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad);
+      g.addColorStop(0, hexA(color, alpha)); g.addColorStop(1, hexA(color, 0));
+      ctx.fillStyle = g;
+      ctx.fillRect(q[0] - rad, q[1] - rad, rad * 2, rad * 2);
     }
   }
 
@@ -1276,11 +1139,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     fire: {
       n: 46,
       spawn: function(p, r, sw, init){
-        p.x = sw.cx - sw.half + r() * sw.half * 2;
-        p.y = sw.tip + 10 + r() * (190 - sw.tip);
+        var q = bp(sw, r(), (r() * 2 - 1) * sw.half);
+        p.x = q[0]; p.y = q[1];
         p.vx = (r() - .5) * 16; p.vy = -(34 + r() * 70);
         p.max = .6 + r() * .9; p.life = init ? r() * p.max : 0;
-        p.size = 1.4 + r() * 3.2; p.z = r() < .25 ? -1 : 1;
+        p.size = 1.6 + r() * 3.4; p.z = r() < .25 ? -1 : 1;
       },
       draw: function(ctx, p, sw, t){
         var k = p.life / p.max;
@@ -1296,19 +1159,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     frost: {
       n: 34,
       spawn: function(p, r, sw, init){
-        p.x = -10 + r() * 180; p.y = init ? -20 + r() * 340 : -16 - r() * 30;
+        p.x = CX - 170 + r() * 340; p.y = init ? CY - 190 + r() * 380 : CY - 200 - r() * 30;
         p.vx = (r() - .5) * 10; p.vy = 12 + r() * 22;
-        p.max = 99; p.life = 0; p.size = 1.6 + r() * 3.6;
+        p.max = 99; p.life = 0; p.size = 1.8 + r() * 4;
         p.rot = r() * TAU; p.vr = (r() - .5) * 1.6; p.z = r() < .4 ? -1 : 1;
       },
       step: function(p, dt){
         p.x += p.vx * dt + Math.sin(p.life * 1.3 + p.s) * .25;
         p.y += p.vy * dt; p.rot += p.vr * dt;
-        if (p.y > 335) p.life = p.max;
+        if (p.y > CY + 195) p.life = p.max;
       },
       draw: function(ctx, p, sw){
         ctx.globalAlpha = p.z < 0 ? .45 : .92;
-        ctx.strokeStyle = sw.E.c; ctx.lineWidth = .9;
+        ctx.strokeStyle = sw.E.c; ctx.lineWidth = 1;
         ctx.beginPath();
         for (var i = 0; i < 3; i++){
           var a = p.rot + i * Math.PI / 3, dx = Math.cos(a) * p.size, dy = Math.sin(a) * p.size;
@@ -1318,15 +1181,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       },
       extra: function(ctx, sw, t){
         for (var i = 0; i < 3; i++){
-          var x = sw.cx + (i - 1) * 26, y = 186 + Math.sin(t * .8 + i) * 4, rad = 30 + 8 * Math.sin(t * .6 + i * 2);
+          var q = bp(sw, .05 + i * .12, 0);
+          var x = q[0] + (i - 1) * 26, y = q[1] + 26 + Math.sin(t * .8 + i) * 4, rad = 36 + 9 * Math.sin(t * .6 + i * 2);
           var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
           g.addColorStop(0, hexA(sw.E.c, .12 + .12 * sw.power)); g.addColorStop(1, hexA(sw.E.c, 0));
           ctx.fillStyle = g; ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
         }
         for (var j = 0; j < 5; j++){
           var tw = Math.max(0, Math.sin(t * 2.2 + j * 1.7));
-          var gy = sw.tip + 20 + j * (170 - sw.tip) / 5;
-          sparkle(ctx, sw.cx + (j % 2 ? 1 : -1) * (sw.half - 1), gy, 1 + 4.5 * tw, hexA('#FFFFFF', .9 * tw));
+          var e = bp(sw, .12 + j * .18, (j % 2 ? 1 : -1) * Math.max(1, sw.half - 1));
+          sparkle(ctx, e[0], e[1], 1 + 5.5 * tw, hexA('#FFFFFF', .9 * tw));
         }
       }
     },
@@ -1334,9 +1198,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     storm: {
       n: 24,
       spawn: function(p, r, sw, init){
-        p.x = sw.cx + (r() - .5) * sw.half * 2.6; p.y = sw.tip + r() * (195 - sw.tip);
+        var q = bp(sw, r(), (r() * 2 - 1) * sw.half * 1.8);
+        p.x = q[0]; p.y = q[1];
         p.vx = (r() - .5) * 70; p.vy = (r() - .5) * 70;
-        p.max = .15 + r() * .35; p.life = init ? r() * p.max : 0; p.size = .8 + r() * 1.7; p.z = 1;
+        p.max = .15 + r() * .35; p.life = init ? r() * p.max : 0; p.size = .9 + r() * 1.8; p.z = 1;
       },
       draw: function(ctx, p, sw){
         var k = p.life / p.max;
@@ -1368,10 +1233,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       n: 30,
       spawn: function(p, r, sw, init){
         p.k = r() < .6 ? 0 : 1;
-        p.x = sw.cx + (r() - .5) * sw.half * 2.6; p.y = sw.tip + 30 + r() * (200 - sw.tip);
+        var q = bp(sw, r(), (r() * 2 - 1) * sw.half * 1.6);
+        p.x = q[0]; p.y = q[1] + 10;
         p.vx = (r() - .5) * 8; p.vy = -(8 + r() * (p.k ? 40 : 16));
         p.max = p.k ? .8 + r() * .8 : 2.2 + r() * 2; p.life = init ? r() * p.max : 0;
-        p.size = p.k ? 1.2 + r() * 2 : 9 + r() * 12; p.z = p.k ? 1 : (r() < .6 ? -1 : 1);
+        p.size = p.k ? 1.2 + r() * 2 : 10 + r() * 14; p.z = p.k ? 1 : (r() < .6 ? -1 : 1);
       },
       draw: function(ctx, p, sw){
         var k = p.life / p.max, fade = Math.sin(k * Math.PI);
@@ -1391,10 +1257,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     holy: {
       n: 30,
       spawn: function(p, r, sw, init){
-        var a = r() * TAU, d = 24 + r() * 74;
-        p.x = 80 + Math.cos(a) * d; p.y = 120 + Math.sin(a) * d * 1.3;
+        var a = r() * TAU, d = 30 + r() * 110;
+        p.x = sw.mid[0] + Math.cos(a) * d; p.y = sw.mid[1] + Math.sin(a) * d * 1.1;
         p.vx = 0; p.vy = -(4 + r() * 10); p.max = 1.6 + r() * 2.2; p.life = init ? r() * p.max : 0;
-        p.size = 2 + r() * 4.5; p.z = 1;
+        p.size = 2.4 + r() * 5; p.z = 1;
       },
       draw: function(ctx, p, sw){
         var k = p.life / p.max, tw = Math.sin(k * Math.PI);
@@ -1402,9 +1268,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         sparkle(ctx, p.x, p.y, p.size * tw, hexA(k < .5 ? '#FFFFFF' : sw.E.b, .95 * tw));
       },
       extra: function(ctx, sw){
-        var g = ctx.createRadialGradient(sw.cx, sw.tip + 20, 0, sw.cx, sw.tip + 20, 42);
+        var x = sw.T[0], y = sw.T[1], rad = 54;
+        var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
         g.addColorStop(0, hexA('#FFFFFF', .25 + .22 * sw.power)); g.addColorStop(1, hexA(sw.E.b, 0));
-        ctx.fillStyle = g; ctx.fillRect(sw.cx - 42, sw.tip - 22, 84, 84);
+        ctx.fillStyle = g; ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
       }
     },
 
@@ -1413,11 +1280,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       spawn: function(p, r, sw, init){
         p.k = r() < .75 ? 0 : 1;
         if (p.k === 0){
-          p.x = sw.cx + (r() - .5) * sw.half * 2.2; p.y = sw.tip + 20 + r() * (190 - sw.tip);
-          p.vy = -(12 + r() * 22); p.max = 1.2 + r() * 1.4; p.size = 1.5 + r() * 3.2;
+          var q = bp(sw, r(), (r() * 2 - 1) * sw.half * 1.2);
+          p.x = q[0]; p.y = q[1];
+          p.vy = -(12 + r() * 22); p.max = 1.2 + r() * 1.4; p.size = 1.8 + r() * 3.4;
         } else {
-          p.x = sw.cx + (r() < .5 ? -1 : 1) * (12 + r() * 30); p.y = 212;
-          p.vy = 8; p.max = .9 + r() * .8; p.size = 1.6 + r() * 1.4;
+          var d = bp(sw, .05 + r() * .3, (r() < .5 ? -1 : 1) * (sw.half + 2));
+          p.x = d[0]; p.y = d[1];
+          p.vy = 8; p.max = .9 + r() * .8; p.size = 1.8 + r() * 1.6;
         }
         p.vx = 0; p.life = init ? r() * p.max : 0; p.z = 1;
       },
@@ -1431,30 +1300,23 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           ctx.globalAlpha = 1 - k * .8;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU);
           ctx.fillStyle = hexA(sw.E.b, .25); ctx.fill();
-          ctx.strokeStyle = sw.E.b; ctx.lineWidth = .9; ctx.stroke();
+          ctx.strokeStyle = sw.E.b; ctx.lineWidth = 1; ctx.stroke();
           ctx.fillStyle = 'rgba(255,255,255,.85)';
-          ctx.fillRect(p.x - p.size * .45, p.y - p.size * .45, 1.1, 1.1);
+          ctx.fillRect(p.x - p.size * .45, p.y - p.size * .45, 1.2, 1.2);
         } else {
           ctx.globalAlpha = 1 - k;
           ctx.fillStyle = sw.E.b;
           ctx.beginPath(); ctx.ellipse(p.x, p.y, p.size * .7, p.size * (1.2 + Math.min(2, p.vy / 60)), 0, 0, TAU); ctx.fill();
         }
       },
-      extra: function(ctx, sw){
-        ctx.save();
-        ctx.clip(sw.bladePath, HOLLOW[sw.blade] ? 'evenodd' : 'nonzero');
-        var g = ctx.createLinearGradient(0, sw.tip, 0, 200);
-        g.addColorStop(0, hexA(sw.E.b, 0)); g.addColorStop(1, hexA(sw.E.b, .2 + .24 * sw.power));
-        ctx.fillStyle = g; ctx.fillRect(0, sw.tip, 160, 200);
-        ctx.restore();
-      }
+      extra: function(ctx, sw){ bladeGlow(ctx, sw, sw.E.b, .12 + .2 * sw.power); }
     },
 
     gale: {
       n: 16,
       spawn: function(p, r, sw){
-        p.ang = r() * TAU; p.rad = 34 + r() * 50; p.sp = 1.2 + r() * 1.8;
-        p.y0 = sw.tip + 20 + r() * (200 - sw.tip); p.len = .6 + r() * 1.1;
+        p.ang = r() * TAU; p.rad = 50 + r() * 70; p.sp = 1.2 + r() * 1.8;
+        p.y0 = sw.mid[1] + (r() - .5) * 190; p.len = .6 + r() * 1.1;
         p.max = 9e9; p.life = 0; p.z = 1;
       },
       step: function(p, dt){ p.ang += p.sp * dt; p.z = Math.sin(p.ang + p.len / 2) < 0 ? -1 : 1; },
@@ -1463,9 +1325,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         ctx.strokeStyle = sw.E.c;
         for (var i = 0; i < 6; i++){
           ctx.globalAlpha = (i + 1) / 6 * (p.z < 0 ? .35 : .8);
-          ctx.lineWidth = .6 + i * .3;
+          ctx.lineWidth = .7 + i * .35;
           ctx.beginPath();
-          ctx.ellipse(80, p.y0, p.rad, p.rad * .3, -.12, p.ang + p.len * i / 6, p.ang + p.len * (i + 1) / 6);
+          ctx.ellipse(sw.mid[0], p.y0, p.rad, p.rad * .3, -.12, p.ang + p.len * i / 6, p.ang + p.len * (i + 1) / 6);
           ctx.stroke();
         }
       }
@@ -1473,15 +1335,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     earth: {
       n: 14,
-      spawn: function(p, r){
-        p.ang = r() * TAU; p.rad = 46 + r() * 34; p.sp = .5 + r() * .7;
-        p.y0 = 110 + r() * 100; p.size = 3 + r() * 5; p.rot = r() * TAU; p.vr = (r() - .5) * 2;
+      spawn: function(p, r, sw){
+        p.ang = r() * TAU; p.rad = 80 + r() * 50; p.sp = .5 + r() * .7;
+        p.y0 = sw.mid[1] + (r() - .5) * 170; p.size = 5 + r() * 7; p.rot = r() * TAU; p.vr = (r() - .5) * 2;
         p.v = []; for (var i = 0; i < 5; i++) p.v.push(.65 + r() * .5);
         p.max = 9e9; p.life = 0; p.z = Math.sin(p.ang) < 0 ? -1 : 1;
       },
       step: function(p, dt){ p.ang += p.sp * dt; p.rot += p.vr * dt; p.z = Math.sin(p.ang) < 0 ? -1 : 1; },
       draw: function(ctx, p, sw, t){
-        var x = 80 + Math.cos(p.ang) * p.rad, y = p.y0 + Math.sin(p.ang) * p.rad * .3 + Math.sin(t + p.s) * 3;
+        var x = sw.mid[0] + Math.cos(p.ang) * p.rad, y = p.y0 + Math.sin(p.ang) * p.rad * .3 + Math.sin(t + p.s) * 3;
         var sc = p.z < 0 ? .78 : 1;
         ctx.save();
         ctx.globalCompositeOperation = 'source-over';
@@ -1496,7 +1358,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         ctx.strokeStyle = 'rgba(6,4,3,.7)'; ctx.lineWidth = 1; ctx.stroke();
         if (sw.power > .3){
           ctx.globalCompositeOperation = 'lighter';
-          ctx.strokeStyle = hexA(sw.E.glow, .85); ctx.lineWidth = .8;
+          ctx.strokeStyle = hexA(sw.E.glow, .85); ctx.lineWidth = .9;
           ctx.beginPath(); ctx.moveTo(-p.size * .4, -p.size * .2); ctx.lineTo(p.size * .1, p.size * .1); ctx.lineTo(p.size * .35, -p.size * .3); ctx.stroke();
         }
         ctx.restore();
@@ -1508,29 +1370,30 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       spawn: function(p, r, sw, init){
         p.k = r() < .08 ? 1 : 0;
         if (p.k){
-          p.x = -20 + r() * 80; p.y = -10 + r() * 120; p.vx = 120 + r() * 80; p.vy = 60 + r() * 50;
+          p.x = CX - 190 + r() * 130; p.y = CY - 200 + r() * 150; p.vx = 140 + r() * 90; p.vy = 70 + r() * 60;
           p.max = .5 + r() * .4; p.life = init ? r() * p.max : -(1 + r() * 4);
         } else {
-          p.x = -20 + r() * 200; p.y = -20 + r() * 340; p.vx = 0; p.vy = -2 - r() * 4;
+          p.x = CX - 180 + r() * 360; p.y = CY - 180 + r() * 360; p.vx = 0; p.vy = -2 - r() * 4;
           p.max = 2 + r() * 3; p.life = init ? r() * p.max : 0;
         }
-        p.size = .8 + r() * 1.8; p.z = p.k ? 1 : (r() < .7 ? -1 : 1);
+        p.size = .9 + r() * 2; p.z = p.k ? 1 : (r() < .7 ? -1 : 1);
       },
       step: function(p, dt){ if (p.life >= 0){ p.x += p.vx * dt; p.y += p.vy * dt; } },
       draw: function(ctx, p, sw){
         if (p.life < 0) return;
         var k = p.life / p.max;
         if (p.k){
-          ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+          ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * .12, p.y - p.vy * .12); ctx.stroke();
           return;
         }
         var tw = Math.sin(k * Math.PI);
         ctx.globalAlpha = tw;
         var col = p.s > 60 ? sw.E.c : '#FFFFFF';
-        if (p.size > 2) sparkle(ctx, p.x, p.y, p.size * 1.6 * tw, col);
+        if (p.size > 2) sparkle(ctx, p.x, p.y, p.size * 1.7 * tw, col);
         else { ctx.fillStyle = col; ctx.fillRect(p.x, p.y, p.size, p.size); }
-      }
+      },
+      extra: function(ctx, sw){ bladeGlow(ctx, sw, sw.E.b, .1 + .16 * sw.power); }
     },
 
     blood: {
@@ -1538,12 +1401,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       spawn: function(p, r, sw, init){
         p.k = r() < .7 ? 0 : 1;
         if (p.k === 0){
-          var sd = r() < .5 ? -1 : 1;
-          p.x = sw.cx + sd * (sw.half - 1 - r() * 3); p.y = sw.tip + 30 + r() * (180 - sw.tip);
-          p.vx = 0; p.vy = 0; p.max = .9 + r() * 1.2; p.size = 1.4 + r() * 1.6; p.hold = .2 + r() * .6;
+          var sd = r() < .5 ? -1 : 1, q = bp(sw, .1 + r() * .85, sd * Math.max(1, sw.half - 1 - r() * 3));
+          p.x = q[0]; p.y = q[1];
+          p.vx = 0; p.vy = 0; p.max = .9 + r() * 1.2; p.size = 1.8 + r() * 2; p.hold = .2 + r() * .6;
         } else {
-          p.x = sw.cx + (r() - .5) * 60; p.y = 160 + r() * 60; p.vx = (r() - .5) * 6; p.vy = -(4 + r() * 8);
-          p.max = 2 + r() * 2; p.size = 10 + r() * 14;
+          p.x = sw.mid[0] + (r() - .5) * 100; p.y = sw.mid[1] + 30 + r() * 90; p.vx = (r() - .5) * 6; p.vy = -(4 + r() * 8);
+          p.max = 2 + r() * 2; p.size = 12 + r() * 16;
         }
         p.life = init ? r() * p.max : 0; p.z = p.k ? -1 : 1;
       },
@@ -1573,23 +1436,24 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
   };
 
+  /* 번개: 칼날 가장자리에서 바깥으로 튀고, 강해지면 칼날 위를 기어갑니다 */
   function makeBolts(sw, rnd){
     var n = 1 + Math.floor(sw.power * 4 + rnd() * 1.5), out = [];
     for (var i = 0; i < n; i++){
       var sd = rnd() < .5 ? -1 : 1;
-      var y0 = sw.tip + 15 + rnd() * (180 - sw.tip), x0 = sw.cx + sd * (sw.half - 3);
-      var len = 26 + rnd() * (30 + 40 * sw.power);
-      var ang = (sd < 0 ? Math.PI : 0) + (rnd() - .5) * 1.4;
-      var pts = [[x0, y0]], seg = 6 + Math.floor(rnd() * 4);
+      var q = bp(sw, .05 + rnd() * .9, sd * Math.max(2, sw.half - 2));
+      var len = 30 + rnd() * (34 + 46 * sw.power);
+      var ang = Math.atan2(sw.n[1] * sd, sw.n[0] * sd) + (rnd() - .5) * 1.3;
+      var pts = [[q[0], q[1]]], seg = 6 + Math.floor(rnd() * 4);
       for (var j = 1; j <= seg; j++){
         var d = len * j / seg;
-        pts.push([x0 + Math.cos(ang) * d + (rnd() - .5) * 10, y0 + Math.sin(ang) * d + (rnd() - .5) * 10]);
+        pts.push([q[0] + Math.cos(ang) * d + (rnd() - .5) * 11, q[1] + Math.sin(ang) * d + (rnd() - .5) * 11]);
       }
       out.push({ pts:pts, a:.6 + rnd() * .4 });
     }
     if (sw.power > .4){
-      var crawl = [], y = sw.tip + 10;
-      while (y < 192){ crawl.push([sw.cx + (rnd() - .5) * sw.half * 1.2, y]); y += 9 + rnd() * 9; }
+      var crawl = [], a = .02;
+      while (a < 1){ crawl.push(bp(sw, a, (rnd() - .5) * sw.half * 1.4)); a += .06 + rnd() * .06; }
       out.push({ pts:crawl, a:.55 });
     }
     return out;
@@ -1622,19 +1486,22 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.globalCompositeOperation = op;
   }
 
-  /* ═════════ 살아 있는 검 (애니메이션) ═════════ */
-  var view = { ctx:null, sw:null, parts:null, bolts:null, boltAt:0, raf:0, last:0, dpr:1 };
+  /* ═════════ 살아 있는 검 (애니메이션) ═════════
+     캔버스 실제 픽셀 수를 화면에 보이는 크기 × 기기 배율에 맞춰, 픽셀 그림이 흐려지지 않게 합니다. */
+  var view = { ctx:null, sw:null, parts:null, bolts:null, boltAt:0, raf:0, last:0, k:1 };
 
   function initCanvas(){
     var c = $('swordCanvas'), dpr = Math.min(2, window.devicePixelRatio || 1);
-    c.width = Math.round(CW * dpr); c.height = Math.round(CH * dpr);
+    var px = Math.max(64, Math.round((c.clientWidth || CW) * dpr));
+    if (c.width !== px){ c.width = px; c.height = px; }
     view.ctx = c.getContext('2d');
-    view.dpr = dpr;
+    view.k = px / CW;
   }
   function paintFrame(t){
     var ctx = view.ctx;
-    ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
-    ctx.clearRect(0, 0, CW, CH);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.setTransform(view.k, 0, 0, view.k, 0, 0);
     if (view.sw) drawSword(ctx, view.sw, t, view.parts, view.bolts);
   }
   function loop(now){
@@ -1659,33 +1526,25 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!view.raf){ view.last = performance.now(); view.raf = requestAnimationFrame(loop); }
   }
 
-  /* ═════════ 멈춘 검 (도감용) ═════════  검 주변만 잘라 200×360 영역을 그립니다 */
+  /* ═════════ 멈춘 검 (도감용) ═════════  캔버스 가운데 300×300 을 잘라 그립니다 */
   function renderStill(canvas, sw, locked){
-    var w = canvas.width, h = canvas.height, s = w / 200;
+    var w = canvas.width, s = w / 300;
     var ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    ctx.setTransform(s, 0, 0, s, -(OX - 20) * s, -(OY - 10) * s);
+    ctx.clearRect(0, 0, w, canvas.height);
+    if (!SPR[sw.key]) return;
+    ctx.setTransform(s, 0, 0, s, -40 * s, -40 * s);
     if (!locked){
       var rnd = rng32(sw.seed + 101);
       drawSword(ctx, sw, 1.7, spawnAll(sw, rnd), sw.E.fx === 'storm' ? makeBolts(sw, rnd) : null);
       return;
     }
-    ctx.save();
-    ctx.translate(OX + 80, OY + 200); ctx.scale(sw.scale, sw.scale); ctx.translate(-80, -200);
-    ctx.fillStyle = '#17130F';
-    ctx.strokeStyle = 'rgba(255,255,255,.08)';
-    ctx.lineWidth = 2;
-    rrect(ctx, 71, 210, 18, 64, 5); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(80, 286, 13, 0, TAU); ctx.fill(); ctx.stroke();
-    ctx.fill(sw.bladePath, HOLLOW[sw.blade] ? 'evenodd' : 'nonzero'); ctx.stroke(sw.bladePath);
-    if (sw.guardPath){ ctx.fill(sw.guardPath); ctx.stroke(sw.guardPath); }
-    ctx.restore();
+    silhouette(ctx, sw);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = 'rgba(255,255,255,.24)';
     ctx.font = '700 ' + Math.round(w * .3) + 'px system-ui, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('?', w / 2, h * .42);
+    ctx.fillText('?', w / 2, canvas.height / 2);
   }
 
   /* ═════════ 게임 상태 ═════════ */
@@ -2241,7 +2100,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           var cell = document.createElement('div');
           cell.className = 'dex-cell off rc' + r;
           var cv = document.createElement('canvas');
-          cv.width = 104; cv.height = 187;
+          cv.width = cv.height = 128;
           cell.appendChild(cv);
           row.appendChild(cell);
           dexCells[e][r] = { cell:cell, cv:cv, drawn:null };
@@ -2594,8 +2453,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     rarityList($('gachaOdds'), '새 검 등급 (부서지거나 팔 때)', function(R){ return (R.w / 10) + '%'; });
     rarityList($('multNote'), '판매가 = 기본 판매가 ×', function(R){ return '×' + R.mult; });
     touchSaveState();
-    render();
-    cloudInit();
+    loadSprites(function(){
+      render();
+      cloudInit();
+    });
+    window.addEventListener('resize', function(){
+      initCanvas();
+      if (view.sw && reduced()) paintFrame(1.7);
+    });
   }
 
   var hot = window.claude && window.claude.hot;

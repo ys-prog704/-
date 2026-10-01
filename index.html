@@ -323,6 +323,48 @@ img{max-width:100%}
 .item.held .pr{color:var(--rail)}
 .item .pr.stock{color:var(--ok)}
 
+/* ── 온라인 (로그인 · 랭킹) ── */
+.online{margin-top:18px;padding:10px 15px}
+.online-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.online-who{flex:1 1 220px;font-size:12.5px;color:var(--ash-2)}
+.btn-login{color:var(--parch);border-color:var(--ash)}
+.online-note{
+  margin-top:9px;padding:9px 11px;font-size:12px;line-height:1.55;
+  background:color-mix(in srgb, var(--quench) 10%, var(--iron-2));
+  border:1px solid color-mix(in srgb, var(--quench) 34%, var(--line));border-radius:var(--r-sm);
+}
+.online-note .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.online-note a{color:var(--quench);font-weight:600}
+.btn-ghost.small{font-size:11.5px;padding:4px 9px}
+.rank{padding:16px 15px}
+.rank-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
+.rank-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.rank-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;max-height:340px;overflow-y:auto}
+.rank-list li{
+  display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:9px;
+  padding:6px 8px;border-radius:var(--r-sm);background:var(--iron-2);
+}
+.rank-list li.me{outline:1px solid var(--gold);outline-offset:-1px;background:color-mix(in srgb, var(--gold) 10%, var(--iron-2))}
+.rank-list .no{font-family:var(--font-mono);font-size:12.5px;font-weight:700;color:var(--ash);text-align:center}
+.rank-list li:nth-child(1) .no{color:#FFD24A}
+.rank-list li:nth-child(2) .no{color:#C9D3DD}
+.rank-list li:nth-child(3) .no{color:#D9925A}
+.rank-list .who{min-width:0}
+.rank-list .nm,.rank-list .sw{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-list .nm{font-size:12.5px;font-weight:600}
+.rank-list .sw{font-size:11px}
+.rank-list .sc{text-align:right}
+.rank-list .lv{display:block;font-family:var(--font-display);font-size:18px;line-height:1;color:var(--ember)}
+.rank-list .pk{display:block;margin-top:2px;font-family:var(--font-mono);font-size:10.5px;color:var(--gold)}
+.rank-list .empty{display:block;background:none;padding:2px 0;font-size:12.5px;color:var(--ash)}
+.rank-me{display:flex;align-items:center;gap:7px;margin-top:10px;flex-wrap:wrap}
+.rank-me label{font-size:11.5px;color:var(--ash)}
+.rank-me input{
+  flex:1 1 110px;min-width:0;font:inherit;font-size:12.5px;color:var(--parch);
+  background:var(--ink);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:6px 8px;
+}
+.rank-me input:focus{outline:2px solid var(--quench);outline-offset:1px}
+
 /* ── 출석 보상 ── */
 .attend{margin-top:18px;padding:13px 15px 14px}
 .attend-head{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap}
@@ -539,6 +581,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div><dt>파괴</dt><dd class="v-boom" id="hudBoom">0</dd></div>
   </dl>
 
+  <section class="panel online" id="online" hidden>
+    <div class="online-row">
+      <span class="online-who" id="onlineWho"></span>
+      <button class="btn-ghost btn-login" id="loginBtn" type="button">구글로 로그인</button>
+      <button class="btn-ghost" id="logoutBtn" type="button" hidden>로그아웃</button>
+    </div>
+    <div class="online-note" id="onlineNote" hidden></div>
+  </section>
+
   <section class="panel attend" id="attend" aria-labelledby="attendTitle">
     <div class="attend-head">
       <h2 id="attendTitle">출석 보상</h2>
@@ -629,6 +680,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     </section>
 
     <div class="side">
+      <section class="panel rank" id="rank" hidden>
+        <div class="rank-head">
+          <h2>랭킹 &middot; 최고 강화</h2>
+          <button class="btn-ghost small" id="rankRefresh" type="button">새로고침</button>
+        </div>
+        <ol class="rank-list" id="rankList"></ol>
+        <div class="rank-me" id="rankMe" hidden>
+          <label for="rankName">랭킹 이름</label>
+          <input id="rankName" maxlength="12" autocomplete="nickname" spellcheck="false">
+          <button class="btn-ghost small" id="rankNameBtn" type="button">바꾸기</button>
+        </div>
+      </section>
+
       <aside class="panel ledger">
         <section>
           <h2>강화 기록</h2>
@@ -1632,9 +1696,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
-      sound: true, log: [],
+      sound: true, log: [], owner: null, synced: '',
       stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:START_GOLD,
-               pulls:1, legends: sw.rar >= 3 ? 1 : 0 }
+               pulls:1, legends: sw.rar >= 3 ? 1 : 0, bestSw:null }
     };
   }
   var state = freshState();
@@ -1689,6 +1753,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function save(){
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
     cloudQueue();
+    onlineQueueSave();
+    queueRank();
     touchSaveState();
   }
   function loadLocal(){
@@ -1727,13 +1793,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         total: num(at.total, 0) | 0
       },
       sound: data.sound !== false,
+      owner: typeof data.owner === 'string' && data.owner.length <= 128 ? data.owner : null,
+      synced: typeof data.synced === 'string' && data.synced.length <= 4000 ? data.synced : '',
       log: Array.isArray(data.log) ? data.log.filter(function(e){
         return e && typeof e.kind === 'string' && typeof e.tag === 'string' && typeof e.text === 'string';
       }).slice(0, 40) : [],
       stats: {
         tries:num(st.tries, 0), wins:num(st.wins, 0), booms:num(st.booms, 0),
         spent:num(st.spent, 0), earned:num(st.earned, 0), peak:num(st.peak, base.gold),
-        best:Math.min(MAX, num(st.best, 0)), pulls:num(st.pulls, 1), legends:num(st.legends, 0)
+        best:Math.min(MAX, num(st.best, 0)), pulls:num(st.pulls, 1), legends:num(st.legends, 0),
+        bestSw: st.bestSw && typeof st.bestSw.seed === 'number' && st.bestSw.el >= 0 && st.bestSw.el < ELEMENTS.length &&
+                st.bestSw.rar >= 0 && st.bestSw.rar < RARITIES.length
+                ? { seed:st.bestSw.seed >>> 0, el:st.bestSw.el | 0, rar:st.bestSw.rar | 0 } : null
       }
     };
     state.found[state.sword.el] |= 1 << state.sword.rar;
@@ -1768,6 +1839,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       n:st.pulls, m:st.legends,
       x:[w.seed, w.el, w.rar],
       f:state.found.map(function(v){ return B32.charAt(v & 31); }).join(''),
+      y:st.bestSw ? [st.bestSw.seed, st.bestSw.el, st.bestSw.rar] : 0,
       i:[state.items.bless, state.items.protect, state.items.master],
       a:[state.attend.last, state.attend.day, state.attend.total]
     }));
@@ -1783,7 +1855,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       throw new Error('코드가 손상되었습니다. 전체를 다시 복사해 주세요.');
     var d = JSON.parse(b64dec(parts[1]));
     var out = {
-      gold:d.g, level:d.l, sound:state.sound, log:[],
+      gold:d.g, level:d.l, sound:state.sound, owner:state.owner, synced:state.synced, log:[],
       buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },
       stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p, pulls:d.n, legends:d.m }
     };
@@ -1792,6 +1864,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       out.found = d.f.split('').map(function(c){ return Math.max(0, B32.indexOf(c)); });
     if (Array.isArray(d.i) && d.i.length === 3) out.items = { bless:d.i[0], protect:d.i[1], master:d.i[2] };
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
+    if (Array.isArray(d.y) && d.y.length === 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2] };
     return out;
   }
 
@@ -1856,6 +1929,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function touchSaveState(){
     var el = $('saveState');
+    if (online.user){
+      el.className = 'save-state' + (online.saveFail ? ' warn' : '');
+      el.innerHTML = online.saveFail ? '<b>이 기기에만 저장됨</b> &middot; 클라우드 실패' : '<b>자동 저장됨</b> &middot; 구글 계정';
+      return;
+    }
     if (cloudStatus === 'on'){ el.className = 'save-state'; el.innerHTML = '<b>자동 저장됨</b> &middot; 클라우드 동기화'; }
     else if (cloudStatus === 'error'){ el.className = 'save-state warn'; el.innerHTML = '<b>이 브라우저에만 저장됨</b> &middot; 클라우드 실패'; }
     else { el.className = 'save-state'; el.innerHTML = '<b>자동 저장됨</b> &middot; 이 브라우저'; }
@@ -2313,7 +2391,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var was = feats(from, state.sword.rar);
       state.level = Math.min(MAX, from + 1);
       state.stats.wins += 1;
-      if (state.level > state.stats.best) state.stats.best = state.level;
+      if (state.level > state.stats.best){
+        state.stats.best = state.level;
+        state.stats.bestSw = { seed:state.sword.seed, el:state.sword.el, rar:state.sword.rar };
+      }
       var sw = currentSword(), gain = null;
       FEATS.forEach(function(F){ if (!gain && sw.f[F.key] && !was[F.key]) gain = F; });
       anvil.classList.add('fx-success');
@@ -2392,17 +2473,37 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     render(); save();
   }
 
-  /* ═════════ 출석 보상 ═════════  기기 시계 기준입니다. */
+  /* ═════════ 출석 보상 ═════════
+     웹사이트에서 로그인하면 서버 시간(한국 시간)으로, Claude 아티팩트에서는 이 기기 시계로 받습니다.
+     웹사이트에서는 로그인해야 받을 수 있습니다 — 기기 시계로 받은 보상이 클라우드로 올라가는 길을 막기 위해서입니다. */
   function dayKey(off){
     var d = new Date();
     if (off) d.setDate(d.getDate() + off);
     return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
   }
-  /* 마지막으로 받은 날이 오늘보다 뒤면(시계를 되돌린 경우) 받을 수 없습니다. */
-  function canClaim(){ return state.attend.last < dayKey(0); }
+  function kstKey(ms){ return new Date(ms + 9 * 3600000).toISOString().slice(0, 10); }
+  /* local: 이 기기 시계 · offline: 서버 연결 실패 · login: 로그인 필요 · wait: 확인 중 · retry: 확인 실패 · server: 서버 기록 기준 */
+  function attendMode(){
+    if (!ONLINE_POSSIBLE) return 'local';
+    if (!online.on) return online.failed ? 'offline' : 'wait';
+    if (!online.user) return online.authReady ? 'login' : 'wait';
+    if (online.attendLoaded) return 'server';
+    return online.attendError ? 'retry' : 'wait';
+  }
+  /* 기기 시계 모드에서 마지막으로 받은 날이 오늘보다 뒤면(시계를 되돌린 경우) 받을 수 없습니다. */
+  function canClaim(){
+    var m = attendMode();
+    if (m === 'local') return state.attend.last < dayKey(0);
+    if (m === 'server') return !online.attend || kstKey(online.attend.lastMs) < kstKey(Date.now());
+    return false;
+  }
   function nextAttendDay(){
+    if (attendMode() === 'server') return online.attend ? online.attend.day : 0;
     var A = state.attend;
-    return (ATTEND_RESET_ON_MISS && A.last && A.last !== dayKey(-1) && canClaim()) ? 0 : A.day;
+    return (ATTEND_RESET_ON_MISS && A.last && A.last !== dayKey(-1) && A.last < dayKey(0)) ? 0 : A.day;
+  }
+  function attendTotal(){
+    return attendMode() === 'server' ? (online.attend ? online.attend.total : 0) : state.attend.total;
   }
   function rewardParts(R, long){
     var out = [];
@@ -2411,39 +2512,48 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return out;
   }
   function claimAttend(){
-    if (rolling || !canClaim()) return;
-    var A = state.attend;
-    A.day = nextAttendDay();
-    var R = ATTEND[A.day], n = A.day + 1, last = n === ATTEND.length, text = rewardParts(R, true).join(' + ');
+    var m = attendMode();
+    if (m === 'login'){ onlineLogin(); return; }
+    if (m === 'retry'){ refreshAttend(); return; }
+    if (m === 'server'){ claimOnline(); return; }
+    if (m !== 'local' || rolling || !canClaim()) return;
+    grantAttend(nextAttendDay(), state.attend.total + 1, false);
+  }
+  /* idx 칸의 보상을 주고 기록을 남깁니다 (서버 모드에서는 서버가 기록을 받아 준 뒤에만 부릅니다) */
+  function grantAttend(idx, total, server){
+    var R = ATTEND[idx], n = idx + 1, last = n === ATTEND.length, text = rewardParts(R, true).join(' + ');
     if (R.gold){
       state.gold += R.gold;
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
     }
     if (R.item) state.items[R.item] = Math.min(999, state.items[R.item] + 1);
-    A.last = dayKey(0);
-    A.total += 1;
-    A.day = (A.day + 1) % ATTEND.length;
+    state.attend = { last:dayKey(0), day:(idx + 1) % ATTEND.length, total:total };
     flash('ok', 'rgba(255,214,120,.8)');
     burst(last ? 40 : 24, 'ok', '#FFD27A');
     fanfare(last ? 4 : 2);
     reveal('출석 ' + n + '일째!', text, last ? '일주일 개근 보상' : '', '#FFD27A', last);
     verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (R.item ? ' 상점에서 무료로 쓸 수 있어요.' : ''));
-    pushLog('gift', '출석', n + '일째 · ' + text, null);
+    pushLog('gift', '출석', n + '일째 · ' + text + (server ? ' · 서버 확인' : ''), null);
     render(); save();
   }
   function renderAttend(){
-    var A = state.attend, can = canClaim(), next = nextAttendDay();
-    $('attend').classList.toggle('done', !can);
-    var sub = $('attendSub');
+    var m = attendMode(), can = canClaim(), next = nextAttendDay(), A = state.attend;
+    var box = $('attend'), sub = $('attendSub'), btn = $('attendBtn'), label = $('attendBtnText');
+    box.classList.toggle('done', !can && (m === 'local' || m === 'server'));
     sub.textContent = '';
-    if (can) sub.textContent = ATTEND_RESET_ON_MISS ? '하루 한 번 · 빠지면 1일차부터' : '하루 한 번 · 빠져도 이어집니다';
+    if (can) sub.textContent = '하루 한 번' + (m === 'server' ? ' · 서버 시간 기준' : '') +
+                               (ATTEND_RESET_ON_MISS ? ' · 빠지면 1일차부터' : ' · 빠져도 이어집니다');
+    else if (m === 'login') sub.textContent = '로그인하면 서버 시간 기준으로 받아요';
+    else if (m === 'wait') sub.textContent = '출석 기록을 확인하는 중…';
+    else if (m === 'offline') sub.textContent = '서버에 연결하지 못했어요 · 새로고침 해 주세요';
+    else if (m === 'retry') sub.textContent = '출석 기록을 불러오지 못했어요';
     else {
       sub.appendChild(document.createTextNode('오늘 출석 완료 · 내일 '));
       var b = document.createElement('b');
-      b.textContent = rewardParts(ATTEND[A.day], true).join(' + ');
+      b.textContent = rewardParts(ATTEND[m === 'server' && online.attend ? online.attend.day : A.day], true).join(' + ');
       sub.appendChild(b);
     }
-    $('attendTotal').textContent = '총 ' + A.total + '일';
+    $('attendTotal').textContent = '총 ' + attendTotal() + '일';
     var ol = $('attendDays');
     if (!ol.children.length){
       ATTEND.forEach(function(R){
@@ -2457,13 +2567,381 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         ol.appendChild(li);
       });
     }
+    var lit = can || m === 'login';
     Array.prototype.forEach.call(ol.children, function(li, i){
       var got = i < next;
-      li.className = (got ? 'got' : i === next ? (can ? 'today' : 'next') : '') + (i === ATTEND.length - 1 ? ' big' : '');
+      li.className = (got ? 'got' : i === next ? (lit ? 'today' : 'next') : '') + (i === ATTEND.length - 1 ? ' big' : '');
       li.firstChild.textContent = (got ? '✓ ' : '') + (i + 1) + '일';
     });
-    $('attendBtn').disabled = rolling || !can;
-    $('attendBtnText').textContent = '오늘 보상 받기 · ' + rewardParts(ATTEND[next], true).join(' + ');
+    var reward = rewardParts(ATTEND[next], true).join(' + ');
+    if (m === 'login'){ btn.disabled = false; label.textContent = '구글로 로그인하고 받기 · ' + reward; }
+    else if (m === 'wait'){ btn.disabled = true; label.textContent = '출석 기록 확인 중…'; }
+    else if (m === 'offline'){ btn.disabled = true; label.textContent = '서버에 연결되면 받을 수 있어요'; }
+    else if (m === 'retry'){ btn.disabled = false; label.textContent = '출석 기록 다시 확인'; }
+    else if (online.claiming){ btn.disabled = true; label.textContent = '서버에서 확인하는 중…'; }
+    else { btn.disabled = rolling || !can; label.textContent = '오늘 보상 받기 · ' + reward; }
+  }
+
+  /* ═════════ 온라인 (Firebase) ═════════
+     웹사이트(GitHub Pages·Vercel 등)에 올렸을 때만 켜집니다. Claude 아티팩트 안에서는 바깥 서버와의
+     통신이 막혀 있어서 꺼진 채로, 지금처럼 이 브라우저에만 저장하며 동작합니다.
+     켜지면: 구글 로그인 · 클라우드 자동 저장 · 서버 시간 기준 출석 · 친구 랭킹.
+     아래 설정값은 웹페이지에 공개되도록 만들어진 값이고, 실제 보안은 firestore.rules 가 지킵니다. */
+  var FIREBASE_CONFIG = {
+    apiKey: 'AIzaSyAnux21iR_yaWp-nCg0klUw67fEEJavBrY',
+    authDomain: 'sword-forge.firebaseapp.com',
+    projectId: 'sword-forge',
+    storageBucket: 'sword-forge.firebasestorage.app',
+    messagingSenderId: '623667049462',
+    appId: '1:623667049462:web:de8b5418cb7b1f026b8dd7'
+  };
+  var FIREBASE_SDK = 'https://www.gstatic.com/firebasejs/12.19.0/';
+  /* 개발용: 127.0.0.1·localhost 에서 ?emu=1 로 열면 로컬 Firebase 에뮬레이터에 붙습니다. */
+  var DEV_HOST = /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+  var EMU = DEV_HOST && /[?&]emu=1(&|$)/.test(location.search);
+  var ONLINE_POSSIBLE = !window.claude && /^https?:$/.test(location.protocol) && (!DEV_HOST || EMU);
+  var RANK_SIZE = 20;
+
+  var online = {
+    on:false, failed:false, authReady:false, fb:null, auth:null, db:null, user:null,
+    attend:null, attendLoaded:false, attendError:false, claiming:false,
+    saveTimer:null, saveBusy:false, saveFail:false, lastCode:'', conflict:'', dirtyAt:0,
+    myRank:null, pendingName:'', rankTimer:null, ranking:null, rankAt:0, rankError:false, note:''
+  };
+
+  function onlineInit(){
+    if (!ONLINE_POSSIBLE) return;
+    var base = (EMU && window.__FB_SDK) || FIREBASE_SDK;
+    Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')])
+      .then(function(m){
+        var F = {};
+        [m[1], m[2]].forEach(function(mod){ for (var k in mod) F[k] = mod[k]; });
+        var app = m[0].initializeApp(EMU ? Object.assign({}, FIREBASE_CONFIG, { projectId:'demo-sword-forge' }) : FIREBASE_CONFIG);
+        online.fb = F;
+        online.auth = F.getAuth(app);
+        online.db = F.getFirestore(app);
+        if (EMU){
+          F.connectAuthEmulator(online.auth, 'http://127.0.0.1:9099', { disableWarnings:true });
+          F.connectFirestoreEmulator(online.db, '127.0.0.1', 8080);
+          /* 시험용 로그인: 에뮬레이터는 서명 없는 가짜 구글 토큰을 받아 줍니다 */
+          window.__online = online;
+          window.__emuLogin = function(sub, name){
+            return F.signInWithCredential(online.auth, F.GoogleAuthProvider.credential(JSON.stringify({
+              sub:sub, email:sub + '@example.com', email_verified:true, name:name
+            })));
+          };
+        }
+        online.on = true;
+        F.onAuthStateChanged(online.auth, onAuth);
+        loadRanking();
+        setInterval(function(){ if (!document.hidden) loadRanking(); }, 180000);
+        renderOnline();
+        render();
+      })
+      .catch(function(){ online.on = false; online.failed = true; renderOnline(); render(); });
+  }
+
+  function onAuth(user){
+    online.authReady = true;
+    online.user = user || null;
+    online.attend = null; online.attendLoaded = false; online.attendError = false;
+    online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
+    online.dirtyAt = 0;
+    renderOnline(); render();
+    if (!user) return;
+    var F = online.fb, uid = user.uid;
+    Promise.all([
+      refreshAttend(),
+      F.getDoc(F.doc(online.db, 'ranking', uid)).then(function(s){
+        if (isUser(uid)) online.myRank = s.exists() ? s.data() : null;
+      }, function(){}),
+      loadCloudSave()
+    ]).then(function(){
+      if (!isUser(uid)) return;
+      queueRank(true);
+      renderOnline(); render();
+    });
+  }
+  function isUser(uid){ return !!online.user && online.user.uid === uid; }
+
+  var LOGIN_ERRORS = {
+    'auth/popup-blocked': '팝업이 막혔어요. 브라우저에서 이 사이트의 팝업을 허용해 주세요.',
+    'auth/unauthorized-domain': '이 주소가 아직 Firebase 승인된 도메인에 없어요. (관리자: Authentication → 설정 → 승인된 도메인)',
+    'auth/operation-not-allowed': 'Firebase 에서 구글 로그인이 아직 켜지지 않았어요. (관리자: Authentication → 로그인 방법)',
+    'auth/network-request-failed': '인터넷 연결을 확인해 주세요.',
+    'auth/web-storage-unsupported': '이 브라우저에서는 로그인을 저장할 수 없어요. 시크릿 모드라면 일반 창에서 열어 주세요.'
+  };
+  function inAppBrowser(){ return /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|everytimeApp|DaumApps/i.test(navigator.userAgent); }
+  function onlineLogin(){
+    if (!online.on || online.user) return;
+    if (inAppBrowser()){ online.note = 'inapp'; renderOnline(); return; }
+    var F = online.fb;
+    F.signInWithPopup(online.auth, new F.GoogleAuthProvider()).catch(function(e){
+      var c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+      online.note = LOGIN_ERRORS[c] || ('로그인하지 못했어요 (' + c + ')');
+      renderOnline();
+    });
+  }
+  function onlineLogout(){
+    if (!online.user) return;
+    clearTimeout(online.saveTimer);
+    var done = function(){ online.fb.signOut(online.auth); };
+    if (online.conflict) done(); else onlineFlushSave().then(done, done);
+  }
+
+  /* ── 클라우드 저장: 로그인하면 불러오고, 바뀔 때마다 2초 모아서 올립니다 ── */
+  function loadCloudSave(){
+    var F = online.fb, uid = online.user.uid;
+    return F.getDoc(F.doc(online.db, 'saves', uid)).then(function(s){
+      if (!isUser(uid)) return;
+      var code = s.exists() ? String(s.data().code || '') : '';
+      var mine = !state.owner || state.owner === uid;     // 이 기기의 진행이 다른 계정 것이면 이 계정으로 올리지 않음
+      if (!code){
+        if (!mine) resetForAccount();
+        claimOwner(uid); onlineQueueSave(true); return;
+      }
+      var local = encodeState();
+      if (code === local){ online.lastCode = code; claimOwner(uid); markSynced(code); return; }
+      try { decodeCode(code); } catch (e){ if (!mine) resetForAccount(); claimOwner(uid); onlineQueueSave(true); return; }
+      if (!mine){ applyCloud(code); return; }                                                     // 남의 판이면 묻지 않고 불러옴
+      /* 지난번에 클라우드와 맞춰 둔 기록(synced)과 비교해, 한쪽만 바뀌었으면 묻지 않고 그쪽을 따릅니다 */
+      if (state.synced && code === state.synced){                                                 // 이 기기만 앞섬 → 올림
+        online.lastCode = code; claimOwner(uid); onlineQueueSave(true); return;
+      }
+      if (state.synced && local === state.synced){ applyCloud(code); return; }                    // 클라우드만 앞섬 → 불러옴
+      if (state.stats.tries === 0 && state.level === 0){ applyCloud(code); return; }              // 새 판이면 불러옴
+      online.conflict = code;                                                                     // 둘 다 바뀌었으면 고르게 함
+    }, function(){
+      if (isUser(uid)) online.note = '클라우드 저장을 불러오지 못했어요. 이 기기에만 저장합니다.';
+    });
+  }
+  function claimOwner(uid){
+    if (state.owner === uid) return;
+    state.owner = uid;
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function markSynced(code){
+    if (state.synced === code) return;
+    state.synced = code;
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function resetForAccount(){
+    var keepSound = state.sound;
+    state = freshState();
+    state.sound = keepSound;
+    verdict('keep', '이 계정은 처음이라 새 판으로 시작합니다.');
+    render();
+  }
+  function applyCloud(code){
+    try { adopt(decodeCode(code)); } catch (e){ return; }
+    if (online.user) state.owner = online.user.uid;
+    state.synced = code;
+    online.conflict = '';
+    online.lastCode = code;
+    verdict('ok', '클라우드에 저장된 기록을 불러왔어요.');
+    $('rollText').textContent = '—';
+    $('marker').classList.remove('on');
+    highlight(null);
+    renderOnline(); render(); save();
+  }
+  function onlineQueueSave(now){
+    if (!online.user || online.conflict) return;
+    clearTimeout(online.saveTimer);
+    var t = Date.now();
+    if (!online.dirtyAt || t < online.dirtyAt) online.dirtyAt = t;
+    online.saveTimer = setTimeout(onlineFlushSave, now || t - online.dirtyAt > 30000 ? 100 : 2000);
+  }
+  function onlineFlushNow(){
+    if (!online.user || online.conflict) return;
+    clearTimeout(online.saveTimer);
+    onlineFlushSave();
+  }
+  function onlineFlushSave(){
+    if (!online.user || online.conflict || online.saveBusy) return Promise.resolve();
+    var code = encodeState();
+    if (code === online.lastCode) return Promise.resolve();
+    var F = online.fb, uid = online.user.uid;
+    online.saveBusy = true;
+    return F.setDoc(F.doc(online.db, 'saves', uid), { code:code, at:F.serverTimestamp() }).then(function(){
+      online.saveBusy = false;
+      if (!isUser(uid)) return;
+      online.lastCode = code; online.saveFail = false; online.dirtyAt = 0;
+      markSynced(code);
+      touchSaveState();
+      if (encodeState() !== code) onlineQueueSave();
+    }, function(){
+      online.saveBusy = false;
+      online.saveFail = true;
+      touchSaveState();
+    });
+  }
+
+  /* ── 출석: 서버가 받아 줘야만 보상을 줍니다 ── */
+  function readAttend(d){
+    return { lastMs: d.last && d.last.toMillis ? d.last.toMillis() : 0, day:(d.day | 0) % ATTEND.length, total:d.total | 0 };
+  }
+  function refreshAttend(){
+    var F = online.fb, uid = online.user && online.user.uid;
+    if (!uid) return Promise.resolve();
+    return F.getDoc(F.doc(online.db, 'attend', uid)).then(function(s){
+      if (!isUser(uid)) return;
+      online.attend = s.exists() ? readAttend(s.data()) : null;
+      online.attendLoaded = true; online.attendError = false;
+    }, function(){
+      if (isUser(uid)){ online.attendLoaded = false; online.attendError = true; }
+    }).then(function(){ renderAttend(); });
+  }
+  function claimOnline(){
+    if (online.claiming || rolling || !online.user) return;
+    var F = online.fb, uid = online.user.uid, ref = F.doc(online.db, 'attend', uid);
+    online.claiming = true;
+    renderAttend();
+    F.getDoc(ref).then(function(s){
+      var prev = s.exists() ? readAttend(s.data()) : null;
+      var idx = prev ? prev.day : 0, total = (prev ? prev.total : 0) + 1;
+      return F.setDoc(ref, { last:F.serverTimestamp(), day:(idx + 1) % ATTEND.length, total:total }).then(function(){
+        if (isUser(uid)) grantAttend(idx, total, true);
+      });
+    }).catch(function(e){
+      if (e && e.code === 'permission-denied') verdict('keep', '오늘 출석 보상은 이미 받았어요 (서버 시간 기준). 내일 다시 오세요.');
+      else verdict('down', '서버에 연결하지 못했어요. 잠시 후 다시 눌러 주세요.');
+    }).then(function(){
+      online.claiming = false;
+      return refreshAttend();
+    });
+  }
+
+  /* ── 랭킹: 최고 강화 단계 → 최고 보유 골드 순. 한 번 오른 기록은 내려가지 않습니다 ── */
+  function defaultName(u){
+    var h = 0;
+    for (var i = 0; i < u.uid.length; i++) h = (h * 31 + u.uid.charCodeAt(i)) % 10000;
+    return '대장장이' + ('000' + h).slice(-4);
+  }
+  function currentName(){ return online.pendingName || (online.myRank && online.myRank.name) || defaultName(online.user); }
+  function cleanName(v){ return String(v || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 12); }
+  function rankPayload(){
+    var st = state.stats, b = st.bestSw || state.sword, best = Math.min(MAX, st.best | 0);
+    var peak = Math.min(999999999999, Math.max(0, Math.round(st.peak)));
+    return { name:currentName(), best:best, peak:peak, score:best * 1e12 + peak,
+             sword:makeSword(b.seed >>> 0, best, b.el, b.rar).name.slice(0, 40), rar:b.rar | 0, el:b.el | 0 };
+  }
+  function queueRank(now){
+    if (!online.user || online.conflict) return;
+    clearTimeout(online.rankTimer);
+    online.rankTimer = setTimeout(sendRank, now ? 300 : 3000);
+  }
+  function sendRank(){
+    if (!online.user || online.conflict) return;
+    var mine = online.myRank, p = rankPayload();
+    if (mine && p.score <= mine.score){
+      if (p.name === mine.name) return;
+      p = { name:p.name, best:mine.best, peak:mine.peak, score:mine.score, sword:mine.sword, rar:mine.rar, el:mine.el };
+    }
+    var F = online.fb, uid = online.user.uid;
+    F.setDoc(F.doc(online.db, 'ranking', uid), Object.assign({}, p, { at:F.serverTimestamp() })).then(function(){
+      if (!isUser(uid)) return;
+      online.myRank = p; online.pendingName = '';
+      mergeMyRank(uid, p); renderOnline();
+    }, function(){ /* 다음 저장 때 다시 시도합니다 */ });
+  }
+  function loadRanking(){
+    if (!online.on) return;
+    var F = online.fb;
+    F.getDocs(F.query(F.collection(online.db, 'ranking'), F.orderBy('score', 'desc'), F.limit(RANK_SIZE))).then(function(qs){
+      online.ranking = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; });
+      online.rankError = false; online.rankAt = Date.now();
+      renderRank();
+    }, function(){ online.rankError = true; renderRank(); });
+  }
+  /* 내 기록이 바뀌면 목록을 다시 받지 않고 내 줄만 고쳐 끼웁니다 */
+  function mergeMyRank(uid, p){
+    if (!online.ranking) return;
+    var list = online.ranking.filter(function(r){ return r.uid !== uid; });
+    list.push(Object.assign({ uid:uid }, p));
+    list.sort(function(a, b){ return b.score - a.score; });
+    online.ranking = list.slice(0, RANK_SIZE);
+  }
+  function renderRank(){
+    var ol = $('rankList');
+    ol.textContent = '';
+    var msg = online.ranking === null ? (online.rankError ? '랭킹을 불러오지 못했어요.' : '불러오는 중…')
+            : !online.ranking.length ? '아직 아무도 없어요. 첫 번째 대장장이가 되어 보세요!' : '';
+    if (msg){
+      var e = document.createElement('li');
+      e.className = 'empty'; e.textContent = msg;
+      ol.appendChild(e);
+      return;
+    }
+    online.ranking.forEach(function(r, i){
+      var R = RARITIES[r.rar] || RARITIES[0];
+      var li = document.createElement('li');
+      if (online.user && r.uid === online.user.uid) li.className = 'me';
+      var no = document.createElement('span'); no.className = 'no'; no.textContent = i + 1;
+      var who = document.createElement('span'); who.className = 'who';
+      var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = String(r.name || '이름 없음');
+      var sw = document.createElement('span'); sw.className = 'sw'; sw.style.color = R.color;
+      sw.textContent = '[' + R.name + '] ' + String(r.sword || '');
+      who.appendChild(nm); who.appendChild(sw);
+      var sc = document.createElement('span'); sc.className = 'sc';
+      var lv = document.createElement('span'); lv.className = 'lv'; lv.textContent = '+' + (r.best | 0);
+      var pk = document.createElement('span'); pk.className = 'pk'; pk.textContent = gold(Number(r.peak) || 0);
+      sc.appendChild(lv); sc.appendChild(pk);
+      li.appendChild(no); li.appendChild(who); li.appendChild(sc);
+      ol.appendChild(li);
+    });
+  }
+
+  function renderOnline(){
+    $('online').hidden = !online.on && !online.failed;
+    $('rank').hidden = !online.on;
+    if (!online.on){
+      $('loginBtn').hidden = $('logoutBtn').hidden = $('onlineNote').hidden = true;
+      $('onlineWho').textContent = '온라인 기능(로그인·출석·랭킹)을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침 해 주세요. 게임은 이 기기에 저장하며 계속할 수 있어요.';
+      return;
+    }
+    var u = online.user;
+    $('loginBtn').hidden = !!u || !online.authReady;
+    $('logoutBtn').hidden = !u;
+    $('onlineWho').textContent = u ? currentName() + '님 · 구글 계정에 자동 저장 중'
+                               : !online.authReady ? '로그인 상태를 확인하는 중…'
+                               : '로그인하면 기기를 바꿔도 이어지고, 출석 보상과 랭킹에 참여해요.';
+    var note = $('onlineNote');
+    note.textContent = '';
+    note.hidden = true;
+    function line(text){ var p = document.createElement('div'); p.textContent = text; note.appendChild(p); }
+    function act(label, fn){
+      var row = note.querySelector('.acts');
+      if (!row){ row = document.createElement('div'); row.className = 'acts'; note.appendChild(row); }
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-ghost'; b.textContent = label;
+      b.addEventListener('click', fn);
+      row.appendChild(b);
+    }
+    if (u && online.conflict){
+      var c = null;
+      try { c = decodeCode(online.conflict); } catch (e) {}
+      line('이 기기의 기록과 구글 계정에 저장된 기록이 달라요.');
+      if (c) line('이 기기: +' + state.level + ' · ' + gold(state.gold) + '   /   클라우드: +' + (c.level | 0) + ' · ' + gold(c.gold || 0));
+      act('클라우드 기록 불러오기', function(){ applyCloud(online.conflict); });
+      act('이 기기 기록으로 계속', function(){ online.conflict = ''; claimOwner(u.uid); onlineQueueSave(true); queueRank(true); renderOnline(); });
+      note.hidden = false;
+    } else if (!u && online.note === 'inapp'){
+      line('이 앱 안의 브라우저에서는 구글 로그인이 막혀 있어요. 크롬이나 사파리로 열어 주세요.');
+      if (/KAKAOTALK/i.test(navigator.userAgent)){
+        var a = document.createElement('a');
+        a.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+        a.textContent = '다른 브라우저로 열기';
+        var row = document.createElement('div'); row.className = 'acts'; row.appendChild(a); note.appendChild(row);
+      } else line('오른쪽 위 메뉴의 "다른 브라우저로 열기"를 눌러 주세요.');
+      note.hidden = false;
+    } else if (online.note && online.note !== 'inapp'){
+      line(online.note);
+      note.hidden = false;
+    }
+    $('rankMe').hidden = !u;
+    if (u && document.activeElement !== $('rankName')) $('rankName').value = currentName();
+    renderRank();
   }
 
   function buy(key){
@@ -2514,9 +2992,25 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('buyProtect').addEventListener('click', function(){ buy('protect'); });
   $('buyMaster').addEventListener('click', function(){ buy('master'); });
   $('attendBtn').addEventListener('click', claimAttend);
-  var shownDay = dayKey(0);
-  setInterval(function(){ if (dayKey(0) !== shownDay){ shownDay = dayKey(0); renderAttend(); } }, 60000);
-  document.addEventListener('visibilitychange', function(){ if (!document.hidden){ shownDay = dayKey(0); renderAttend(); } });
+  $('loginBtn').addEventListener('click', onlineLogin);
+  $('logoutBtn').addEventListener('click', onlineLogout);
+  $('rankRefresh').addEventListener('click', loadRanking);
+  $('rankNameBtn').addEventListener('click', function(){
+    var v = cleanName($('rankName').value);
+    if (!v || !online.user) return;
+    online.pendingName = v;
+    renderOnline();
+    sendRank();
+  });
+  function dayStamp(){ return dayKey(0) + '|' + kstKey(Date.now()); }
+  var shownDay = dayStamp();
+  setInterval(function(){ if (dayStamp() !== shownDay){ shownDay = dayStamp(); renderAttend(); } }, 60000);
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){ onlineFlushNow(); return; }
+    shownDay = dayStamp();
+    if (online.user) refreshAttend(); else renderAttend();
+    if (online.on && Date.now() - online.rankAt > 60000) loadRanking();
+  });
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;
@@ -2540,10 +3034,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     resetArmed = false;
     this.textContent = '초기화';
     this.classList.remove('armed');
-    var keepSound = state.sound, keepAttend = state.attend;
+    var keepSound = state.sound, keepAttend = state.attend, keepOwner = state.owner, keepSynced = state.synced;
     state = freshState();
     state.sound = keepSound;
     state.attend = keepAttend;
+    state.owner = keepOwner;
+    state.synced = keepSynced;
     $('rollText').textContent = '—';
     $('marker').classList.remove('on');
     highlight(null);
@@ -2619,6 +3115,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     loadSprites(function(){
       render();
       cloudInit();
+      onlineInit();
     });
     window.addEventListener('resize', function(){
       initCanvas();

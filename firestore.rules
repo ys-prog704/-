@@ -1,0 +1,64 @@
+rules_version = '2';
+
+// 검 키우기 대장간 — Firestore 보안 규칙
+// Firebase 콘솔 → Firestore Database → [규칙] 탭에 그대로 붙여넣고 [게시] 하세요.
+//
+// 게임 화면의 계산은 브라우저에서 하므로, 이 규칙이 막는 것은 "서버에 기록되는 것"뿐입니다.
+//  - 저장: 자기 저장만 읽고 쓸 수 있습니다.
+//  - 출석: 서버 시간(한국 시간 기준) 하루 한 번, 7칸 주기로 한 칸씩만 진행됩니다.
+//          기기 날짜를 바꿔도 소용없습니다.
+//  - 랭킹: 누구나 볼 수 있고, 자기 기록만 올릴 수 있으며, 범위를 벗어난 값은 거부합니다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function onlyKeys(keys) {
+      return request.resource.data.keys().hasOnly(keys) && request.resource.data.keys().hasAll(keys);
+    }
+    // 한국 시간(UTC+9) 기준 날짜
+    function kstDay(t) { return (t + duration.value(9, 'h')).date(); }
+
+    match /saves/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && onlyKeys(['code', 'at'])
+        && request.resource.data.code is string
+        && request.resource.data.code.size() <= 4000
+        && request.resource.data.at == request.time;
+    }
+
+    // day 는 "다음에 받을 칸"(0~6), total 은 지금까지 받은 날 수입니다. 7 은 게임의 ATTEND 칸 수입니다.
+    match /attend/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && onlyKeys(['last', 'day', 'total'])
+        && request.resource.data.last == request.time
+        && request.resource.data.day == 1
+        && request.resource.data.total == 1;
+      allow update: if isOwner(uid)
+        && onlyKeys(['last', 'day', 'total'])
+        && request.resource.data.last == request.time
+        && kstDay(request.time) > kstDay(resource.data.last)
+        && request.resource.data.day == (resource.data.day + 1) % 7
+        && request.resource.data.total == resource.data.total + 1;
+    }
+
+    match /ranking/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid)
+        && onlyKeys(['name', 'best', 'peak', 'score', 'sword', 'rar', 'el', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+        && request.resource.data.best is int
+        && request.resource.data.best >= 0 && request.resource.data.best <= 20
+        && request.resource.data.peak is int
+        && request.resource.data.peak >= 0 && request.resource.data.peak < 1000000000000
+        && request.resource.data.score == request.resource.data.best * 1000000000000 + request.resource.data.peak
+        && request.resource.data.sword is string && request.resource.data.sword.size() <= 40
+        && request.resource.data.rar is int && request.resource.data.rar >= 0 && request.resource.data.rar <= 4
+        && request.resource.data.el is int && request.resource.data.el >= 0 && request.resource.data.el <= 9
+        && request.resource.data.at == request.time;
+    }
+  }
+}

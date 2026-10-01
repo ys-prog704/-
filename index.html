@@ -321,6 +321,39 @@ img{max-width:100%}
 .item .pr{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--gold);white-space:nowrap}
 .item.held{border-color:var(--rail);background:color-mix(in srgb, var(--rail) 14%, var(--iron-2))}
 .item.held .pr{color:var(--rail)}
+.item .pr.stock{color:var(--ok)}
+
+/* ── 출석 보상 ── */
+.attend{margin-top:18px;padding:13px 15px 14px}
+.attend-head{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap}
+.attend-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.attend-sub{flex:1 1 auto;font-size:12px;color:var(--ash)}
+.attend-sub b{font-weight:600;color:var(--gold)}
+.attend-total{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--ash-2)}
+.attend-days{list-style:none;margin:11px 0 0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.attend-days li{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  min-width:0;min-height:54px;padding:6px 2px;border-radius:var(--r-sm);
+  background:var(--iron-2);border:1px solid var(--line);text-align:center;
+}
+.attend-days .d{font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--ash)}
+.attend-days .rw{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--parch)}
+.attend-days .rw2{font-size:10.5px;font-weight:600;color:var(--gold)}
+.attend-days .rw2:empty{display:none}
+.attend-days li.got{opacity:.42}
+.attend-days li.today{
+  border-color:var(--gold);background:color-mix(in srgb, var(--gold) 15%, var(--iron-2));
+  box-shadow:0 0 16px color-mix(in srgb, var(--gold) 28%, transparent);
+}
+.attend-days li.today .d{color:var(--gold)}
+.attend-days li.big .rw{color:var(--gold)}
+.attend-foot{margin-top:11px}
+.btn-gift{
+  width:100%;color:#1A0D06;background:linear-gradient(180deg,#F4C95E,#C8922C);
+  box-shadow:0 0 0 1px rgba(255,224,150,.32) inset,0 6px 20px rgba(217,164,65,.26);
+}
+.btn-gift:hover:not(:disabled){filter:brightness(1.07)}
+.attend.done .attend-days,.attend.done .attend-foot{display:none}
 .i-bless{--rail:#5FA463}
 .i-protect{--rail:#C94A40}
 .i-master{--rail:#8A8076}
@@ -353,6 +386,7 @@ img{max-width:100%}
 .t-boom{background:rgba(201,74,64,.18);color:var(--boom)}
 .t-sell{background:rgba(217,164,65,.16);color:var(--gold)}
 .t-buy{background:rgba(111,168,184,.16);color:var(--quench)}
+.t-gift{background:rgba(217,164,65,.2);color:#F4C95E}
 .t-r0{background:rgba(168,162,154,.16);color:var(--r0)}
 .t-r1{background:color-mix(in srgb, var(--r1) 20%, transparent);color:var(--r1)}
 .t-r2{background:color-mix(in srgb, var(--r2) 20%, transparent);color:var(--r2)}
@@ -504,6 +538,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div><dt>도감</dt><dd class="v-dex" id="hudDex">0 / 50</dd></div>
     <div><dt>파괴</dt><dd class="v-boom" id="hudBoom">0</dd></div>
   </dl>
+
+  <section class="panel attend" id="attend" aria-labelledby="attendTitle">
+    <div class="attend-head">
+      <h2 id="attendTitle">출석 보상</h2>
+      <span class="attend-sub" id="attendSub"></span>
+      <span class="attend-total" id="attendTotal">총 0일</span>
+    </div>
+    <ol class="attend-days" id="attendDays"></ol>
+    <div class="attend-foot">
+      <button class="btn btn-gift" id="attendBtn" type="button"><span id="attendBtnText">오늘 보상 받기</span></button>
+    </div>
+  </section>
 
   <main class="stage">
 
@@ -1549,13 +1595,23 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 게임 상태 ═════════ */
   var ITEMS = {
-    bless:   { label:'축복', mult:3 },
-    protect: { label:'파괴 방지', mult:4 },
-    master:  { label:'장인의 손길', mult:7 }
+    bless:   { label:'축복',       full:'축복의 주문서', short:'축복서', mult:3 },
+    protect: { label:'파괴 방지',  full:'파괴 방지권',   short:'방지권', mult:4 },
+    master:  { label:'장인의 손길', full:'장인의 손길',   short:'장인',   mult:7 }
   };
   var START_GOLD = 1000000;
-  var SAVE_KEY = 'forge-sword-kr-v3', OLD_KEY = 'forge-sword-kr-v2';
-  var CODE_TAG = 'SWORD3';
+  /* v4 부터 모두 처음부터 다시 시작합니다 — 예전 저장(v2·v3)과 예전 저장 코드는 읽지 않습니다.
+     (예전 저장은 지우지 않고 그대로 두므로, 되돌리려면 SAVE_KEY 만 바꾸면 됩니다) */
+  var SAVE_KEY = 'forge-sword-kr-v4', SAVE_VERSION = 4;
+  var CODE_TAG = 'SWORD4';
+
+  /* ═════════ 출석 보상 ═════════  7일 주기, 하루 한 번.
+     ATTEND_RESET_ON_MISS 가 false 면 하루 빠져도 다음 칸으로 이어지고, true 면 빠진 날 1일차로 돌아갑니다. */
+  var ATTEND = [
+    { gold:100000 }, { gold:200000 }, { item:'bless' }, { gold:400000 },
+    { item:'protect' }, { gold:600000 }, { item:'master', gold:1000000 }
+  ];
+  var ATTEND_RESET_ON_MISS = false;
   var B32 = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
 
   function rollRarity(){
@@ -1574,6 +1630,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return {
       gold: START_GOLD, level: 0, sword: sw, found: found,
       buffs: { bless:false, protect:false, master:false },
+      items: { bless:0, protect:0, master:0 },
+      attend: { last:'', day:0, total:0 },
       sound: true, log: [],
       stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:START_GOLD,
                pulls:1, legends: sw.rar >= 3 ? 1 : 0 }
@@ -1633,10 +1691,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     cloudQueue();
     touchSaveState();
   }
-  /* 이전 버전(v2) 세이브가 있으면 골드·단계·통계를 그대로 이어받고 검만 새로 뽑습니다. */
   function loadLocal(){
     try {
-      var raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem(OLD_KEY);
+      var raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return false;
       adopt(JSON.parse(raw));
       return true;
@@ -1651,6 +1708,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                sw.el >= 0 && sw.el < ELEMENTS.length && sw.rar >= 0 && sw.rar < RARITIES.length;
     var found = Array.isArray(data.found) && data.found.length === ELEMENTS.length
       ? data.found.map(function(v){ return (v | 0) & 31; }) : base.found;
+    var it = data.items || {}, at = data.attend || {};
+    function cnt(v){ return Math.min(999, num(v, 0) | 0); }
     state = {
       gold: num(data.gold, base.gold),
       level: level,
@@ -1660,6 +1719,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
         master:  !!(data.buffs && data.buffs.master)
+      },
+      items: { bless:cnt(it.bless), protect:cnt(it.protect), master:cnt(it.master) },
+      attend: {
+        last: typeof at.last === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(at.last) ? at.last : '',
+        day: Math.min(ATTEND.length - 1, num(at.day, 0) | 0),
+        total: num(at.total, 0) | 0
       },
       sound: data.sound !== false,
       log: Array.isArray(data.log) ? data.log.filter(function(e){
@@ -1702,14 +1767,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak),
       n:st.pulls, m:st.legends,
       x:[w.seed, w.el, w.rar],
-      f:state.found.map(function(v){ return B32.charAt(v & 31); }).join('')
+      f:state.found.map(function(v){ return B32.charAt(v & 31); }).join(''),
+      i:[state.items.bless, state.items.protect, state.items.master],
+      a:[state.attend.last, state.attend.day, state.attend.total]
     }));
     return CODE_TAG + '-' + body + '-' + checksum(body);
   }
   function decodeCode(code){
     var parts = String(code || '').replace(/\s+/g, '').split('-');
-    if (parts.length !== 3 || (parts[0] !== CODE_TAG && parts[0] !== 'SWORD2'))
+    if (parts.length !== 3 || !/^SWORD\d+$/.test(parts[0]))
       throw new Error('형식이 맞지 않는 코드입니다.');
+    if (parts[0] !== CODE_TAG)
+      throw new Error('예전 버전의 저장 코드입니다. 게임이 처음부터 새로 시작되어 더는 쓸 수 없습니다.');
     if (checksum(parts[1]) !== parts[2].toUpperCase())
       throw new Error('코드가 손상되었습니다. 전체를 다시 복사해 주세요.');
     var d = JSON.parse(b64dec(parts[1]));
@@ -1721,6 +1790,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2] };
     if (typeof d.f === 'string' && d.f.length === ELEMENTS.length)
       out.found = d.f.split('').map(function(c){ return Math.max(0, B32.indexOf(c)); });
+    if (Array.isArray(d.i) && d.i.length === 3) out.items = { bless:d.i[0], protect:d.i[1], master:d.i[2] };
+    if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     return out;
   }
 
@@ -2004,10 +2075,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ['bless','protect','master'].forEach(function(key){
       var cap = key.charAt(0).toUpperCase() + key.slice(1);
       var btn = $('buy' + cap), label = $('pr' + cap);
-      var ip = itemPrice(key), held = state.buffs[key];
+      var ip = itemPrice(key), held = state.buffs[key], have = state.items[key];
       btn.classList.toggle('held', held);
+      label.classList.toggle('stock', have > 0 && !held);
       if (held){ label.textContent = '적용됨'; btn.disabled = true; }
       else if (ip === null){ label.textContent = '—'; btn.disabled = true; }
+      else if (have > 0){
+        label.textContent = '보유 ' + have + '개 · 무료';
+        btn.disabled = rolling || (key === 'protect' && o && o.x === 0);
+      }
       else {
         label.textContent = gold(ip);
         btn.disabled = rolling || state.gold < ip || (key === 'protect' && o && o.x === 0);
@@ -2033,6 +2109,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('stPeak').textContent = gold(st.peak);
 
     renderLog();
+    renderAttend();
     renderCodex();
     renderChart();
   }
@@ -2315,13 +2392,94 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     render(); save();
   }
 
+  /* ═════════ 출석 보상 ═════════  기기 시계 기준입니다. */
+  function dayKey(off){
+    var d = new Date();
+    if (off) d.setDate(d.getDate() + off);
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+  /* 마지막으로 받은 날이 오늘보다 뒤면(시계를 되돌린 경우) 받을 수 없습니다. */
+  function canClaim(){ return state.attend.last < dayKey(0); }
+  function nextAttendDay(){
+    var A = state.attend;
+    return (ATTEND_RESET_ON_MISS && A.last && A.last !== dayKey(-1) && canClaim()) ? 0 : A.day;
+  }
+  function rewardParts(R, long){
+    var out = [];
+    if (R.item) out.push(long ? ITEMS[R.item].full : ITEMS[R.item].short);
+    if (R.gold) out.push(long ? gold(R.gold) : (R.gold / 10000) + '만');
+    return out;
+  }
+  function claimAttend(){
+    if (rolling || !canClaim()) return;
+    var A = state.attend;
+    A.day = nextAttendDay();
+    var R = ATTEND[A.day], n = A.day + 1, last = n === ATTEND.length, text = rewardParts(R, true).join(' + ');
+    if (R.gold){
+      state.gold += R.gold;
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+    }
+    if (R.item) state.items[R.item] = Math.min(999, state.items[R.item] + 1);
+    A.last = dayKey(0);
+    A.total += 1;
+    A.day = (A.day + 1) % ATTEND.length;
+    flash('ok', 'rgba(255,214,120,.8)');
+    burst(last ? 40 : 24, 'ok', '#FFD27A');
+    fanfare(last ? 4 : 2);
+    reveal('출석 ' + n + '일째!', text, last ? '일주일 개근 보상' : '', '#FFD27A', last);
+    verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (R.item ? ' 상점에서 무료로 쓸 수 있어요.' : ''));
+    pushLog('gift', '출석', n + '일째 · ' + text, null);
+    render(); save();
+  }
+  function renderAttend(){
+    var A = state.attend, can = canClaim(), next = nextAttendDay();
+    $('attend').classList.toggle('done', !can);
+    var sub = $('attendSub');
+    sub.textContent = '';
+    if (can) sub.textContent = ATTEND_RESET_ON_MISS ? '하루 한 번 · 빠지면 1일차부터' : '하루 한 번 · 빠져도 이어집니다';
+    else {
+      sub.appendChild(document.createTextNode('오늘 출석 완료 · 내일 '));
+      var b = document.createElement('b');
+      b.textContent = rewardParts(ATTEND[A.day], true).join(' + ');
+      sub.appendChild(b);
+    }
+    $('attendTotal').textContent = '총 ' + A.total + '일';
+    var ol = $('attendDays');
+    if (!ol.children.length){
+      ATTEND.forEach(function(R){
+        var li = document.createElement('li'), parts = rewardParts(R, false);
+        ['d', 'rw', 'rw2'].forEach(function(c, k){
+          var sp = document.createElement('span');
+          sp.className = c;
+          if (k) sp.textContent = parts[k - 1] || '';
+          li.appendChild(sp);
+        });
+        ol.appendChild(li);
+      });
+    }
+    Array.prototype.forEach.call(ol.children, function(li, i){
+      var got = i < next;
+      li.className = (got ? 'got' : i === next ? (can ? 'today' : 'next') : '') + (i === ATTEND.length - 1 ? ' big' : '');
+      li.firstChild.textContent = (got ? '✓ ' : '') + (i + 1) + '일';
+    });
+    $('attendBtn').disabled = rolling || !can;
+    $('attendBtnText').textContent = '오늘 보상 받기 · ' + rewardParts(ATTEND[next], true).join(' + ');
+  }
+
   function buy(key){
     if (rolling || state.buffs[key]) return;
     var price = itemPrice(key);
-    if (price === null || state.gold < price) return;
-    state.gold -= price;
-    state.buffs[key] = true;
-    pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
+    if (price === null) return;
+    if (state.items[key] > 0){
+      state.items[key] -= 1;
+      state.buffs[key] = true;
+      pushLog('buy', '사용', ITEMS[key].full + ' · 보관함에서', null);
+    } else {
+      if (state.gold < price) return;
+      state.gold -= price;
+      state.buffs[key] = true;
+      pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
+    }
     tone(520, .09, 'triangle', .05);
     render(); save();
   }
@@ -2355,6 +2513,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('buyBless').addEventListener('click', function(){ buy('bless'); });
   $('buyProtect').addEventListener('click', function(){ buy('protect'); });
   $('buyMaster').addEventListener('click', function(){ buy('master'); });
+  $('attendBtn').addEventListener('click', claimAttend);
+  var shownDay = dayKey(0);
+  setInterval(function(){ if (dayKey(0) !== shownDay){ shownDay = dayKey(0); renderAttend(); } }, 60000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden){ shownDay = dayKey(0); renderAttend(); } });
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;
@@ -2378,9 +2540,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     resetArmed = false;
     this.textContent = '초기화';
     this.classList.remove('armed');
-    var keepSound = state.sound;
+    var keepSound = state.sound, keepAttend = state.attend;
     state = freshState();
     state.sound = keepSound;
+    state.attend = keepAttend;
     $('rollText').textContent = '—';
     $('marker').classList.remove('on');
     highlight(null);
@@ -2447,7 +2610,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 시작 ═════════ */
   function boot(hot){
     initCanvas();
-    if (hot && hot.save) adopt(hot.save); else loadLocal();
+    if (hot && hot.save && hot.v === SAVE_VERSION) adopt(hot.save); else loadLocal();
     $('soundBtn').textContent = state.sound ? '소리 켬' : '소리 끔';
     $('soundBtn').setAttribute('aria-pressed', String(state.sound));
     rarityList($('gachaOdds'), '새 검 등급 (부서지거나 팔 때)', function(R){ return (R.w / 10) + '%'; });
@@ -2464,7 +2627,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   var hot = window.claude && window.claude.hot;
-  if (hot && hot.snapshot) hot.snapshot(function(){ return { save: state }; });
+  if (hot && hot.snapshot) hot.snapshot(function(){ return { save: state, v: SAVE_VERSION }; });
   if (hot && hot.ready) hot.ready(boot);
   else boot((hot && hot.data) || null);
 })();

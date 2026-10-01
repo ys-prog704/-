@@ -161,7 +161,7 @@ img{max-width:100%}
 }
 .reveal-card{position:relative;text-align:center;padding:10px 12px;animation:reveal-in 1.9s cubic-bezier(.2,.9,.3,1) forwards}
 .reveal-rar{
-  margin:0;font-family:var(--font-display);font-size:clamp(46px,13vw,74px);line-height:1;
+  margin:0;font-family:var(--font-display);font-size:clamp(40px,11vw,64px);line-height:1;white-space:nowrap;
   color:var(--rc);text-shadow:0 0 16px var(--rc),0 0 40px var(--rc),0 3px 0 rgba(0,0,0,.55);
 }
 .reveal-name{margin:8px 0 0;font-size:15.5px;font-weight:700;color:#FFFFFF;text-shadow:0 2px 10px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.9)}
@@ -221,6 +221,8 @@ img{max-width:100%}
   text-shadow:0 0 30px rgba(232,98,44,.45);
 }
 .nameplate .sname{display:block;margin-top:5px;font-size:17px;font-weight:700;letter-spacing:.01em;text-wrap:balance}
+.nextfeat{display:block;margin-top:7px;font-size:12px;color:var(--ash)}
+.nextfeat b{font-family:var(--font-mono);font-weight:600;color:var(--ember)}
 .nameplate .epi{display:block;margin-top:2px;font-size:13px;font-weight:600;color:var(--rc, var(--ash))}
 .verdict{min-height:22px;font-size:13.5px;font-weight:600;letter-spacing:.02em;text-align:center;max-width:440px}
 .verdict.v-ok{color:var(--ok)}
@@ -282,19 +284,6 @@ img{max-width:100%}
 .btn-sell{flex:1 1 128px;color:var(--gold);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
 .btn-sell:hover:not(:disabled){box-shadow:0 0 0 1px var(--gold) inset}
 .btn-sell.armed{color:#1A0D06;background:var(--gold)}
-.btn-pull{
-  width:100%;max-width:440px;position:relative;color:#FFFFFF;
-  background:
-    linear-gradient(var(--iron-2),var(--iron-2)) padding-box,
-    linear-gradient(90deg,#4FA8FF,#B45FFF,#FFB02E,#FF5FD0,#4FA8FF) border-box;
-  background-size:100% 100%,240% 100%;
-  border:1.5px solid transparent;
-  animation:slide-b 4s linear infinite;
-}
-@keyframes slide-b{to{background-position:0 0,240% 0}}
-.btn-pull:hover:not(:disabled){filter:brightness(1.15)}
-.btn-pull .cost{color:var(--gold)}
-
 .bellows{width:100%;max-width:440px;font-size:12.5px;color:var(--ash);text-align:center}
 .bellows button{
   font-family:var(--font-body);font-size:12.5px;font-weight:600;color:var(--quench);
@@ -356,6 +345,8 @@ img{max-width:100%}
 .t-boom{background:rgba(201,74,64,.18);color:var(--boom)}
 .t-sell{background:rgba(217,164,65,.16);color:var(--gold)}
 .t-buy{background:rgba(111,168,184,.16);color:var(--quench)}
+.t-r0{background:rgba(168,162,154,.16);color:var(--r0)}
+.t-r1{background:color-mix(in srgb, var(--r1) 20%, transparent);color:var(--r1)}
 .t-r2{background:color-mix(in srgb, var(--r2) 20%, transparent);color:var(--r2)}
 .t-r3{background:color-mix(in srgb, var(--r3) 20%, transparent);color:var(--r3)}
 .t-r4{background:color-mix(in srgb, var(--r4) 22%, transparent);color:var(--r4)}
@@ -490,7 +481,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   <header class="brand">
     <div>
       <h1>검 키우기 대장간</h1>
-      <p class="tagline">강화에 성공할 때마다 새 검이 뽑힙니다. 확률은 전부 공개됩니다.</p>
+      <p class="tagline">한 자루를 끝까지 키우세요. 부서지면 새 검이 뽑힙니다. 확률은 전부 공개됩니다.</p>
     </div>
     <div class="brand-tools">
       <button class="btn-ghost" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
@@ -526,6 +517,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <div class="lv" id="lvText">+0</div>
         <strong class="sname" id="swordName"></strong>
         <span class="epi" id="swordEpi"></span>
+        <span class="nextfeat" id="nextFeat"></span>
       </div>
 
       <p class="verdict" id="verdict" role="status" aria-live="polite"></p>
@@ -556,7 +548,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <button class="btn btn-forge" id="forgeBtn" type="button">강화하기<span class="cost" id="forgeCost">100 G</span></button>
         <button class="btn btn-sell" id="sellBtn" type="button">판매<span class="cost" id="sellPrice">0 G</span></button>
       </div>
-      <button class="btn btn-pull" id="pullBtn" type="button">같은 단계로 검 다시 뽑기<span class="cost" id="pullCost">1,000 G</span></button>
 
       <p class="bellows" id="bellows" hidden>
         골드가 부족합니다 &#8212;
@@ -824,29 +815,50 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function newSeed(){ return (Math.random() * 4294967296) >>> 0; }
 
   /* ═════════ 검 생성 ═════════
-     같은 seed·단계·속성·등급이면 언제나 같은 검이 나옵니다 (저장·도감이 seed 만 기억). */
+     생김새·이름은 seed 와 등급만으로 정해집니다 — 한 자루는 부서질 때까지 같은 모습입니다.
+     빛·입자·크기·장식(빛의 흐름, 룬, 빛줄기, 별빛, 무지개빛)은 지금 단계(lv)에 따라 자랍니다. */
+  var SHAPES = [            // 칼날 [최고 계층, 그 계층만 고를 확률] · 보호대 [최고 계층, 확률]
+    [1, 0,  1, 0 ],         // 일반
+    [1, .5, 1, .5],         // 희귀
+    [2, .5, 2, .5],         // 영웅
+    [2, .7, 3, .6],         // 전설
+    [2, 1,  3, 1 ]          // 신화
+  ];
+  /* 단계가 오르면 깨어나는 변화. 등급이 rar 이상인 검은 처음부터 갖고 태어납니다. */
+  var FEATS = [
+    { key:'flow',  at:5,  rar:2, short:'빛의 흐름', text:'칼날에 빛이 흐르기 시작했습니다' },
+    { key:'runes', at:8,  rar:2, short:'룬 각인',   text:'칼날에 룬이 새겨졌습니다' },
+    { key:'rays',  at:12, rar:3, short:'빛줄기',    text:'검이 빛줄기를 뿜기 시작했습니다' },
+    { key:'orbit', at:16, rar:3, short:'별빛 공전', text:'별빛이 검 주위를 돌기 시작했습니다' },
+    { key:'prism', at:20, rar:4, short:'무지개빛',  text:'검에 무지개빛이 깃들었습니다' }
+  ];
+  function feats(lv, rar){
+    var f = {};
+    FEATS.forEach(function(F){ f[F.key] = lv >= F.at || rar >= F.rar; });
+    return f;
+  }
+  function tierPick(r, tiers, top, onlyTop){
+    if (r() < onlyTop) return pick(r, tiers[top]);
+    var pool = [];
+    for (var i = 0; i <= top; i++) pool = pool.concat(tiers[i]);
+    return pick(r, pool);
+  }
   function makeSword(seed, lv, el, rar){
-    var r = rng32(seed ^ (lv * 2654435761));
-    var t = lv < 5 ? 0 : lv < 10 ? 1 : lv < 15 ? 2 : 3;
-    if (rar >= 3) t = Math.min(3, t + 1);
-    var bt = Math.min(t, 2), pool = [];
-    for (var i = 0; i <= bt; i++) pool = pool.concat(BLADE_TIERS[i]);
-    var blade = r() < .55 ? pick(r, BLADE_TIERS[bt]) : pick(r, pool);
-    var gpool = [];
-    for (var j = 0; j <= t; j++) gpool = gpool.concat(GUARD_TIERS[j]);
-    var guard = r() < .55 ? pick(r, GUARD_TIERS[t]) : pick(r, gpool);
+    var r = rng32(seed), sh = SHAPES[rar];
+    var blade = tierPick(r, BLADE_TIERS, sh[0], sh[1]);
+    var guard = tierPick(r, GUARD_TIERS, sh[2], sh[3]);
     var E = ELEMENTS[el], R = RARITIES[rar];
-    var power = Math.max(.06, Math.min(1, lv / 20 * .62 + R.boost));
+    var power = Math.max(.06, Math.min(1, lv / 20 * .7 + R.boost));
     var k = .42 + .58 * Math.min(1, power * 1.3);
     var runes = [], nr = 4 + Math.floor(r() * 4);
     for (var q = 0; q < nr; q++) runes.push(Math.floor(r() * RUNES.length));
-    var creature = pick(r, CREATURES);
+    var creature = pick(r, CREATURES), epithet = pick(r, EPITHETS);
     return {
       seed:seed, lv:lv, el:el, rar:rar, E:E, R:R, M:METALS[rar],
-      blade:blade, guard:guard, power:power,
+      blade:blade, guard:guard, power:power, f:feats(lv, rar),
       ca:mix('#3C3A38', E.a, k), cb:mix('#9A9690', E.b, k), cc:mix('#E6E2DC', E.c, k),
       name:E.word + ' ' + creature + '의 ' + NOUNS[blade],
-      epithet: rar >= 3 ? pick(r, EPITHETS) : '',
+      epithet: rar >= 3 ? epithet : '',
       runes:runes, tip:tipOf(BLADES[blade]), half:HALF[blade],
       cx: blade === 'katana' ? 84 : blade === 'curved' ? 83 : 80,
       scale:.84 + lv * .008,
@@ -889,8 +901,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.fillStyle = ag;
     ctx.fillRect(-70, -60, 300, 440);
 
-    if (sw.rar === 4) rays(ctx, t, 16, 215, 15, null, .32, t * .3);
+    if (sw.f.prism) rays(ctx, t, 16, 215, 15, null, .32, t * .3);
     else if (sw.rar === 3) rays(ctx, t, 12, 195, 14, '#FFD27A', .26, t * .22);
+    else if (sw.f.rays) rays(ctx, t, 10, 185, 12, E.glow, .14 + .14 * P, t * .2);
     else if (E.fx === 'holy' && P > .18) rays(ctx, t, 8, 165, 11, E.c, .08 + .14 * P, t * .16);
 
     if (E.fx === 'cosmos') nebula(ctx, sw, t, true);
@@ -905,7 +918,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var fx = FX[E.fx];
     if (fx.extra) fx.extra(ctx, sw, t, bolts);
     drawParts(ctx, sw, parts, t, 1);
-    if (sw.rar >= 3) orbit(ctx, sw, t);
+    if (sw.f.orbit) orbit(ctx, sw, t);
 
     ctx.restore();
     ctx.globalCompositeOperation = 'source-over';
@@ -1017,7 +1030,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       ctx.lineWidth = 1.1;
       ctx.beginPath(); ctx.moveTo(sw.cx, sw.tip + 8); ctx.lineTo(sw.cx, 197); ctx.stroke();
     }
-    if (P > .2){
+    if (sw.f.flow){
       var span = 197 - sw.tip + 70;
       var y = 197 + 35 - ((t * (40 + 70 * P)) % span);
       var eg = ctx.createLinearGradient(0, y - 28, 0, y + 28);
@@ -1027,7 +1040,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       ctx.fillStyle = eg;
       ctx.fillRect(0, y - 28, 160, 56);
     }
-    if (sw.rar >= 2 || P > .55) runeLine(ctx, sw, t);
+    if (sw.f.runes) runeLine(ctx, sw, t);
     var c = (t % 2.8) / .75;
     if (c < 1){
       ctx.save();
@@ -1048,7 +1061,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.strokeStyle = hexA(sw.cc, .55);
     ctx.lineWidth = 1;
     ctx.stroke(bp);
-    if (sw.rar === 4){
+    if (sw.f.prism){
       ctx.globalCompositeOperation = 'lighter';
       var rg = ctx.createLinearGradient(0, sw.tip, 0, 200);
       for (var i = 0; i <= 6; i++) rg.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,68%)');
@@ -1169,7 +1182,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       g.addColorStop(0, M.c); g.addColorStop(.42, M.b); g.addColorStop(1, M.a);
       ctx.fillStyle = g; ctx.fill(gp);
       ctx.strokeStyle = hexA(M.c, .55); ctx.lineWidth = .8; ctx.stroke(gp);
-      if (sw.rar === 4){
+      if (sw.f.prism){
         ctx.globalCompositeOperation = 'lighter';
         var hg = ctx.createLinearGradient(0, 0, 160, 0);
         for (var i = 0; i <= 6; i++) hg.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,66%)');
@@ -1215,14 +1228,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   function orbit(ctx, sw, t){
-    var n = sw.rar === 4 ? 9 : 6;
+    var rainbow = sw.f.prism, n = rainbow ? 9 : 6;
     for (var i = 0; i < n; i++){
-      var a = t * (sw.rar === 4 ? .9 : .6) + i * TAU / n;
+      var a = t * (rainbow ? .9 : .6) + i * TAU / n;
       var x = 80 + Math.cos(a) * 68, y = 128 + Math.sin(a) * 68 * .42 + Math.sin(t * 1.3 + i) * 6;
       var tw = .55 + .45 * Math.sin(t * 4 + i * 2.1);
-      var col = sw.rar === 4
-        ? 'hsla(' + ((t * 90 + i * 40) % 360).toFixed(0) + ',100%,72%,' + tw.toFixed(2) + ')'
-        : 'rgba(255,214,120,' + tw.toFixed(2) + ')';
+      var col = rainbow ? 'hsla(' + ((t * 90 + i * 40) % 360).toFixed(0) + ',100%,72%,' + tw.toFixed(2) + ')'
+              : sw.rar === 3 ? 'rgba(255,214,120,' + tw.toFixed(2) + ')'
+              : hexA(sw.E.c, tw);
       sparkle(ctx, x, y, 3 + 3.5 * tw, col);
     }
   }
@@ -1683,12 +1696,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     for (var i = 0; i < RARITIES.length; i++){ acc += RARITIES[i].w; if (u < acc) return i; }
     return 0;
   }
-  /* lv 는 검이 태어난 단계 — 하락해도 생김새는 그대로 남습니다 */
-  function rollSword(lv){
-    return { seed:newSeed(), el:Math.floor(Math.random() * ELEMENTS.length), rar:rollRarity(), lv:lv };
+  /* 새 검은 게임 시작 · 파괴 · 판매 때만 뽑습니다 */
+  function rollSword(){
+    return { seed:newSeed(), el:Math.floor(Math.random() * ELEMENTS.length), rar:rollRarity() };
   }
   function freshState(){
-    var sw = rollSword(0), found = [];
+    var sw = rollSword(), found = [];
     for (var i = 0; i < ELEMENTS.length; i++) found.push(0);
     found[sw.el] |= 1 << sw.rar;
     return {
@@ -1700,7 +1713,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     };
   }
   var state = freshState();
-  var rolling = false, pullLock = false;
+  var rolling = false;
   var sellArmed = false, sellTimer = null;
   var resetArmed = false, resetTimer = null;
 
@@ -1725,7 +1738,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return n;
   }
   function sellPrice(){ return Math.round(LEVELS[state.level].price * RARITIES[state.sword.rar].mult); }
-  function pullCost(){ return Math.max(1000, LEVELS[Math.min(state.level, MAX - 1)].cost * 2); }
 
   /* 보호 아이템은 확률을 재분배할 뿐, 네 구간의 합은 항상 1입니다. */
   function odds(level, buffs){
@@ -1775,9 +1787,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state = {
       gold: num(data.gold, base.gold),
       level: level,
-      sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0,
-                      lv:Math.min(MAX, Math.max(0, num(sw.lv, level) | 0)) }
-                  : { seed:base.sword.seed, el:base.sword.el, rar:base.sword.rar, lv:level },
+      sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0 } : base.sword,
       found: found,
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
@@ -1824,7 +1834,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       t:st.tries, w:st.wins, k:st.booms, e:st.best,
       s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak),
       n:st.pulls, m:st.legends,
-      x:[w.seed, w.el, w.rar, w.lv],
+      x:[w.seed, w.el, w.rar],
       f:state.found.map(function(v){ return B32.charAt(v & 31); }).join('')
     }));
     return CODE_TAG + '-' + body + '-' + checksum(body);
@@ -1841,7 +1851,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },
       stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p, pulls:d.n, legends:d.m }
     };
-    if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2], lv:d.x[3] };
+    if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2] };
     if (typeof d.f === 'string' && d.f.length === ELEMENTS.length)
       out.found = d.f.split('').map(function(c){ return Math.max(0, B32.indexOf(c)); });
     return out;
@@ -2014,33 +2024,44 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ['valS','valK','valD','valX'].forEach(function(id){ $(id).classList.toggle('hit', id === map[kind]); });
   }
   var revealTimer = null;
-  function reveal(sw){
+  function reveal(title, name, sub, color, myth){
     var el = $('reveal');
     el.hidden = true;
     void el.offsetWidth;
-    el.className = 'reveal' + (sw.rar === 4 ? ' myth' : '');
-    el.style.setProperty('--rc', sw.R.color);
-    $('revealRar').textContent = sw.R.name + '!';
-    $('revealName').textContent = sw.name;
-    $('revealEpi').textContent = sw.epithet ? '「' + sw.epithet + '」' : '';
+    el.className = 'reveal' + (myth ? ' myth' : '');
+    el.style.setProperty('--rc', color);
+    $('revealRar').textContent = title;
+    $('revealName').textContent = name;
+    $('revealEpi').textContent = sub || '';
     el.hidden = false;
     clearTimeout(revealTimer);
     revealTimer = setTimeout(function(){ el.hidden = true; }, 1950);
   }
-  function celebrate(sw){
-    flash('ok', hexA(sw.R.color, sw.rar >= 3 ? .9 : .65));
-    burst(16 + sw.rar * 9, 'ok', sw.R.color);
+  function popIn(anvil){
+    anvil.classList.remove('fx-success');
+    void anvil.offsetWidth;
+    anvil.classList.add('fx-success');
+    setTimeout(function(){ anvil.classList.remove('fx-success'); }, 620);
+  }
+  /* 새 검이 나오는 순간 — 등급이 높을수록 크게 */
+  function newSwordMoment(sw, lead){
+    flash('ok', hexA(sw.R.color, sw.rar >= 3 ? .9 : .6));
+    burst(14 + sw.rar * 9, 'ok', sw.R.color);
     fanfare(sw.rar);
-    if (sw.rar >= 2) reveal(sw);
+    reveal(sw.rar >= 2 ? sw.R.name + '!' : '새 검!', sw.name,
+           sw.epithet ? '「' + sw.epithet + '」' : sw.R.name + ' · ' + sw.E.name + ' 속성',
+           sw.R.color, sw.rar === 4);
     if (sw.rar === 4) quake();
+    verdictSword('ok', lead, sw);
+    pushLog('r' + sw.rar, sw.R.name, '새 검 · ' + sw.name, null);
   }
 
   /* ═════════ 화면 갱신 ═════════ */
   var cur = null;
   function currentSword(){
     var s = state.sword;
-    if (!cur || cur.seed !== s.seed || cur.lv !== s.lv || cur.el !== s.el || cur.rar !== s.rar){
-      cur = makeSword(s.seed, s.lv, s.el, s.rar);
+    if (!cur || cur.seed !== s.seed || cur.lv !== state.level || cur.el !== s.el || cur.rar !== s.rar){
+      cur = makeSword(s.seed, state.level, s.el, s.rar);
       showSword(cur);
     }
     return cur;
@@ -2070,6 +2091,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('swordName').textContent = sw.name;
     $('swordEpi').textContent = sw.epithet ? '「' + sw.epithet + '」' : '';
     $('nameplate').style.setProperty('--rc', sw.R.color);
+    var nx = null, nf = $('nextFeat');
+    FEATS.forEach(function(F){ if (!nx && !sw.f[F.key]) nx = F; });
+    nf.textContent = '';
+    if (nx){
+      nf.appendChild(document.createTextNode('다음 변화 '));
+      var nb = document.createElement('b');
+      nb.textContent = '+' + nx.at;
+      nf.appendChild(nb);
+      nf.appendChild(document.createTextNode(' \u00B7 ' + nx.short));
+    } else nf.textContent = '이 검은 모든 변화를 깨웠습니다';
 
     var parts = maxed ? { s:0, k:1, d:0, x:0 } : o;
     $('segS').style.flexBasis = (parts.s * 100) + '%';
@@ -2100,9 +2131,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       $('sellPrice').textContent = price > 0 ? gold(price) : '판매 불가';
     }
 
-    var pc = pullCost();
-    $('pullCost').textContent = gold(pc);
-    $('pullBtn').disabled = rolling || pullLock || state.gold < pc;
 
     $('bellows').hidden = !(!maxed && state.gold < row.cost && price <= 0);
 
@@ -2324,7 +2352,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('rollText').textContent = '굴리는 중…';
     $('forgeBtn').disabled = true;
     $('sellBtn').disabled = true;
-    $('pullBtn').disabled = true;
     tone(1180, .05, 'square', .05);
 
     sweep(r, function(){
@@ -2339,16 +2366,26 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var anvil = $('anvil'), from = state.level, wait = 380, replace = false;
 
     if (kind === 'success'){
+      var was = feats(from, state.sword.rar);
       state.level = Math.min(MAX, from + 1);
       state.stats.wins += 1;
       if (state.level > state.stats.best) state.stats.best = state.level;
-      giveSword(rollSword(state.level));
-      var sw = currentSword();
+      var sw = currentSword(), gain = null;
+      FEATS.forEach(function(F){ if (!gain && sw.f[F.key] && !was[F.key]) gain = F; });
       anvil.classList.add('fx-success');
-      celebrate(sw);
-      verdictSword('ok', '강화 성공! ', sw);
-      pushLog(sw.rar >= 2 ? 'r' + sw.rar : 'ok', sw.rar >= 2 ? sw.R.name : '성공',
-              '+' + from + ' → +' + state.level + ' · ' + sw.R.name + ' ' + sw.E.name, r);
+      flash('ok', hexA(sw.E.glow, gain ? .85 : .5));
+      burst(gain ? 34 : 18, 'ok', sw.E.glow);
+      tone(660, .13, 'triangle', .075);
+      tone(990, .24, 'triangle', .062, .1);
+      if (state.level === MAX){
+        reveal('+' + MAX + ' 달성!', sw.name, '더는 강화할 수 없는 경지입니다', sw.R.color, true);
+        fanfare(4); quake();
+      } else if (gain){
+        reveal(gain.short + '!', '+' + state.level + ' · ' + gain.text, '', sw.E.glow, gain.key === 'prism');
+        fanfare(Math.min(4, 1 + FEATS.indexOf(gain)));
+      }
+      verdict('ok', '강화 성공! +' + state.level + (gain ? ' — ' + gain.text + '!' : ''));
+      pushLog('ok', '성공', '+' + from + ' → +' + state.level + (gain ? ' · ' + gain.short : ''), r);
     } else if (kind === 'keep'){
       anvil.classList.add('fx-keep');
       burst(7); tone(180, .17, 'sine', .085);
@@ -2356,11 +2393,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       pushLog('keep', '유지', '+' + from + ' 유지', r);
     } else if (kind === 'down'){
       state.level = Math.max(0, from - 1);
+      currentSword();
       anvil.classList.add('fx-down');
       burst(12);
       tone(250, .18, 'sawtooth', .06);
       tone(160, .28, 'sawtooth', .055, .1);
-      verdict('down', '강화 실패 — 단계가 하락했습니다. 검은 그대로입니다.');
+      verdict('down', '강화 실패 — 단계가 하락했습니다.');
       pushLog('down', '하락', '+' + from + ' → +' + state.level, r);
     } else {
       var lost = currentSword();
@@ -2370,17 +2408,20 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       flash('boom'); quake(); burst(30, 'boom');
       noise(.5, .13, 1200);
       tone(90, .55, 'sawtooth', .11);
-      if (lost.rar >= 3) verdictSword('boom', '', lost, ' — 산산조각 났습니다…');
-      else verdict('boom', '검이 산산조각 났습니다. +0부터 다시.');
-      pushLog('boom', '파괴', '+' + from + ' ' + lost.R.name + ' ' + lost.E.name + ' 파괴', r);
-      wait = 640; replace = true;
+      verdictSword('boom', '+' + from + ' ', lost, ' — 산산조각 났습니다…');
+      pushLog('boom', '파괴', '+' + from + ' ' + lost.name, r);
+      wait = 820; replace = true;
     }
 
     if (state.gold > state.stats.peak) state.stats.peak = state.gold;
 
     setTimeout(function(){
       anvil.classList.remove('fx-success','fx-keep','fx-down','fx-boom');
-      if (replace) giveSword(rollSword(0));
+      if (replace){
+        giveSword(rollSword());
+        popIn(anvil);
+        newSwordMoment(currentSword(), '부서진 자리에 새 검: ');
+      }
       rolling = false;
       render(); save();
     }, wait);
@@ -2393,44 +2434,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.gold += price;
     state.stats.earned += price;
     if (state.gold > state.stats.peak) state.stats.peak = state.gold;
-    pushLog('sell', '판매', '+' + state.level + ' ' + old.R.name + ' ' + old.E.name + ' → ' + gold(price), null);
+    pushLog('sell', '판매', '+' + state.level + ' ' + old.name + ' → ' + gold(price), null);
     state.level = 0;
     state.buffs = { bless:false, protect:false, master:false };
     sellArmed = false;
-    giveSword(rollSword(0));
-    var sw = currentSword();
-    verdictSword('ok', gold(price) + '에 팔았습니다. 새 검: ', sw);
+    giveSword(rollSword());
     $('rollText').textContent = '—';
     highlight(null);
     tone(880, .1, 'triangle', .06);
     tone(1320, .18, 'triangle', .05, .08);
-    if (sw.rar >= 3) celebrate(sw);
+    popIn($('anvil'));
+    newSwordMoment(currentSword(), gold(price) + '에 팔았습니다. 새 검: ');
     render(); save();
-  }
-
-  function pull(){
-    if (rolling || pullLock) return;
-    var c = pullCost();
-    if (state.gold < c) return;
-    pullLock = true;
-    state.gold -= c;
-    state.stats.spent += c;
-    giveSword(rollSword(state.level));
-    var sw = currentSword();
-    var anvil = $('anvil');
-    anvil.classList.remove('fx-success');
-    void anvil.offsetWidth;
-    anvil.classList.add('fx-success');
-    celebrate(sw);
-    verdictSword('ok', '새 검을 뽑았습니다! ', sw);
-    pushLog(sw.rar >= 2 ? 'r' + sw.rar : 'buy', sw.rar >= 2 ? sw.R.name : '뽑기',
-            '+' + state.level + ' 다시 뽑기 · ' + sw.R.name + ' ' + sw.E.name, null);
-    render(); save();
-    setTimeout(function(){
-      anvil.classList.remove('fx-success');
-      pullLock = false;
-      render();
-    }, 420);
   }
 
   function buy(key){
@@ -2446,7 +2461,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 이벤트 ═════════ */
   $('forgeBtn').addEventListener('click', attempt);
-  $('pullBtn').addEventListener('click', pull);
 
   $('sellBtn').addEventListener('click', function(){
     if (rolling) return;
@@ -2500,10 +2514,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var keepSound = state.sound;
     state = freshState();
     state.sound = keepSound;
-    verdict('keep', '대장간을 새로 열었습니다.');
     $('rollText').textContent = '—';
     $('marker').classList.remove('on');
     highlight(null);
+    popIn($('anvil'));
+    newSwordMoment(currentSword(), '대장간을 새로 열었습니다. 새 검: ');
     render(); save();
   });
 
@@ -2568,7 +2583,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (hot && hot.save) adopt(hot.save); else loadLocal();
     $('soundBtn').textContent = state.sound ? '소리 켬' : '소리 끔';
     $('soundBtn').setAttribute('aria-pressed', String(state.sound));
-    rarityList($('gachaOdds'), '성공하면 새 검 등장', function(R){ return (R.w / 10) + '%'; });
+    rarityList($('gachaOdds'), '새 검 등급 (부서지거나 팔 때)', function(R){ return (R.w / 10) + '%'; });
     rarityList($('multNote'), '판매가 = 기본 판매가 ×', function(R){ return '×' + R.mult; });
     touchSaveState();
     render();

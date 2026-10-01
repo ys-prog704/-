@@ -146,7 +146,15 @@ img{max-width:100%}
 @keyframes slide{to{background-position:240% 0}}
 
 .swordstage{position:relative;width:100%;max-width:300px;aspect-ratio:260/380}
-.swordcanvas{display:block;width:100%;height:100%;transform-origin:50% 62%}
+.swordcanvas{
+  /* 검 상자보다 넓게 그려서 빛줄기·후광이 네모 경계에 닿기 전에 저절로 사라지게 합니다.
+     (380×400 캔버스 중 가운데 260×380 이 검 상자와 겹칩니다) */
+  position:absolute;left:-23.077%;top:-7.895%;width:146.154%;height:105.263%;
+  display:block;pointer-events:none;transform-origin:50% 66%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 20%,#000 80%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 20%,#000 80%,transparent 100%);
+}
+.tierband,.nameplate{position:relative;z-index:2}
 .sparks{position:absolute;inset:0;pointer-events:none;overflow:visible}
 
 /* 뽑기 연출 */
@@ -502,7 +510,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <p class="tierband" id="tierband"></p>
 
       <div class="swordstage" id="swordstage">
-        <canvas class="swordcanvas" id="swordCanvas" width="260" height="380" role="img" aria-label="현재 검"></canvas>
+        <canvas class="swordcanvas" id="swordCanvas" width="380" height="400" role="img" aria-label="현재 검"></canvas>
         <div class="sparks" id="sparks" aria-hidden="true"></div>
         <div class="reveal" id="reveal" hidden aria-hidden="true">
           <div class="reveal-card">
@@ -881,8 +889,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   ];
 
   /* ═════════ 렌더러 ═════════
-     캔버스 260×380 안에 160×330 검을 (50,30) 위치에 그립니다. 발광은 'lighter' 합성. */
-  var CW = 260, CH = 380, OX = 50, OY = 30;
+     캔버스 380×400 안에 160×330 검을 (110,60) 위치에 그립니다. 빛줄기는 반지름 180 안에서 끝납니다. 발광은 'lighter' 합성. */
+  var CW = 380, CH = 400, OX = 110, OY = 60;
   var TAU = Math.PI * 2;
 
   function drawSword(ctx, sw, t, parts, bolts){
@@ -901,10 +909,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.fillStyle = ag;
     ctx.fillRect(-70, -60, 300, 440);
 
-    if (sw.f.prism) rays(ctx, t, 16, 215, 15, null, .32, t * .3);
-    else if (sw.rar === 3) rays(ctx, t, 12, 195, 14, '#FFD27A', .26, t * .22);
-    else if (sw.f.rays) rays(ctx, t, 10, 185, 12, E.glow, .14 + .14 * P, t * .2);
-    else if (E.fx === 'holy' && P > .18) rays(ctx, t, 8, 165, 11, E.c, .08 + .14 * P, t * .16);
+    if (sw.f.prism) rays(ctx, t, 16, 178, 15, null, .32, t * .3);
+    else if (sw.rar === 3) rays(ctx, t, 12, 170, 14, '#FFD27A', .26, t * .22);
+    else if (sw.f.rays) rays(ctx, t, 10, 162, 12, E.glow, .14 + .14 * P, t * .2);
+    else if (E.fx === 'holy' && P > .18) rays(ctx, t, 8, 150, 11, E.c, .08 + .14 * P, t * .16);
 
     if (E.fx === 'cosmos') nebula(ctx, sw, t, true);
     drawParts(ctx, sw, parts, t, -1);
@@ -1657,7 +1665,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    ctx.setTransform(s, 0, 0, s, -30 * s, -20 * s);
+    ctx.setTransform(s, 0, 0, s, -(OX - 20) * s, -(OY - 10) * s);
     if (!locked){
       var rnd = rng32(sw.seed + 101);
       drawSword(ctx, sw, 1.7, spawnAll(sw, rnd), sw.E.fx === 'storm' ? makeBolts(sw, rnd) : null);

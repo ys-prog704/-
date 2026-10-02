@@ -342,6 +342,10 @@ img{max-width:100%}
 .online-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
 .online-who{flex:1 1 220px;font-size:12.5px;color:var(--ash-2)}
 .btn-login{color:var(--parch);border-color:var(--ash)}
+.gis-box{min-height:44px;display:flex;align-items:center;border-radius:22px;color-scheme:light}   /* 어두운 화면에서 구글 창 뒤에 흰 바탕이 깔리지 않게 */
+.gis-box.probing{position:absolute;opacity:0;pointer-events:none}   /* 숨기면(visibility) 크롬이 구글 창을 멈춰서 버튼이 안 그려짐 */
+.gis-box.pulse{animation:gisPulse 1.1s ease-out 2}
+@keyframes gisPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 70%, transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .online-note{
   margin-top:9px;padding:9px 11px;font-size:12px;line-height:1.55;
   background:color-mix(in srgb, var(--quench) 10%, var(--iron-2));
@@ -484,6 +488,17 @@ img{max-width:100%}
 .dex-cell.on:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 0 16px color-mix(in srgb, var(--rc) 55%, transparent)}
 .dex-cell.off{border-color:var(--line)}
 .dex-cell.now{outline:2px solid var(--ember);outline-offset:1px}
+.dex-cell.na{border-style:dashed;border-color:var(--line);background:none;position:relative}
+.dex-cell.na::after{content:'—';position:absolute;inset:0;display:grid;place-items:center;color:var(--ash);font-size:12px;opacity:.6}
+.dex-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.dex-tab{
+  font:inherit;font-size:12.5px;font-weight:600;color:var(--ash-2);cursor:pointer;
+  background:var(--iron-2);border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;
+}
+.dex-tab span{margin-left:2px;font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--ash)}
+.dex-tab:hover{color:var(--parch);border-color:var(--ash)}
+.dex-tab.on{color:var(--ink);background:var(--gold);border-color:var(--gold)}
+.dex-tab.on span{color:var(--ink)}
 .rc0{--rc:var(--r0)}.rc1{--rc:var(--r1)}.rc2{--rc:var(--r2)}.rc3{--rc:var(--r3)}.rc4{--rc:var(--r4)}
 
 /* ── 저장 ── */
@@ -591,7 +606,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   <dl class="hud">
     <div><dt>보유 골드</dt><dd class="v-gold" id="hudGold">0</dd></div>
     <div><dt>최고 강화</dt><dd id="hudBest">+0</dd></div>
-    <div><dt>도감</dt><dd class="v-dex" id="hudDex">0 / 50</dd></div>
+    <div><dt>도감</dt><dd class="v-dex" id="hudDex">0 / 192</dd></div>
     <div><dt>파괴</dt><dd class="v-boom" id="hudBoom">0</dd></div>
   </dl>
 
@@ -601,6 +616,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="online-row">
       <span class="online-who" id="onlineWho"></span>
       <button class="btn-ghost btn-login" id="loginBtn" type="button">구글로 로그인</button>
+      <div class="gis-box" id="gisBox" hidden></div>
       <button class="btn-ghost" id="logoutBtn" type="button" hidden>로그아웃</button>
     </div>
     <div class="online-note" id="onlineNote" hidden></div>
@@ -769,7 +785,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <h2>도감 &middot; 속성 &times; 등급</h2>
       <span class="count" id="codexCount">0 / 50</span>
     </div>
-    <p class="codex-lead">뽑은 적 있는 속성과 등급의 칸이 밝혀집니다. 50칸을 모두 채워 보세요.</p>
+    <div class="dex-tabs" id="dexTabs" role="tablist" aria-label="무기 종류"></div>
+    <p class="codex-lead">무기 종류마다 뽑은 적 있는 속성과 등급의 칸이 밝혀집니다. "—" 칸은 그 종류에 없는 전설·신화예요.</p>
     <div class="dex-wrap" id="dexWrap"></div>
   </section>
 
@@ -1744,11 +1761,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function swordKind(w){ return w && hasKind(w.kind | 0, w.el, w.rar) ? w.kind | 0 : 0; }
   function freshState(){
-    var sw = rollSword(), found = [];
+    var sw = rollSword(), found = [], foundKind = [];
     for (var i = 0; i < ELEMENTS.length; i++) found.push(0);
+    for (var k = 0; k < KINDS.length; k++) foundKind.push(found.slice());
     found[sw.el] |= 1 << sw.rar;
+    foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
-      gold: START_GOLD, level: 0, sword: sw, found: found,
+      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind,
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -1774,12 +1793,29 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function giveSword(sw){
     state.sword = sw;
     state.found[sw.el] |= 1 << sw.rar;
+    state.foundKind[swordKind(sw)][sw.el] |= 1 << sw.rar;
     state.stats.pulls += 1;
     if (sw.rar >= 3) state.stats.legends += 1;
   }
-  function foundCount(){
+  /* 도감은 종류 × 속성 × 등급입니다. 전설·신화는 그 종류에 그림이 있는 칸만 셉니다 (kind 를 빼면 전체) */
+  var dexSizes = null;
+  function dexSize(kind){
+    if (!dexSizes){
+      dexSizes = KINDS.map(function(K, k){
+        var n = 0;
+        for (var e = 0; e < ELEMENTS.length; e++) for (var r = 0; r < RARITIES.length; r++) if (hasKind(k, e, r)) n++;
+        return n;
+      });
+    }
+    return kind === undefined ? dexSizes.reduce(function(a, b){ return a + b; }, 0) : dexSizes[kind];
+  }
+  function dexCount(kind){
     var n = 0;
-    for (var e = 0; e < state.found.length; e++) for (var r = 0; r < RARITIES.length; r++) if (state.found[e] & (1 << r)) n++;
+    for (var k = 0; k < KINDS.length; k++){
+      if (kind !== undefined && k !== kind) continue;
+      for (var e = 0; e < ELEMENTS.length; e++)
+        for (var r = 0; r < RARITIES.length; r++) if (hasKind(k, e, r) && (state.foundKind[k][e] & (1 << r))) n++;
+    }
     return n;
   }
   function sellPrice(){ return Math.round(LEVELS[state.level].price * RARITIES[state.sword.rar].mult); }
@@ -1830,13 +1866,22 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                sw.el >= 0 && sw.el < ELEMENTS.length && sw.rar >= 0 && sw.rar < RARITIES.length;
     var found = Array.isArray(data.found) && data.found.length === ELEMENTS.length
       ? data.found.map(function(v){ return (v | 0) & 31; }) : base.found;
+    var fk = [], hasFk = Array.isArray(data.foundKind);
+    for (var k = 0; k < KINDS.length; k++){
+      var src = hasFk && Array.isArray(data.foundKind[k]) && data.foundKind[k].length === ELEMENTS.length ? data.foundKind[k] : null;
+      fk.push(ELEMENTS.map(function(E, e){
+        var v = src ? (src[e] | 0) & 31 : (!hasFk && k === 0 ? found[e] : 0);   // 종류가 생기기 전 기록은 모두 검
+        for (var r = 3; r < RARITIES.length; r++) if (!hasKind(k, e, r)) v &= ~(1 << r);
+        return v;
+      }));
+    }
     var it = data.items || {}, at = data.attend || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
     state = {
       gold: num(data.gold, base.gold),
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
-      found: found,
+      found: found, foundKind: fk,
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -1865,6 +1910,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       }
     };
     state.found[state.sword.el] |= 1 << state.sword.rar;
+    state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
   }
 
   /* ═════════ 저장 2 · 저장 코드 (기기 간 이동) ═════════ */
@@ -1896,6 +1942,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       n:st.pulls, m:st.legends,
       x:w.kind ? [w.seed, w.el, w.rar, w.kind] : [w.seed, w.el, w.rar],
       f:state.found.map(function(v){ return B32.charAt(v & 31); }).join(''),
+      q:state.foundKind.map(function(m){ return m.map(function(v){ return B32.charAt(v & 31); }).join(''); }).join(''),
       y:st.bestSw ? (st.bestSw.kind ? [st.bestSw.seed, st.bestSw.el, st.bestSw.rar, st.bestSw.kind]
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
       i:[state.items.bless, state.items.protect, state.items.master],
@@ -1920,6 +1967,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2], kind:d.x[3] | 0 };
     if (typeof d.f === 'string' && d.f.length === ELEMENTS.length)
       out.found = d.f.split('').map(function(c){ return Math.max(0, B32.indexOf(c)); });
+    if (typeof d.q === 'string' && d.q.length && d.q.length % ELEMENTS.length === 0){
+      out.foundKind = [];
+      for (var k = 0; k * ELEMENTS.length < d.q.length && k < KINDS.length; k++)
+        out.foundKind.push(d.q.substr(k * ELEMENTS.length, ELEMENTS.length).split('').map(function(c){ return Math.max(0, B32.indexOf(c)); }));
+    }
     if (Array.isArray(d.i) && d.i.length === 3) out.items = { bless:d.i[0], protect:d.i[1], master:d.i[2] };
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
@@ -2148,7 +2200,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     $('hudGold').textContent = fmt(state.gold);
     $('hudBest').textContent = '+' + state.stats.best;
-    $('hudDex').textContent = foundCount() + ' / ' + (ELEMENTS.length * RARITIES.length);
+    $('hudDex').textContent = dexCount() + ' / ' + dexSize();
     $('hudBoom').textContent = fmt(state.stats.booms);
 
     var tb = $('tierband');
@@ -2277,9 +2329,20 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (state.log.length > 40) state.log.length = 40;
   }
 
-  /* ═════════ 도감 ═════════  칸마다 그 속성·등급을 대표하는 검을 하나씩 정해 둡니다 */
-  var dexCells = null, dexQueue = [];
-  function canonical(e, r){ return makeSword(((e + 1) * 7919 + (r + 1) * 104729) >>> 0, 4 + r * 4, e, r); }
+  /* ═════════ 도감 ═════════  종류마다 칸(속성 × 등급)을 대표하는 무기를 하나씩 정해 둡니다.
+     그 종류에 없는 전설·신화 칸은 "—" 로 비워 둡니다. */
+  var dexCells = null, dexQueue = [], dexKind = null;
+  function canonical(e, r, k){ return makeSword(((e + 1) * 7919 + (r + 1) * 104729) >>> 0, 4 + r * 4, e, r, k); }
+  function buildDexTabs(){
+    var box = $('dexTabs');
+    box.textContent = '';
+    KINDS.forEach(function(K, k){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'dex-tab'; b.setAttribute('role', 'tab');
+      b.addEventListener('click', function(){ dexKind = k; renderCodex(); });
+      box.appendChild(b);
+    });
+  }
   function pumpDex(){
     var t0 = performance.now();
     while (dexQueue.length && performance.now() - t0 < 10) dexQueue.shift()();
@@ -2325,30 +2388,46 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function renderCodex(){
     if (!dexCells) buildDex();
-    var n = 0, queued = dexQueue.length > 0;
+    if (!$('dexTabs').children.length) buildDexTabs();
+    if (dexKind === null) dexKind = swordKind(state.sword);
+    var k = dexKind, K = KINDS[k], queued = dexQueue.length > 0, cw = state.sword, ck = swordKind(cw);
     for (var e = 0; e < ELEMENTS.length; e++){
       for (var r = 0; r < RARITIES.length; r++){
-        var on = !!(state.found[e] & (1 << r)), c = dexCells[e][r], want = on ? 'on' : 'off';
-        if (on) n++;
+        var c = dexCells[e][r], avail = hasKind(k, e, r);
+        var on = avail && !!(state.foundKind[k][e] & (1 << r)), want = k + (avail ? (on ? 'on' : 'off') : 'na');
         if (c.drawn !== want){
           c.drawn = want;
           c.cell.classList.toggle('on', on);
-          c.cell.classList.toggle('off', !on);
-          (function(c, e, r, on){
+          c.cell.classList.toggle('off', avail && !on);
+          c.cell.classList.toggle('na', !avail);
+          if (!avail){
+            c.cv.getContext('2d').clearRect(0, 0, c.cv.width, c.cv.height);
+            c.cell.title = ELEMENTS[e].name + ' 속성에는 ' + RARITIES[r].name + ' ' + josa(K.name, '이', '가') + ' 없어요';
+          } else (function(c, e, r, k, want, on){
             dexQueue.push(function(){
-              var sw = canonical(e, r);
+              if (c.drawn !== want) return;                     // 그새 다른 종류로 바뀌었으면 건너뜀
+              var sw = canonical(e, r, k);
               renderStill(c.cv, sw, !on);
               c.cell.title = on
                 ? '[' + RARITIES[r].name + '] ' + sw.name
-                : RARITIES[r].name + ' ' + ELEMENTS[e].name + ' · 아직 못 뽑음';
+                : RARITIES[r].name + ' ' + ELEMENTS[e].name + ' ' + KINDS[k].name + ' · 아직 못 뽑음';
             });
-          })(c, e, r, on);
+          })(c, e, r, k, want, on);
         }
-        c.cell.classList.toggle('now', state.sword.el === e && state.sword.rar === r);
+        c.cell.classList.toggle('now', k === ck && cw.el === e && cw.rar === r);
       }
     }
     if (!queued && dexQueue.length) requestAnimationFrame(pumpDex);
-    $('codexCount').textContent = n + ' / ' + (ELEMENTS.length * RARITIES.length);
+    Array.prototype.forEach.call($('dexTabs').children, function(b, i){
+      b.textContent = '';
+      b.appendChild(document.createTextNode(KINDS[i].name + ' '));
+      var n = document.createElement('span');
+      n.textContent = dexCount(i) + '/' + dexSize(i);
+      b.appendChild(n);
+      b.classList.toggle('on', i === k);
+      b.setAttribute('aria-selected', String(i === k));
+    });
+    $('codexCount').textContent = '전체 ' + dexCount() + ' / ' + dexSize();
   }
 
   var chartBuilt = false;
@@ -2677,7 +2756,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var RANK_SIZE = 20;
 
   var online = {
-    on:false, failed:false, authReady:false, fb:null, auth:null, db:null, user:null,
+    on:false, failed:false, authReady:false, fb:null, auth:null, db:null, user:null, popupAt:0,
     attend:null, attendLoaded:false, attendError:false, claiming:false,
     saveTimer:null, saveBusy:false, saveFail:false, lastCode:'', conflict:'', dirtyAt:0,
     myRank:null, pendingName:'', rankTimer:null, ranking:null, rankAt:0, rankError:false, note:''
@@ -2746,19 +2825,92 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     'auth/web-storage-unsupported': '이 브라우저에서는 로그인을 저장할 수 없어요. 시크릿 모드라면 일반 창에서 열어 주세요.'
   };
   function inAppBrowser(){ return /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|everytimeApp|DaumApps/i.test(navigator.userAgent); }
+  /* ── 구글 공식 로그인 버튼 (Google Identity Services) ──
+     Firebase 로그인 창은 firebaseapp.com 을 거쳐 돌아오는데, 아이폰 사파리에서는 첫 로그인 때
+     "missing initial state" 로 자주 끊깁니다. 구글이 직접 띄우는 버튼은 구글 창 안에서 끝나고
+     결과(ID 토큰)만 이 페이지로 돌려주므로 그런 일이 없습니다.
+     이 사이트 주소가 OAuth 클라이언트의 "승인된 JavaScript 원본"에 없으면 구글이 버튼을 그리지 않으므로
+     (iframe 이 0×0), 그때는 예전 방식(Firebase 창)을 그대로 씁니다. */
+  var GOOGLE_CLIENT_ID = '623667049462-jspaun653uo11qnc8lpii7bb2et5p4ok.apps.googleusercontent.com';
+  var GIS_SRC = 'https://accounts.google.com/gsi/client';
+  var gis = { state:'idle' };      // idle → loading → probing → ready | off
+  var RETRY_HINT = '로그인 창에 영어로 된 오류가 떴다면 그 창을 닫고, 여기서 "구글로 로그인"을 한 번 더 눌러 주세요. ' +
+                   '아이폰에서 처음 한 번은 가끔 그래요.';
+
+  function gisStart(){
+    if (gis.state !== 'idle' || !online.on || !online.authReady || online.user || inAppBrowser()) return;
+    if (EMU && !window.__gisStub && !window.__gisReal) return;    // 시험(에뮬레이터)에서는 가짜 버튼이나 진짜 버튼 시험일 때만
+    gis.state = 'loading';
+    function off(){ gis.state = 'off'; $('gisBox').textContent = ''; renderOnline(); }
+    function go(){
+      var g = window.google && window.google.accounts && window.google.accounts.id;
+      if (!g) return off();
+      try {
+        g.initialize({ client_id:GOOGLE_CLIENT_ID, callback:gisCredential, ux_mode:'popup', auto_select:false });
+        gis.state = 'probing';
+        renderOnline();
+        g.renderButton($('gisBox'), { type:'standard', theme:'filled_black', size:'large', shape:'pill',
+                                      text:'signin_with', locale:'ko', width:220 });
+      } catch (e){ return off(); }
+      var t0 = Date.now();
+      (function check(){
+        if (gis.state !== 'probing') return;
+        var f = $('gisBox').querySelector('iframe');
+        if (f && f.offsetHeight > 0){ gis.state = 'ready'; renderOnline(); return; }
+        if (Date.now() - t0 > 9000) return off();
+        setTimeout(check, 250);
+      })();
+    }
+    if (EMU && window.__gisStub) window.google = { accounts:{ id:window.__gisStub } };
+    if (window.google && window.google.accounts && window.google.accounts.id){ go(); return; }
+    var sc = document.createElement('script');
+    sc.src = GIS_SRC; sc.async = true;
+    sc.onload = go; sc.onerror = off;
+    document.head.appendChild(sc);
+  }
+  function gisCredential(resp){
+    if (!online.on || online.user || !resp || !resp.credential) return;
+    var F = online.fb;
+    F.signInWithCredential(online.auth, F.GoogleAuthProvider.credential(resp.credential)).catch(function(e){
+      var c = (e && e.code) || '';
+      online.note = LOGIN_ERRORS[c] || ('로그인하지 못했어요 (' + c + ')');
+      renderOnline();
+    });
+  }
+  /* 출석 버튼 등에서 로그인을 부르면: 구글 버튼이 있으면 그쪽을 가리키고, 없으면 예전 방식 */
   function onlineLogin(){
     if (!online.on || online.user) return;
     if (inAppBrowser()){ online.note = 'inapp'; renderOnline(); return; }
-    var F = online.fb;
-    F.signInWithPopup(online.auth, new F.GoogleAuthProvider()).catch(function(e){
+    if (gis.state === 'ready'){
+      var box = $('gisBox');
+      $('online').scrollIntoView({ behavior:'smooth', block:'center' });
+      box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse');
+      online.note = '위의 Google 로그인 버튼을 눌러 주세요.';
+      renderOnline();
+      return;
+    }
+    var F = online.fb, my = online.popupAt = Date.now();
+    F.signInWithPopup(online.auth, new F.GoogleAuthProvider()).then(function(){
+      if (online.popupAt === my) online.popupAt = 0;
+    }, function(e){
+      if (online.popupAt === my) online.popupAt = 0;
       var c = (e && e.code) || '';
       if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
       online.note = LOGIN_ERRORS[c] || ('로그인하지 못했어요 (' + c + ')');
       renderOnline();
     });
   }
+  /* 예전 방식에서 로그인 창이 끊긴 채로 이 화면에 돌아오면 다시 누르라고 알려 줍니다 */
+  function loginReturnCheck(){
+    var my = online.popupAt;
+    if (!my || online.user) return;
+    setTimeout(function(){
+      if (online.popupAt === my && !online.user && !document.hidden){ online.note = RETRY_HINT; renderOnline(); }
+    }, 1500);
+  }
   function onlineLogout(){
     if (!online.user) return;
+    try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
     clearTimeout(online.saveTimer);
     var done = function(){ online.fb.signOut(online.auth); };
     if (online.conflict) done(); else onlineFlushSave().then(done, done);
@@ -2975,7 +3127,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       return;
     }
     var u = online.user;
-    $('loginBtn').hidden = !!u || !online.authReady;
+    $('loginBtn').hidden = !!u || !online.authReady || gis.state === 'ready';
+    $('gisBox').hidden = !!u || (gis.state !== 'ready' && gis.state !== 'probing');
+    $('gisBox').classList.toggle('probing', gis.state === 'probing');
     $('logoutBtn').hidden = !u;
     $('onlineWho').textContent = u ? currentName() + '님 · 구글 계정에 자동 저장 중'
                                : !online.authReady ? '로그인 상태를 확인하는 중…'
@@ -3012,6 +3166,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('rankMe').hidden = !u;
     if (u && document.activeElement !== $('rankName')) $('rankName').value = currentName();
     renderRank();
+    gisStart();
   }
 
   /* ═════════ 카카오톡 안에서 열었을 때 ═════════
@@ -3171,6 +3326,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (document.hidden){ onlineFlushNow(); return; }
     shownDay = dayStamp();
     if (online.user) refreshAttend(); else renderAttend();
+    loginReturnCheck();
     if (online.on && Date.now() - online.rankAt > 60000) loadRanking();
   });
 

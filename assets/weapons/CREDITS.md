@@ -1,6 +1,6 @@
 # 무기 그림 출처
 
-모든 그림은 [Dungeon Crawl Stone Soup](https://github.com/crawl/crawl) 의 타일을
++21 각성 그림(`awakened/`)을 뺀 모든 무기 그림은 [Dungeon Crawl Stone Soup](https://github.com/crawl/crawl) 의 타일을
 재사용 가능한 것만 골라 묶은 공식 배포본 [crawl/tiles](https://github.com/crawl/tiles)
 (커밋 `a6ea1655db5c044829d9eea19a232fa6fcac87b0`, 폴더 `releases/Nov-2015`)에서 가져왔습니다. 이 배포본은 작가들이 권리를 포기한
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) 그림만 담고 있으며,

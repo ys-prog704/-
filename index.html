@@ -509,6 +509,49 @@ img{max-width:100%}
 }
 .btn-synth:hover:not(:disabled){filter:brightness(1.07)}
 .vault-acts .btn-sell{flex:1 1 128px}
+.btn-look{flex:1 1 110px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
+.vcard .aw{
+  align-self:center;font-size:10px;font-weight:800;letter-spacing:.08em;color:#140A10;border-radius:999px;padding:1px 7px;
+  background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF);
+}
+.awake-dex{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.awake-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px}
+.awake-head h3{
+  margin:0;font-size:14px;font-weight:800;letter-spacing:.02em;
+  background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.awake-head .count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--r4)}
+.awake-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-width:520px}
+.awake-col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.awake-col > span{font-size:11px;font-weight:700;color:var(--ash-2);text-align:center}
+.awake-cell{
+  position:relative;aspect-ratio:1;padding:0;border-radius:var(--r-sm);background:var(--ink);
+  border:1px solid var(--line);overflow:hidden;cursor:default;font:inherit;transition:transform .18s ease;
+}
+.awake-cell.on{
+  cursor:pointer;border-color:transparent;
+  background:linear-gradient(var(--ink),var(--ink)) padding-box,linear-gradient(135deg,#FF7FDC,#FFC04A,#7FEFFF) border-box;
+}
+.awake-cell.on:hover{transform:translateY(-2px) scale(1.04)}
+.awake-cell canvas{display:block;width:100%;height:100%}
+.show{
+  position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;
+  background:rgba(6,4,3,.82);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
+.show[hidden]{display:none}
+.show-card{
+  width:min(440px,100%);text-align:center;border-radius:var(--r-lg);padding:14px 14px 16px;
+  background:radial-gradient(120% 90% at 50% 38%,#2A1E2E,var(--iron) 70%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 18px 60px rgba(0,0,0,.6);
+}
+.show-top{
+  margin:2px 0 0;font-family:var(--font-display);font-size:22px;letter-spacing:.04em;
+  background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.show-card canvas{display:block;width:min(380px,100%);aspect-ratio:1;margin:2px auto 0}
+.show-name{margin:4px 0 0;font-size:18px;font-weight:800;color:#FFFFFF;text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.show-sub{margin:4px 0 12px;font-size:13px;color:var(--ash-2)}
+.show-close{width:100%;max-width:220px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
 
 .codex{margin-top:18px;padding:16px 15px 18px}
 .codex-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
@@ -847,6 +890,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="vault-acts">
       <button class="btn btn-synth" id="synthBtn" type="button" disabled>합성하기<span class="cost" id="synthNote">두 자루를 골라 주세요</span></button>
       <button class="btn btn-sell" id="vaultSellBtn" type="button" disabled>팔기<span class="cost" id="vaultSellNote">한 자루를 골라 주세요</span></button>
+      <button class="btn btn-look" id="vaultLookBtn" type="button" disabled>크게 보기<span class="cost">고른 무기</span></button>
     </div>
   </section>
 
@@ -858,6 +902,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="dex-tabs" id="dexTabs" role="tablist" aria-label="무기 종류"></div>
     <p class="codex-lead">무기 종류마다 뽑은 적 있는 속성과 등급의 칸이 밝혀집니다. 칸 오른쪽 아래 숫자는 그 무기를 가장 높이 올린 단계예요. "—" 칸은 그 종류에 없는 전설·신화예요.</p>
     <div class="dex-wrap" id="dexWrap"></div>
+    <div class="awake-dex">
+      <div class="awake-head"><h3>+21 각성 무기</h3><span class="count" id="awakeCount">0 / 15</span></div>
+      <p class="codex-lead">+20 두 자루를 합성해 +21 이 되면 무기가 각성해 새 모습이 됩니다. 종류마다 3가지, 무기마다 정해져 있어요. 밝혀진 칸을 누르면 크게 볼 수 있어요.</p>
+      <div class="awake-grid" id="awakeGrid"></div>
+    </div>
   </section>
 
   <details class="chart">
@@ -878,8 +927,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <p class="mult-note" id="multNote"></p>
   </details>
 
-  <p class="note">무기 그림: <a href="https://github.com/crawl/tiles">Dungeon Crawl Stone Soup 타일</a> (CC0, 퍼블릭 도메인).<br>밸런스는 소스의 <code>LEVELS</code>, 뽑기 확률은 <code>RARITIES</code>·<code>KINDS</code> 배열만 고치면 됩니다.</p>
+  <p class="note">무기 그림: <a href="https://github.com/crawl/tiles">Dungeon Crawl Stone Soup 타일</a> (CC0, 퍼블릭 도메인). +21 각성 그림은 이 게임을 위해 새로 그렸습니다 (CC0).<br>밸런스는 소스의 <code>LEVELS</code>, 뽑기 확률은 <code>RARITIES</code>·<code>KINDS</code> 배열만 고치면 됩니다.</p>
 
+</div>
+
+<div class="show" id="show" hidden>
+  <div class="show-card" role="dialog" aria-modal="true" aria-labelledby="showName">
+    <p class="show-top" id="showTop"></p>
+    <canvas id="showCanvas" width="380" height="380"></canvas>
+    <p class="show-name" id="showName"></p>
+    <p class="show-sub" id="showSub"></p>
+    <button class="btn show-close" id="showClose" type="button">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -968,6 +1027,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var SPRITE_SIGNATURE = [[["power", "flamingDeath"], ["chillyDeath", "winter"], ["great4", "arcBlade"], ["doomKnight", "zonguldrok"], ["golden", "order"], ["scimitar3", "plutonium"], ["galeCutlass", "gyre"], ["morg", "ancient"], ["katana1", "claymore3"], ["bloodbane", "cerebov"]], [[null, "woe"], ["arga", null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], ["trog", "trog2"]], [[null, null], [null, null], ["wucadMu", null], [null, "majin"], [null, "dispater"], ["olgreb", null], [null, null], [null, null], [null, null], [null, null]], [[null, null], ["crystalSpear", null], [null, null], ["curseScythe", null], ["guard", null], ["wyrmbane", null], [null, null], [null, null], [null, "prune"], ["octopus", null]], [["firestarter", "asmodeus"], [null, null], [null, null], ["torment", null], ["brilliance", "undeadhunter"], [null, null], [null, null], [null, null], ["eos", "variability"], ["skullcrusher", null]]];
   /* WEAPON-SPRITES:END */
 
+  /* AWAKEN-SPRITES:BEGIN */
+  /* +21 각성 무기 그림 — tools/build_awakened.py 가 만듭니다. 직접 고치지 마세요. */
+  var AWAKEN_DATA = {"aw_sword_heaven":{"P":[6.54,57.46],"T":[57.46,6.54],"g":24.5,"h":4.45,"s":0.0,"n":64,"ko":"천공의 성검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAiUlEQVR42tWOvQ0CMRSDnVyKKyhuACRuE7IYYrUbJQUDpAzolEdhewIqnhTlk/1+DPxUid/yyIQrBLs7QkqCIBsutrYp2G3V09OdSoIg66GgEVYc7L2FrN1Qp1LG8KSgoBNWNMLmNffQiRoOMakkTOc/HWMQCrqVRvh4H57OHQCwAHi/pAz8e30B1yAiZXkrAeoAAAAASUVORK5CYII="},"aw_sword_abyss":{"P":[6.19,57.81],"T":[57.81,6.19],"g":26.0,"h":5.16,"s":-0.0,"n":64,"ko":"심연의 마검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAc0lEQVR42t3OIRKAIBAF0A8yI9EbSLRbTA7Bg3sEb+AGg5FIYBwDf/UGBjc9/rKwwFflYSsGRWSnEyZGmIyFiTuINugUiFmPmYlR2EQsQviJd3f94dJ3HhTCZMImwgnhV073ukbQVgzvNjXJANAAODf8t24TUxalBTsKJwAAAABJRU5ErkJggg=="},"aw_sword_dragon":{"P":[6.97,57.03],"T":[57.03,6.97],"g":23.3,"h":3.39,"s":0.0,"n":64,"ko":"창세의 용검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAgElEQVR42t3NuxHDIBRE0UWakYk8dGBKoROXYpemElSCQocKCRhwwN0OHPklnNn3QfpNBZ7XMnF34yGSp5NOEoytgVhBEsgXKCfb481Pg5nNiB0kgdxAqd4+ZxIEFu2zcxtsRSN132kgV1Au39tnEnxm7WLG6A2MKkmrpM+hf6kvrTEidw3ST6UAAAAASUVORK5CYII="},"aw_axe_titan":{"P":[4.17,59.83],"T":[55.44,8.56],"g":42.5,"h":18.59,"s":0.0,"n":64,"ko":"거신의 양날도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAvklEQVR42tXQsW3DMBSE4U9Pgq3OLoMggDyBZ/AoGSEjJKNkExUuUmYEjaBSCAgxBUkDGSGv4eHnkYd7/JmNgKMqnhp5XaslL4X0qmdQydjImYPAhVHgxlWP2efzPcpP74KOfhMEw1qypAWOOXdzITnPcMqJQ0BiDM423jDlxWnHlHR5D9yFHS8cc4rypjWd8layLrWgm0pad6xNLI+rrmzBR11HbuaH2IvopEa2Jr6bmMvR7zVr+GmhX/7T/ALRGjPKRIOWRwAAAABJRU5ErkJggg=="},"aw_axe_chaos":{"P":[5.48,59.48],"T":[58.52,6.45],"g":38.5,"h":10.11,"s":-5.98,"n":64,"ko":"혼돈의 처형도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAZUlEQVR42u2OIQ6AMAxF3xjJFJxgCVdAIjn6jsAJyOTkJAoQa8mSIZF89fpfmxReYy/oADwCkxF1SGMSYAE3hGIcoh4YFbwCCkvTZB1ioyKzNqtCUNir5XLel8fydlbKAiT+fJobFv4N14KPIokAAAAASUVORK5CYII="},"aw_axe_thunder":{"P":[5.66,59.42],"T":[58.34,6.74],"g":42.0,"h":12.94,"s":-4.3,"n":64,"ko":"뇌신의 도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAXUlEQVR42u3NsQ2DMBgF4c92EQokMkDYJEU2YRGKLBYJZaLUUcSfwmYAOgquOumd9NhLejYpyBA8QJaWAjkuY2uG2vhcm/RTXd7zvcra3RREvL4/SLk9he3i5KD8AUdnDY0L/Q4TAAAAAElFTkSuQmCC"},"aw_staff_star":{"P":[3.3,60.28],"T":[59.87,3.72],"g":53.0,"h":8.34,"s":-0.06,"n":64,"ko":"성좌의 지팡이","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEoklEQVR42u1aXWhTZxh+vpCFuKyhuOAUyloSt9E4GFLQi6ETcTcDGUTHYGBwccO7CRMnA2Eb7EfYKkNRdtWxjvWiqw1NGXqRljAZXWSgxZpaRooZTRrStIs1x6RJ4d2FPd/OyV8TTdLvnPSFA8k5OTl53ud5f743H6BxkzI5KnU+HJkn6NnCkXmSMjkiIpIyOVICDkfmiYhI905oaQU8CVDNOqVeP7ycWoQH/7TxXClfaEoBFnM7WcztJX98ufOaV4ASOOVjtDDYo3KCfE3K5Eh+Xc4ZmswBMnDKx+iHd21F4GWTMjku7+vjE1SNInQDvtAJ18cn6LtLfVU5waAFRyS9h4sck878W/Kz8cQif33U7Vk3NxhEZj/9MAQAuHo1UnT9UTZfl+eIr4DlAADg9MgqpGyKlXPCo2xexX61lcUoOvu5OX9ZqW/f9rwK+N/h+wCAqbvTuHNnqiJ4+4vbEY7Mk0F05itZPLFYM3gAcHTuYLP/xOHo3MGMWpD/7m4LxruBg+dBchh4fdfw6q5u/tGpu9MAoAI/1N9XFDZKJwgbAoVmd9owG0r+39FlU+yzMx/TF99e4OfWY72cMWFzQPSKKv5ve8dgd9rQ5Q5zVuUSd9TtUd0/1N/HHbXes4RVQGHyszttxb39GsCh/j4qdV52UCVHCJkEpWyKbd07DAAwOb/E8swkD4H7/Y6iRZGUTTHloawkS0EXLOZ27a0A5TZ4ZdJDRET7LxN9sOc5Wpn08EO5+Ck85Hu5CsqsBIVOgknvYdje+QsAcO/mDFZjOdX1paALpo5D6pusBx6HUOgcfvzax5fBz5qfgZTJUTyxyCuA8A6YDSVx5Mpj8Kl7vxdd5+CtB3jJzIXO4bZ3DLemJd49WraYIGVyZNliYppQgMXcTktBFwDg5Q/bOPPu1628GgCAVW4XZnoxG0ri1rTEv6OwdS7XJjMRwf88OAQA+L73AqJzEfz5jZkviHZ3W1RAC+30yGrVJVA4ByiZN3Ucws49XyEejVa8p/dtIwddC3AhZT/s89Owz0/733iLFgZ7KPh557pDjaed/DDRmD95sQ03An7OvGYZbTTz9TImCvNvfhSHfedL+PWXn1qH+QfLkop5XUxyq25zFwc4+OMnTm0YeNZs4AAQS0QxFpjAvuxZAFAtcfXNej6mYt7h2LXhsmfNZF7u8ERinjUDfPphCN5rIVV7G49G9S97ZZ1fGOyhlUmPcNne2GjwsuyPXH4B0blg6zIvQsIrZYZmMO90BTFwLC0kUawR4OX2FgCcrqDQCxtDI5j/LfIeTl5sUzEvatyzRjBfOMwQOemxese8b2QUNwJ+DBxL4+D5B8JnfFZP5jeHGU0eZmxoIyQzb+pI4P1PgojORdDlbiHmC4cZWmP+iXOA/Ne1949t8I2MAoCmx1isFuCbw4y1YcbxE6eE7e3rrgCRhxkNrwKFwwzfyCjOBLKtu6RVbjjQi7Fa2ls9Ms8qxfy+7FlYX3kNALB173ALZfu1/TVyttdqk1OzApR7dOUt6l3usK7bW2MR+OUAbl76VLULQ8/SV0+ECsCX2qKu+xBQvm+JWr9pm9ba9h8UY+P/xWd4OAAAAABJRU5ErkJggg==","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAYklEQVR42u3OsQ2AMAxE0R9H1DBCRmEMhqFiMRoGoUBiBgRyKOxQhJ6Ka+7Jiq0AAJMVcScCkNtZbKSddY9jZawmpILLOyi2LsEBD6SgKTgdWQ2Kf4NjoU56HRz8MZvw59PcTakPp8eAakkAAAAASUVORK5CYII="},"aw_staff_tree":{"P":[5.84,58.16],"T":[58.16,5.84],"g":51.0,"h":9.4,"s":0.0,"n":64,"ko":"세계수의 지팡이","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFbUlEQVR42u1bXUhbZxh+jnUiyywSZPRH0JVeiNVRutyM0ouyIdkuitB1eLWLUbe2MBiD3vSiS3+8EnZfFGFuZaF1IN3NwaG5yHQ3xzBM1GA0ydkSE1wSQ7KkB53NLvT79p2Tc+KmJuc7wRcCx+/kKM/787zP+yYCx1bfZmtuLVW631AvIPWA2ppbS1cnnRWd0FAP4B8F76Fl4IwKKDkHgBOXmgyd0FgP4PVSnpxL7gXs+LZQULKCpR1AgBEgbERHn71AcSWF6xdbcO7USXgCCcwEfZDcCyiupMq4gHXGCStFOvzmJorenKupsdklDjlxuuklvsv9jsxSBsrPWSwntzC3msd6roS2X8L4Q1Gw49sCzYj3bUijiFJw27X9t/LAciWQWcoAAMQhJ+RIHJ5AArIY133v1Z7TkPbuseWQd6+rMkDgvXUVlKxA2FxyL+BWVkA4mcOPv+UBABubG/S55EYaobUorn/4AQDgyc1ejIiL+POzbmSWMiiupMr4QOA13UkN593rAICOhz3ILGXwxk9RJApNAIC/Xm7S54rKtq4TiDnaGyDFXpWRIZdtcCboAwDYu+307OO5TUPwAPB682uqnx8Mf6MivEHnBTjaG8raIXcOKChZwdMvIrwQo2fikBMAKHg27SvZR598qgIc31SsIYQKSlaQ7wcQm1yhZ55AouIzRWUbyY204f0pKYo7864yjuFWCRaUrLDj24I45MS01w8p9opmg/fXeVrzWvChtSgCi8vw+wOq33fR/QXlElYZWqINhpM5ei1H4kg2LePKu++URT20FtVviZNOjD57odsJuHeAHFH3+dVYBpGtgCFwvejbXbMIhtLI73EI2wm4LQFbc2uJkJ+cKqjIcGJ8DKG1KH0R4FrwE+NjKgItKFlB2wYbrRR9thwCi8uqc23UCXg5EsdcKA1gt+4t5QBiHW02SLG8yiFf3/2KtjqtTYyP0WvXD/PoenoNd7ouYSbog6dfLHEvhUkJPLnZS1vYuVMnMWyg+/VMHHJi5PkslcwdD3v+zaz7AcoDAs+RJ06YknbrvM/RWfaez0f9qpmB1DwBz47PLQNnAEA1EHHvADLjv3dlNxumvX5VJtx1ngUADItxPAreQ+7Lb/G9N0JJr9JOgftpkETTiBg73jpLnSLd6qUjr2Pg7V312C8aboK4ngZZ4HIkjtVYBufb7ViN7e4DzrfbVbognMxhLpRG19NrkNwLsHfbDcdfrh3Agp/2+hFO5qgGIFLY0V4uXcg9MjKTEVqb7lw7QEtgcqqAx7f7dMlMb24wqvH9jDsdMO31U/DkWg+s0QD1f/9eI2+EF07mKHhPIKG7xTlKE3giPAK6o80GOVWoOnhTM0ALntX5RL1VG7xp06CW8Ei7Y6NeC/Cmj8PTXj8Gb1ymet8ME3hI/VoRnqkO0JO3ciSOKSlaM8IzzQF6bE9UHlFxZoCviQO08pZdb5sV9ZqRoJbtPYEEHt/u29vwmA++Zl2AtDgjeWumCdWKPEt4I89n0efoxGosYxrb10wJ6s3zcqpgOtvXpAS0hEcWFkTe8gb+SB2gJTyywwsnczWXt6aSICtveSO8qpCg0QLTTHlbMwcYLTBZlccz+EM5QPXhJaPpicIzU95WnQO0hDciLqLP0alSeFYAf2gSZBeYbAZYyRoOE312gWmVmj8wB2jZnggdKxHegaWw0QKTh3m+6iWgJ2/NWmDW3AFG8nZKilo25fctAfazN7bPW0neHpgE2a+lkCkunMxh8Mblsj1ePURftwtoM4B8IYHXef7IOYCAI+BHxEV6r97AVyRBAp60uXqq+/8sfMjL1X+htN8/INZdBli9vx95Nhx74diOrS7tH+qpPrhneLj6AAAAAElFTkSuQmCC","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAMUlEQVR42mNgoCr4AaUZ/zAwMTAwMDAwMUEZLIxQBgMDPgYEMP+DicAYf/8wjIJBCABe0wYHogz9+AAAAABJRU5ErkJggg=="},"aw_staff_lich":{"P":[3.96,60.04],"T":[60.04,3.96],"g":53.0,"h":7.28,"s":0.0,"n":64,"ko":"리치왕의 지팡이","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAO0lEQVR42mNgIAg+QGnGH0wQBhMDE0wOnfEPpub/B4Lm8sB0CSGZwwzR/RNm5wGYlAK6Xf8fMIyCAQcAbXQKvnzHbzIAAAAASUVORK5CYII="},"aw_spear_sky":{"P":[2.3,61.7],"T":[61.7,2.3],"g":54.5,"h":3.04,"s":0.0,"n":64,"ko":"천룡의 창","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEbklEQVR42u2bb2gbdRjHv5d2MfRmekpgGw22NGxlCTpHYIpMZX9AVEQEi4ijgzEZKmOwyhQR/ANzL5YqWKkDS16EbpNoLGPQ+aIt+1OEqazNtJHKEhPottakS5rl2jSdPL6Yd+TSxiXp3fq7S553CQmXz/Pv+9xzvwA1q1nVGG8RiLcIVLXgRES3ZkWFE+qNDg4AmfkkACCZnsPn3b3VFXHJbs2K1L7nrSUlYDIifGY+KUd9dDyCZHoOB955tzoin29Xfg+TOJ+jpkc2Lht9w/SAwlofHY8AABofbMCmNheeema3fqEqiToRUTh2U458segz2wN4i0CZ26F7OkGqd8lGxyPY6mrFXHYRnx49XtK12G2C6fOoFP7r3j4M/nhWTv2B709DzKY4/TSyxRu0ENxXNG2Lpb04nyNPt7ek1GfeAXG/my5/3LwEQG14E4u1DwDWti1lp/0Xx4+V3fHrWa79VqcNUZ8NLR1hhcyVAl9q3TM9CeZngRbwTGZAbnJwiRO6Xo5pAs9cBojZFPfwEz8o3hvrH8KBb+OawDM7CqcnggCASCiBbR9FFaOtmvBMOkDMpriWjjBFfQ58MzCDNa9G4PrnqOyU505swF/XJlSBBwAmpyP55uZ6DxJDXbC1/wq8cQhvXvPi3NQG1eCZzID8WQDp84iEEkhu3IGRqZsICTm5a+1a/A6dZ+6s+Hocyw7IhT4EAOx4sQ8AEDM1I3L2aYz1D+HxV3bJ35EaZyWZwKQDoj6HYgZITwQRCSUAQAGeb2b7bqxtelvRS3TnAN4iUObwEVzynsTmLy2wtm1BeiKIQCCGzjN3EPU5io7JhQrS0hEuyQkca/AAMD08gp2/DOLC6UcRCNwdgqR6j/occja0Om2yXI7+ISo+p6sMKITvC13F5YXbOPiQHT/PzcIr/o3YmgaI2RQnKcTw+40ydCXgzDigGLy/8z35vT+jMTyfuq6AK7zVrVQK61mEH+DuzaLWhsfEInzm8BFMD4/I0d/U0oxPzGuhxXbHxGrk1+3cjr7QVc1/i4k1eEkGC21bQ6P+HcBbBDonNC0LL9X09PAIupOTuOQ9iT3OxwAAjrGfoHvjLQLRzCmK+93ksdrJY7VT+wON8uKStwg09eQL5LHaiT74jDxWu/xay+f63P2MfP509+zrv8naXkza1O74qyKD+TXftb8He3vvjqqF8FqDrooDChsegGUjv5pmul/wUsNjCV4zB/yf1LH2jI5TG1zScj3AayJzNHOKLq53yRKWL3WGNt4i0MX1Lor73bQQ3EfOOrMu4Dm1a77rqx7s7V1X1lZG102wmNRJmxzWjVMTvvDGRg9Nj9MCXk/dnqsEvCZ1NanTl9SpUgJ6lroVy6DepW5FGWAEqavYAUaRurIdUJO6xRs1qTOS1JUNL62l4343xf3u6oGXTmlLe3tnnZlOvGYzvgPkEfe/U9pxv5ucdWaqhj8aKtbiif6XEAjEsHUzz9z2VvNJMDc5KE92+ScvjG6qn7iomc7sXzPkFlHFWOz5AAAAAElFTkSuQmCC","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAXElEQVR42mNgIAgkmKCMBCjN+AEqwsYAZXDARARgIgkPGCGM/wchIowMByACzP+halhgDA4GKEPgH5Sh8Admzg8ow+ED1PL/BxiYIYpvQg3kh2n/C2OwMIwCOgEAyEERMNDWN9YAAAAASUVORK5CYII="},"aw_spear_trident":{"P":[2.62,61.38],"T":[61.38,2.62],"g":53.5,"h":8.69,"s":0.0,"n":64,"ko":"해신의 삼지창","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAE8UlEQVR42u2ZXWhbZRjH/6mlBIMsYr2Ym6Y2tpuNG5spUgau4PRm4MUGcyJbkWwi06GIihtOzEU33bQtW6FO7LwoI4VgE9oL0X6tbOA4062GdWnTLjHRpa1Nv5LlNB9VHi/0HE5PT9Ikm+2bj+cuOW8gv+fj/z7Pc4CC5YZp1FrSqLWUt+BERDeG3EmdkFNOkoITEVls3SvCExHNBvkl54qzFT4cmRM/t9t7YLfZE54FgHBkDnOhBTQ2t2Z/5IV0P1F/liy2bjpRf3ZZ9OUZMhvkad+BI8vOFWWrI7YbylFV9TQ2V+oVSyMcmYOQJXOhBbz59gf4/rt28NF5VU7UvBB1Qfjkz4UsESKvFP2sS3sBSgqjBC6c4yNx2vBERVL44mwSPEHspKnMR+dVGrWWBm95AAAjo25srtRjk/5xVG4yYMfOF7Nf8ISUTxZJoRyIiPhInL5s/nbF6DMtgtLIf3LyHFwjIwlFTKPW0pVfrmO7oRwL0UV81XoRHPdzwugzrwXyBieTyCv9TqoXTDpBqbvLBF6j1i7pD9LtGtcu6ovjRDMWujHkXqb26cBLnSm/IZSaJrYcsDhOAatxCUy68NJzs0GeLLZusXNksh+QwtOMhTizjjizTvGPpgov15LZIK8YfXZugdAAEBrAtebjGBzmEzpKrvZNX3yG+alA0ha33d4D7x+TbKt+zGEizqwjIqIf+q/S+f2lFHOYltR0qpGXj7/7DhxZcVfAhBM4s474SFwsgZjDJDohE3giEms+K+7+mMNE5/eXkts3QW7fBHFmHQWsRuLMOnL7JtKGT0XxVaw5wdumh8c5DQDYtmcXSrZeQG0L8NrlR3ExUIPfbrsS1nw63SPTw1B5VSkAoGTrBfG7d7ynUO0/ivnpB1eEb7f3pATP3CzAR+dVZXVuAIDHOY3aFqC2BRi55kLc3w8A8LbpoXTfSyMvnxiTGZMZcEV9GngWqKx/CG2qRsT9/dgBG5oOrxedUFbnFp2Qbtoz6wCNWkvjU34AwO93JnFpRofq2FEAQNPh9XjmozEMna4AAMxyewEAtx74GADwysG3ACDttVcRq/ANDecAAJ2NW9DZuAWDwzwmp2YAAM996kXI5QAAGP4+iY26yozgmbkFlOA9t8dwnftJTHkA6Ojw4aUzNzHm9uLhy69i255d+NXeBwB44fNgRgtPFcvwApAgev3H1uG91glUPVaCN3Y/IrbM73f+lfG2V8U6vNImp//YOgDA4DB/T/BrHvlgiKdgiKebTje9fuhd2lm7O6WWVTrrZ+2y09bVmxH8/TbVWsCH/S2Y7mvAN95DGHW5kqZ9TpmQ9rauXoo5TBSwGkmvN6xpKhetJrwgeBVPPYmqvRwAYNLvz5/Is1Dzqw6e1/C0OM6M2q/6LaBRa0kYWBp+rM5ftQ9YjRRzmNZc7VftFpCrfc3xKEIuBz6s/hM5b8kEL6dFr6D2/73SsnX15he8dLARXmLo9Yb8ghfS/tSZFgpYjRSwGrMKvvhe4KXLjFGXCzVfRwtqnxeix3p7+7+1woVlBmPLjFVrhQvLjMIyo7DMyFl4VWGZkSDts2GZcV9vAY1aS+G7ToTvOtE3cDVvlhnLZ4HQAJ6PNqDm5Sg2bNShrO7fV9S5mvpFcvj4nV54nNOwHAyLNZ/LdV8sb3E7OnzIJ1NJNUD+MOe7vIIVDP8AnJzDsXt3bUAAAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAj0lEQVR42u2OKw4CQRBE33RvGMQmIBEE8AhA4OYy3AIHR5sDINAIMmIPMJJPIIhuDAkOSamXqlR3wRct31BGAoAyMyPmag7qEA8oAOvTypwEAYC62AhAqN7WvGustL+PDULdAiBaLgLwbBzoZ2u101AUQObdAIBeivb0cePqUyfIByRPhtUXtuejX+SvH+gF/NEbazxCARcAAAAASUVORK5CYII="},"aw_spear_reaper":{"P":[5.18,62.6],"T":[58.82,8.97],"g":61.07,"h":10.81,"s":-6.92,"n":64,"ko":"사신의 대낫","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEY0lEQVR42u2bXUhbZxjHf8f2wlYQS0kb1unEdE6T9KKzsxeb2K0Xq64wzMZoHXQwmGN0MAQHhUDH0tWFtribMUZvpIOuVxWUofaqTqGbIw5C3YnaZETq/KyzkzULBDy7kHOWaT6MJuec92zP1SE55yT/33me5/++L++RMEmUFJcp2c55En8s5ft3JbOI/fOvlU3nrazG2Fe6l5XVGADlBw/lHYZkhOiRwBgAR11VGa9RhacKFcZOQUh6iR8JjHHUVUUsntA+7x0Y2nTuqZMvsq90b1YA0YfzADQcq9sRCEkP8Q8XfuP98x34L1/kQSQKwLOOSu0c+4H92vGJk69px+0dH1NT7aCy3J5SfHI0HKvbFgTJqJoHePPcuwAcOeLG7arVoNgP7Gd+cZkzZ88B8GrzaZzOWg1GKgDbhWBIE8wE5tOrXRqMZBCVVYdp8bQAUFPtSHvPXCEYCiATlGQQalzw+jQIqUBMTEUAeK/1rS1DMB2AbCAueH0Am7JBFa9GMgT1XqmgmBbARhC3+wfSZkNNtSMtgJLiMqXN08nMbJT+H69vgmB6AMkgbvcP/MtBNpaEGrIcAuCLzz6hzdNJIDjMz5FBMTMgWzaoEGQ5RPf1LwF46un1716qbCEQHGZ5dY7ppaD4ADZmQzKE6K9hrnQ0AfDM4RoArvm7GBpJpBUPUCQigCfxx9IbzU3aoOr48Re40tHEiZZ26ps+ZDo8AYDb6cB2cC7jvYQEkAzBd/kq9++PAxCLJ5hfXCYkT3LN3wWAq7pCTBvcaikszgZYmJkCYLCvF4APvF8TiydobnDjqq7gRk/AWiWQKqbDE9Q6n2NcjhCLJxj5YWxL1+0WXfhPQ31a45sOT+B2OmhucGvpn+npA+wSOf3bPJ3cvHWPl185xB+/PwLg0dIyrK0x8P0DgqHZrENiSWTxADOzUe6MduP3ehiXI9zoCeS0PiCJLv6XyOh6D1gKbmthRLKK+O2uCBX9l8ULA6BQ4oUAUEjxpgdQaPGmBqCHeNMC0Eu8KQHoKd50APQWbyoARog3xUhQXeczQrzhGaAuaDzvOGWIeMMzoKS4TPnu24sAnP+o95/FDZ3EG5767a1fKQ2uM8rdni7lbk+XUrrHpmxlp4jwJZDc8Oy2Cl5/+3MA/F6P7v9FMlJ8PubzQgEwyuoMB2C01RnaA8xgdYZ3e7XLO8sbldI9NsVZ3qh7tzekBNSaDwSH8V2q1z4/3eozzZMvKrT4jVYXkidNlaFSocWbwep0BWBGq9MFgJmtruA94H+rM7nVFbQERLC6gpWAKFZXkAwQyeryDkA0q8sbAFGtLlPsykX84myAxjo7N2/dY21NsYTV5dQE1Q1Jy6tz3BnttoTPS7nUvKhWt6MMsILVbSsDsjU8kawuZwDJW1DfOfsNdluFZcf2RenEq+G7VG+ZhpdTD1iYmWI6PEFInsTv9Vh2Vrc7nfjBvl7G5fX3cLLtt7UcAPWFg1y3nVpqfi/CXD4f8Tf42k64qOtw4QAAAABJRU5ErkJggg==","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAVUlEQVR42u2NsQ2AMAwEj0QiJSOwBh2MziiICShTRHkKvxArIHGNT++3DG/WI2ZRgwQs5JANdgAGyaVJV0hW9b0aCaIezN1SulfttPRq0fN/dPLzFW4uVxR4T+lpsAAAAABJRU5ErkJggg=="},"aw_mace_sun":{"P":[6.65,57.35],"T":[57.35,6.65],"g":47.5,"h":9.4,"s":0.0,"n":64,"ko":"태양신의 철퇴","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFXUlEQVR42u2bbUhbZxTH/wldG5fgUhXZ4sDaUWy6zm4ozKGOsQ1sytrNubGXD2WTQQf7MnR1jAm2sFeL/TKwZZR1FNHSTVMt6MrqHKu1dRQ00SYESXyZriEmU9MbjS/w7EN6H+9N7o0xrfrcmAP5ct/0d55z/uecJzdA0pKmWNNq9GRLwwfmF8mDOkGtBNC1QiZMZGg1ekIIIc6xuyInyB0XnovVCcxHwFxwCY9npsPqsEuubEtHJz2u1egJNz8N17g7MVIgEJxRZe7MBICoThDCA4C5vTPmv7FNaWlx8tRplB0xwTXuhrm9E4ODQwAAHv5q9601PU/FcmkLBGdUWo2eeKY9AIAz5xpR9b5GdP3ixDUAwIT+aww7RzF0x47a45X03vCIYtoBQlgA4MOfz/XSkuyVi/1/ipzgd1gAAGVnn0B/b48oKuaCS3B7fMjLNUY4Qc1izrs9PgCAZ9qDlo5OcJMNYniJCEjNPQAAqH9xEFaHncK7xt04c65REp5JDQgEZ1R5uUZiddhXDqa+JIa21cDvsMBl8wIAni17hUYAAPxe/Qx2HbuCoTuhZ/ApoQgNEKbDyVOnQzkvcIDXfBgZb98Whbb3fCF278ugDum3B9A4VYg3yt6MCs+sA4TixU02UAcI4Xlzjbsx7BzFzr/epcf67QEAQFXbclQBZCoFRNCC/AW6qeC5bF5kyNx/Pb0Wup7qiCap5IV8XlCJlDO2sQLPQ8uZt6se+z8fxlxwCY9qHqEpsJrxgirUlLxcI+GdoGIpAlo6xB1c88Vf8OMnM9j+5KtYnLiGAXMXMj4UNzp87QcAXU81bo8EUZAT6hV4HeCt9nglmxHA/1Plh0yixuWtoxURdX7YOSq6j4cHgAs3/Nhn2L6iBb09tCdQRCMUHhFWhx2pfa+JRc/mxfX02ojrw1cfALjiOuVWAavDjt0GQms+Dy9Uea64joIDiIAvO2Lic17WCWqW4YWrzsMLrfX7jyXhbz52FPufNtJ0iTZFMjcLcPPTuNp9C6Ul2Vi01dBz579pj/k5VW3LEArqnqd2yUaCijX4D45V4edvC0R9Pp1/HBa0tIzJPoMrrsPg4BB+vfATpDZOyg+Z2HWAsBni7tngNR+mA44QvnGqEDU1X9IKcNnciv7eHrpPMOwclQTVavREEeMwd89Gx11vVz3VgPD21jPtgdvjg7m9k9Z3q8NO817KCcy3wkL4v3/4QqT2l6dCKy3c6BD2BMIpMrxXYN60Gj0hS/+GPr4m0ncim5x9J4NoNXriHLtLfvvjZsSucGB+MeI4f05qt5hZ8GjwcjDRHBA+WLG/6r4mSfjVYB7WSm+6BoRKXWjQ6bcHUNW2LBKvWITsQUzFguDx9T7t+dY1AcuVNqYjQE7tnzNq45ogFaX0qwkeEtViFbzNsA1NgdUEbzNMtdE5H6/gKTICHqbgKS7nk4LHoOBtaAqwKHjrLoKsC966RkBS8Las4PmaSLkxixh0KWTqUj7Tgrcu8AuWClJuzCKVRbnEoEtRHLwqXngAOJgTyu+mi6XIKWoGAMwu71DUlKaOB56bbMDBHC2K9xqQnaZDTlEzRm68B/NnmYqLZHU88Hx5+8fjx9h/HABgwNyFl7+bVdaMHs/qlxuzyNSlfLJgqSAGXQox6FIUrfbqWMG1Gj35yrQHxXsNMH06Ar/DIgr7hF15KbXny17fiezEr/NSYV9gSNtaU92CpYIUGNKoExIJXL1qX3//Hb2PStQ4UGHDgLkroRZaXgTvv5snfEVldnlHwpU62Wkw9NV0veir6URUe1U0Dah/fcU/rG5orOssEP7jBSQtaUlLWtISy/4HDZ00jgmI1S4AAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAl0lEQVR42u2PMQrCQBBFX8ZANiDGMo2wx0gT8Cg5iFa2nsbKMuANvIArsbCMYKGwGIsZEAvJBfzV4/Pmw8BIEpDv5pAadFsmAMhip87Um3xbqTLzeRCAZ/NSiMRWh7ONyoOrSQAydzwJQDWnEoDQc1W5CLb8OKssg6xFIV0KgCN6AEpKBYq9Xd0vBk3/+UKbNv789J/RvAGtmCAHG3eoDgAAAABJRU5ErkJggg=="},"aw_mace_doom":{"P":[5.66,58.34],"T":[58.34,5.66],"g":51.5,"h":13.64,"s":0.0,"n":64,"ko":"파멸의 전투망치","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAc0lEQVR42u2OMQ5AUBBEH34QiZ/oNKLUKhWOpHEDF5M4jkKhEhFB8Xdbnc5ULzuTnYF3NYAPECkwiFXC5APcBAQAaXIUBmCpIwl1pcBsXcZrq9H96Q+xvElhlQpWuYRaGluBLRM4Tw0bHXsp5GrtCr++0QN6exDuZzO7jAAAAABJRU5ErkJggg=="},"aw_mace_meteor":{"P":[6.58,57.42],"T":[57.42,6.58],"g":48.3,"h":6.57,"s":0.0,"n":64,"ko":"유성의 모닝스타","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFmUlEQVR42u2YfWxTVRjGfx2gHR2zjDCWDoSxjQHjQ7cRiCSYqREFI9mIJE6JOkOMIdH4FWNEp2EiGgH5CMZAIjHQmYV0MskU2CJxIjb7Yji7rdBlYevSfbTrurZ0jHj8Y/S6rWsHitvtx5M0Off03vY+7/u8zznvgQgiiCCCIIdKqRZhQXIsoiqlWgghREgHwUuytsE0gqh33tbn8huc8QITFSxB6HW4WTAvgcrqGh9irW2WMYPmvN5LW6c5YIlMDQbyLo9dMW9OomjrNKP7/jRv7PgYW91ZAOr+bOHT3V+wNGMVhtoqiajzei+9Djd7Dx4N+NuKYCqDI9piWs8dl+bau6zS2HxrXPDVCR5MX0ivw80r29+m7GQRLo9dEXQBGC3b9196GgB9gxGA1csW+QThzO919PY7OXTsJCW6knHJy7YEVEq1aOs0S9c/VVyg9dxx9A1G9h4vISF+FnmPr5OCUNtkAuBqu5mWaxZWLU8jWj3ntv5L1gqorK6hyWgaIXtvEADefD6HTpudiw2NuD2DrEhZAMBsdSzddgcWq3tcBSjkXvcvbFzL3PhZI+b1DUa0Z39hunIabs8gACtSFrBs4f0AdNrsdNsd7Dx4jG15W0aYaVCuAt66H47pymnSuPJijTTutNlH3FdZPfRdk9HEtrwtYnQQZK+A5ckJVFRf9nuPpcvKFVMr27duHtov9DsBmDkjBgDPFBUPrXvMryEq5Ercm72jBa9JJjccJ8p+5oqpVbpOTR6q/4T4WVi6rKxansbMGTFYrG6/8pdlCXh3cABFJecwd1nJWJzsc99zG7KpqL4sGZ838154FRCIvGw94INPDgyt62Wn0Uz5Z5MzHN12B5Zb87PVscxWx0rzXjz76rvsKywgqHoBl8eu2FdYwL7CAgy1VRQfWhq4RxiW+eHkAZqbmjiiLQ7YC8iyGfJK1tlvkJx99Gc08dHk4+ank7Z4sbQS+AuC7LvBe+Y+xv5nrvvML5qnkYxuLBhqq4ZUZGikyWgKzp1g67dD5hebtpJLJRXkHRkc97m4+ekYaqskFXkz788Io+RKvqPLTKXyMwAczfU8kPMo2YkO5ih6xnwmI3sTGdmbWL/hKZ9yCrQKRMmVPEBqShJr3vMA8M2uUrKSlNT3TGfnwWNkZG/CM0WFxerGYnVTdrKInNyc4D/66nO4RJ/DJf4wmMSLL78u1j28QXhPgLwfW59L7Cjc73PcpVKqhVZ39o7OB6fKhTiAN/PX2i3s2XOAlqtXqNH/NqJ+A5FzeeyKsfb7ss+6GOwQA/X5Qlda7pN5f8+EzCmwSqkWutJyMVCfL7qLM0VycnpA8iGF4TW/6/PDUhAmknzUZJIfXvPG5maW5uppMfQQVpkfy+1Dmngg8pPxToqJJO80Hwag5EI8qSlJfpe6kM2+rrRcdBdnioH6/PB2++7izAl3+0nbCY7l9mu+9vBOVqcskqP4P4kH2t4GalFDQvJisEPoSstl4/YTqgCVUi1s+lwA9pzJwtjcHF5u3+dw+Ti+XN0+6m6TH32Y4WiuR7vVGdnehi15ub/71P9KHGBJXBQV5y8CUHrqh/AwPJVSLYRVKwbq88XmJYlCExMdVJm/KwHYvCRRcnpNTLTQxEQHHXnFv5V94ZOpAJzQm/jxyyRi01YSt1oXdLKPulPyTvNhbPpcfm3qoK3Lwfz7olmZb+BSSQVhKfssTVxQL3WKcJT9HZWASqkWzn5DyMpecTuZfyJJhfa79QAkrS1CExtNo+2vMGhprVohrFqRpYkTWZq4STm3n9R+Xgx2CGHViu7iTGmd1380P6QC4N8DHOcBuNFeTouhhw83qui7eS+P7O4LKdn77QVutJcD5Tia66lrdEnzoVbzfgNwqaRiBPG3Tt0MScNTjLcChGrmI4gggggiAP4GG++21HAnjPMAAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAcklEQVR42u2OsQmAQBRD392B2nmFA4gTOIKNWwmupr2FI1g4go2gaPH/txcsTZOQBBJ4j0a5HggAlG3pAVgrjWJu5QQPEKbCynGWJIwSAYuI7loAcOEQP3VYx+GUe3V8I+I6bSuzcq1b6b7pi+y58+NL3BlBDuTK10W8AAAAAElFTkSuQmCC"}};
+  var AWAKEN_FORMS = [["aw_sword_heaven","aw_sword_abyss","aw_sword_dragon"],["aw_axe_titan","aw_axe_chaos","aw_axe_thunder"],["aw_staff_star","aw_staff_tree","aw_staff_lich"],["aw_spear_sky","aw_spear_trident","aw_spear_reaper"],["aw_mace_sun","aw_mace_doom","aw_mace_meteor"]];
+  /* AWAKEN-SPRITES:END */
+
   var CREATURES = ['용','불사조','늑대','사자','독수리','거인','악마','천사','히드라',
                    '그리핀','유니콘','크라켄','타이탄','와이번','백호','흑룡','봉황'];
   var EPITHETS = ['천둥의 심판','영원한 겨울','종말의 불꽃','별을 삼킨 자','신들의 황혼',
@@ -1027,6 +1092,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!SPRITE_POOLS[kind]) return false;
     return rar < 3 || !!(SPRITE_SIGNATURE[kind][el] && SPRITE_SIGNATURE[kind][el][rar - 3]);
   }
+  /* +21 은 각성해서 종류마다 3가지 중 하나의 새 모습이 됩니다 (무기마다 정해짐) */
+  function awakeForm(seed){ return Math.floor(rng32((seed ^ 0x5A21) >>> 0)() * 3); }
+  function awakeKey(seed, kind){ return AWAKEN_FORMS[kind] ? AWAKEN_FORMS[kind][awakeForm(seed)] : null; }
   function makeSword(seed, lv, el, rar, kind){
     kind = kind | 0;
     if (!hasKind(kind, el, rar)) kind = 0;
@@ -1037,17 +1105,21 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var runes = [], nr = 3 + Math.floor(r() * 3);
     for (var q = 0; q < nr; q++) runes.push(Math.floor(r() * RUNES.length));
     var creature = pick(r, CREATURES), epithet = pick(r, kind ? EPITHETS_ANY : EPITHETS);
-    var S = 6 + lv * .08;                      // 그림 한 픽셀이 캔버스에서 차지하는 크기 — 단계마다 커집니다
+    var name = rar >= 3 ? D.ko : E.word + ' ' + creature + '의 ' + D.ko, was = '';
+    var ak = lv > MAX ? awakeKey(seed, kind) : null;
+    if (ak && AWAKEN_DATA[ak]){ was = name; key = ak; D = AWAKEN_DATA[ak]; name = D.ko; epithet = ''; }
+    var n = D.n || 32;
+    var S = (6 + lv * .08) * 32 / n;           // 그림 한 픽셀이 캔버스에서 차지하는 크기 — 단계마다 커집니다 (각성 그림은 두 배 촘촘)
     var L = Math.hypot(D.T[0] - D.P[0], D.T[1] - D.P[1]);
     var ux = (D.T[0] - D.P[0]) / L, uy = (D.T[1] - D.P[1]) / L, nx = -uy, ny = ux;
     var mx = (D.P[0] + D.T[0]) / 2, my = (D.P[1] + D.T[1]) / 2;
     function C(x, y){ return [CX + (x - mx) * S, CY + (y - my) * S]; }
     var G = C(D.P[0] + ux * D.g + nx * D.s, D.P[1] + uy * D.g + ny * D.s), T = C(D.T[0], D.T[1]);
     return {
-      seed:seed, lv:lv, el:el, rar:rar, kind:kind, E:E, R:R, K:K, key:key,
-      power:power, f:feats(lv, rar),
-      tint: rar >= 3 ? 0 : Math.round((.3 + .55 * Math.min(1, lv / 20)) * 20) / 20,
-      name: rar >= 3 ? D.ko : E.word + ' ' + creature + '의 ' + D.ko,
+      seed:seed, lv:lv, el:el, rar:rar, kind:kind, E:E, R:R, K:K, key:key, sz:n,
+      power:power, f:feats(lv, rar), awake:!!was, was:was,
+      tint: was ? 1 : rar >= 3 ? 0 : Math.round((.3 + .55 * Math.min(1, lv / 20)) * 20) / 20,
+      name: name,
       epithet: rar >= 3 ? epithet : '',
       runes:runes, S:S, ox:CX - mx * S, oy:CY - my * S,
       u:[ux, uy], n:[nx, ny], ang:Math.atan2(uy, ux),
@@ -1079,20 +1151,34 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 그림 불러오기 · 물들이기 ═════════ */
   var SPR = {};
   function loadSprites(done){
-    var keys = Object.keys(SPRITE_DATA), left = keys.length;
+    var keys = Object.keys(SPRITE_DATA).concat(Object.keys(AWAKEN_DATA)), left = keys.length;
     if (!left){ done(); return; }
+    function finish(){ if (--left === 0) done(); }
     keys.forEach(function(k){
-      var img = new Image();
+      var D = SPRITE_DATA[k] || AWAKEN_DATA[k], n = D.n || 32, img = new Image();
       img.onload = img.onerror = function(){
-        if (img.naturalWidth){
-          var c = document.createElement('canvas');
-          c.width = c.height = 32;
-          c.getContext('2d').drawImage(img, 0, 0);
-          SPR[k] = { canvas:c, outline:null };
-        }
-        if (--left === 0) done();
+        if (!img.naturalWidth){ finish(); return; }
+        var c = document.createElement('canvas');
+        c.width = c.height = n;
+        c.getContext('2d').drawImage(img, 0, 0);
+        var spr = { canvas:c, outline:null, n:n, mask:null };
+        if (!D.m){ SPR[k] = spr; finish(); return; }
+        var mi = new Image();                     // 각성 그림: 속성 색으로 물들일 픽셀
+        mi.onload = mi.onerror = function(){
+          if (mi.naturalWidth){
+            var mc = document.createElement('canvas');
+            mc.width = mc.height = n;
+            var mx = mc.getContext('2d');
+            mx.drawImage(mi, 0, 0);
+            var md = mx.getImageData(0, 0, n, n).data, mask = new Uint8Array(n * n);
+            for (var i = 0; i < mask.length; i++) mask[i] = md[i * 4] > 127 ? 1 : 0;
+            spr.mask = mask;
+          }
+          SPR[k] = spr; finish();
+        };
+        mi.src = D.m;
       };
-      img.src = SPRITE_DATA[k].src;
+      img.src = D.src;
     });
   }
   /* 회색 칼날만 속성 색으로 물들입니다. 금빛 손잡이·보석 같은 색 있는 픽셀과 검은 외곽선은 그대로 둡니다. */
@@ -1100,11 +1186,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function tinted(key, el, k){
     var id = key + '|' + el + '|' + k;
     if (tintCache[id]) return tintCache[id];
+    var spr = SPR[key], n = spr.n || 32;
     var c = document.createElement('canvas');
-    c.width = c.height = 32;
+    c.width = c.height = n;
     var x = c.getContext('2d');
-    x.drawImage(SPR[key].canvas, 0, 0);
-    if (k > 0){
+    x.drawImage(spr.canvas, 0, 0);
+    if (spr.mask) awakeTint(x, n, spr.mask, ELEMENTS[el]);
+    else if (k > 0){
       var E = ELEMENTS[el], A = hexRgb(E.a), B = hexRgb(E.b), Cc = hexRgb(E.c);
       var d = x.getImageData(0, 0, 32, 32), a = d.data;
       for (var i = 0; i < a.length; i += 4){
@@ -1121,24 +1209,38 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     return (tintCache[id] = c);
   }
-  /* 그림을 한 픽셀 부풀린 모양 — 등급 테두리와 잠긴 도감 칸에 씁니다 (34×34, 한 픽셀 여백) */
+  /* 각성 그림: 마스크 픽셀의 밝기를 속성 색 단계(그림자 → 본색 → 하이라이트 → 흰빛)로 바꿉니다.
+     금장식·보석·나무·뼈는 그대로 둡니다. (tools/build_awakened.py 의 미리보기와 같은 계산) */
+  function awakeTint(x, n, mask, E){
+    var A = hexRgb(E.a), B = hexRgb(E.b), Cc = hexRgb(E.c), W = [255, 255, 255];
+    var d = x.getImageData(0, 0, n, n), a = d.data;
+    for (var i = 0; i < mask.length; i++){
+      var p = i * 4;
+      if (!mask[i] || !a[p + 3]) continue;
+      var l = (a[p] * .3 + a[p + 1] * .59 + a[p + 2] * .11) / 255;
+      var m = l < .5 ? lerp3(A, B, l / .5) : l < .85 ? lerp3(B, Cc, (l - .5) / .35) : lerp3(Cc, W, Math.min(1, (l - .85) / .15));
+      a[p] = m[0]; a[p + 1] = m[1]; a[p + 2] = m[2];
+    }
+    x.putImageData(d, 0, 0);
+  }
+  /* 그림을 한 픽셀 부풀린 모양 — 등급 테두리와 잠긴 도감 칸에 씁니다 ((n+2)×(n+2), 한 픽셀 여백) */
   function outlineMask(key){
-    var s = SPR[key];
+    var s = SPR[key], n = s.n || 32, m = n + 2;
     if (s.outline) return s.outline;
-    var src = s.canvas.getContext('2d').getImageData(0, 0, 32, 32).data;
+    var src = s.canvas.getContext('2d').getImageData(0, 0, n, n).data;
     var c = document.createElement('canvas');
-    c.width = c.height = 34;
-    var x = c.getContext('2d'), d = x.createImageData(34, 34), a = d.data;
-    for (var y = 0; y < 34; y++){
-      for (var xx = 0; xx < 34; xx++){
+    c.width = c.height = m;
+    var x = c.getContext('2d'), d = x.createImageData(m, m), a = d.data;
+    for (var y = 0; y < m; y++){
+      for (var xx = 0; xx < m; xx++){
         var on = false;
         for (var dy = -1; dy <= 1 && !on; dy++){
           for (var dx = -1; dx <= 1 && !on; dx++){
             var sx = xx - 1 + dx, sy = y - 1 + dy;
-            if (sx >= 0 && sy >= 0 && sx < 32 && sy < 32 && src[(sy * 32 + sx) * 4 + 3] >= 128) on = true;
+            if (sx >= 0 && sy >= 0 && sx < n && sy < n && src[(sy * n + sx) * 4 + 3] >= 128) on = true;
           }
         }
-        if (on){ var i = (y * 34 + xx) * 4; a[i] = a[i + 1] = a[i + 2] = a[i + 3] = 255; }
+        if (on){ var i = (y * m + xx) * 4; a[i] = a[i + 1] = a[i + 2] = a[i + 3] = 255; }
       }
     }
     x.putImageData(d, 0, 0);
@@ -1146,11 +1248,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   var scratch = null;
   function scratchCtx(){
-    if (!scratch){ scratch = document.createElement('canvas'); scratch.width = scratch.height = 34; }
+    if (!scratch){ scratch = document.createElement('canvas'); scratch.width = scratch.height = 66; }
     var x = scratch.getContext('2d');
     x.globalCompositeOperation = 'source-over';
-    x.clearRect(0, 0, 34, 34);
+    x.clearRect(0, 0, 66, 66);
     return x;
+  }
+  /* 작업 캔버스의 왼쪽 위 (n+2)×(n+2) 를 무기 자리(한 픽셀 여백 포함)에 그립니다 */
+  function blitScratch(ctx, sw){
+    var m = sw.sz + 2;
+    ctx.drawImage(scratch, 0, 0, m, m, sw.ox - sw.S, sw.oy - sw.S, m * sw.S, m * sw.S);
   }
 
   /* ═════════ 렌더러 ═════════  모든 좌표는 380×380 캔버스 단위 */
@@ -1176,6 +1283,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     else if (sw.f.rays) rays(ctx, M, t, 10, 162, 12, E.glow, .14 + .14 * P, t * .2);
     else if (E.fx === 'holy' && P > .18) rays(ctx, M, t, 8, 150, 11, E.c, .08 + .14 * P, t * .16);
 
+    if (sw.awake) sigil(ctx, sw, t);
     if (E.fx === 'cosmos') nebula(ctx, sw, t);
     drawParts(ctx, sw, parts, t, -1);
 
@@ -1199,7 +1307,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ctx.imageSmoothingEnabled = false;
     ctx.shadowColor = hexA(sw.E.glow, .45 + .45 * sw.power);
     ctx.shadowBlur = blurPx(ctx, 5 + 26 * sw.power);
-    ctx.drawImage(tinted(sw.key, sw.el, sw.tint), sw.ox, sw.oy, 32 * sw.S, 32 * sw.S);
+    ctx.drawImage(tinted(sw.key, sw.el, sw.tint), sw.ox, sw.oy, sw.sz * sw.S, sw.sz * sw.S);
     ctx.restore();
   }
   /* 등급 테두리: 희귀 파랑 · 영웅 보라 · 전설 금빛(맥동) · 신화와 +20 무지개 */
@@ -1209,43 +1317,78 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     else if (sw.rar === 3) fill = hexA(sw.R.color, .7 + .25 * Math.sin(t * 3));
     else if (sw.rar >= 1) fill = hexA(sw.R.color, sw.rar === 1 ? .55 : .75);
     if (!fill) return;
-    var x = scratchCtx();
+    var x = scratchCtx(), m = sw.sz + 2;
     x.drawImage(outlineMask(sw.key), 0, 0);
     x.globalCompositeOperation = 'source-in';
     if (fill === 'prism'){
-      var g = x.createLinearGradient(0, 34, 34, 0);
+      var g = x.createLinearGradient(0, m, m, 0);
       for (var i = 0; i <= 6; i++) g.addColorStop(i / 6, 'hsl(' + ((t * 140 + i * 60) % 360).toFixed(0) + ',100%,62%)');
       x.fillStyle = g;
     } else x.fillStyle = fill;
-    x.fillRect(0, 0, 34, 34);
+    x.fillRect(0, 0, m, m);
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     if (sw.rar >= 3 || sw.f.prism){
       ctx.shadowColor = sw.f.prism ? 'rgba(255,255,255,.7)' : hexA('#FFD27A', .8);
       ctx.shadowBlur = blurPx(ctx, 10);
     }
-    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    blitScratch(ctx, sw);
     ctx.restore();
   }
   /* 도감의 잠긴 칸: 어두운 실루엣과 옅은 테두리 */
   function silhouette(ctx, sw){
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    var x = scratchCtx();
+    var x = scratchCtx(), m = sw.sz + 2;
     x.drawImage(outlineMask(sw.key), 0, 0);
     x.globalCompositeOperation = 'source-in';
     x.fillStyle = 'rgba(255,255,255,.14)';
-    x.fillRect(0, 0, 34, 34);
-    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    x.fillRect(0, 0, m, m);
+    blitScratch(ctx, sw);
     x = scratchCtx();
     x.drawImage(SPR[sw.key].canvas, 1, 1);
     x.globalCompositeOperation = 'source-in';
     x.fillStyle = '#17130F';
-    x.fillRect(0, 0, 34, 34);
-    ctx.drawImage(scratch, sw.ox - sw.S, sw.oy - sw.S, 34 * sw.S, 34 * sw.S);
+    x.fillRect(0, 0, m, m);
+    blitScratch(ctx, sw);
     ctx.restore();
   }
 
+  /* +21 각성: 무기 뒤에서 천천히 도는 마법진 (룬 고리 + 육망성) */
+  function sigil(ctx, sw, t){
+    var g = sw.E.glow, r1 = 138, r2 = 116, pulse = .5 + .5 * Math.sin(t * 2.2);
+    ctx.save();
+    ctx.translate(CX, CY);                       // 캔버스 한가운데 (도감·무기고 칸에서도 잘리지 않게)
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = hexA(g, .34 + .16 * pulse);
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(0, 0, r1, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(0, 0, r2, 0, Math.PI * 2); ctx.stroke();
+    ctx.rotate(t * .22);
+    ctx.lineWidth = 1.6;
+    for (var i = 0; i < 18; i++){
+      ctx.save();
+      ctx.rotate(i * Math.PI * 2 / 18);
+      ctx.translate(0, -(r1 + r2) / 2);
+      ctx.beginPath();
+      RUNES[(sw.seed + i * 5) % RUNES.length].forEach(function(q){ ctx.moveTo(q[0] * .8, q[1] * .8); ctx.lineTo(q[2] * .8, q[3] * .8); });
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.rotate(-t * .5);
+    ctx.strokeStyle = hexA(g, .2 + .12 * pulse);
+    ctx.lineWidth = 1.4;
+    for (var k = 0; k < 2; k++){
+      ctx.beginPath();
+      for (var j = 0; j <= 3; j++){
+        var a = (j / 3 + k / 6) * Math.PI * 2 - Math.PI / 2;
+        ctx[j ? 'lineTo' : 'moveTo'](Math.cos(a) * r2, Math.sin(a) * r2);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
   function rays(ctx, c, t, n, len, w, color, alpha, rot){
     ctx.save();
     ctx.translate(c[0], c[1]);
@@ -1776,6 +1919,62 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!view.raf){ view.last = performance.now(); view.raf = requestAnimationFrame(loop); }
   }
 
+  /* ═════════ 크게 보기 창 ═════════  무기고의 무기와 +21 각성 순간을 큰 캔버스로 */
+  var show = { ctx:null, sw:null, parts:null, bolts:null, boltAt:0, raf:0, last:0, k:1, back:null };
+  function paintShow(t){
+    var ctx = show.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.setTransform(show.k, 0, 0, show.k, 0, 0);
+    if (show.sw) drawSword(ctx, show.sw, t, show.parts, show.bolts);
+  }
+  function showLoop(now){
+    if ($('show').hidden || !show.sw){ show.raf = 0; return; }
+    show.raf = requestAnimationFrame(showLoop);
+    var dt = Math.min(.05, (now - show.last) / 1000);
+    show.last = now;
+    stepParts(show.sw, show.parts, dt);
+    if (show.bolts && now > show.boltAt){
+      show.bolts = makeBolts(show.sw, Math.random);
+      show.boltAt = now + 60 + Math.random() * 110;
+    }
+    paintShow(now / 1000);
+  }
+  function openShow(sw, top, sub){
+    var box = $('show'), c = $('showCanvas');
+    $('showTop').textContent = top;
+    $('showName').textContent = sw.name;
+    $('showSub').textContent = sub || '';
+    if (box.hidden) show.back = document.activeElement;
+    box.hidden = false;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), px = Math.max(64, Math.round((c.clientWidth || CW) * dpr));
+    if (c.width !== px){ c.width = px; c.height = px; }
+    show.ctx = c.getContext('2d');
+    show.k = px / CW;
+    show.sw = sw;
+    show.parts = spawnAll(sw, Math.random);
+    show.bolts = sw.E.fx === 'storm' ? makeBolts(sw, Math.random) : null;
+    show.boltAt = 0;
+    c.setAttribute('aria-label', sw.R.name + ' 등급, ' + sw.name);
+    $('showClose').focus();
+    if (reduced() || !SPR[sw.key]){ paintShow(1.7); return; }
+    if (!show.raf){ show.last = performance.now(); show.raf = requestAnimationFrame(showLoop); }
+  }
+  function closeShow(){
+    if ($('show').hidden) return;
+    $('show').hidden = true;
+    show.sw = null;
+    if (show.back && show.back.focus && document.contains(show.back)) show.back.focus();
+    show.back = null;
+  }
+  function vaultLook(){
+    var w = state.vault[vaultSel[0]];
+    if (vaultSel.length !== 1 || !w) return;
+    var sw = vaultSword(w);
+    openShow(sw, '+' + w.lv + (sw.awake ? ' 각성' : ''),
+             sw.R.name + ' · ' + sw.E.name + ' 속성' + (sw.awake ? ' · 각성 전: ' + sw.was : '') + ' · ' + gold(vaultPrice(w)));
+  }
+
   /* ═════════ 멈춘 검 (도감용) ═════════  캔버스 가운데 300×300 을 잘라 그립니다 */
   function renderStill(canvas, sw, locked){
     var w = canvas.width, s = w / 300;
@@ -1844,7 +2043,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     found[sw.el] |= 1 << sw.rar;
     foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
-      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(),
+      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -1876,6 +2075,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.found[w.el] |= 1 << w.rar;
     state.foundKind[k][w.el] |= 1 << w.rar;
     if (lv > row[w.rar]) row[w.rar] = Math.min(SYNTH_MAX, lv);
+  }
+  /* 각성 도감: 종류 × 형태(3) = 15칸 */
+  function awakeIndex(w){ return swordKind(w) * 3 + awakeForm(w.seed); }
+  function noteAwake(w){ if (w.lv > MAX) state.awake |= 1 << awakeIndex(w); }
+  function awakeSample(kind, form){
+    for (var seed = 1; seed < 1000; seed++)
+      if (awakeForm(seed) === form) return makeSword(seed, MAX + 1, (kind * 3 + form) % ELEMENTS.length, 2, kind);
+    return makeSword(1, MAX + 1, 0, 2, kind);
   }
   function giveSword(sw){
     state.sword = sw;
@@ -1984,7 +2191,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       gold: num(data.gold, base.gold),
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
-      found: found, foundKind: fk, vault: vault, dexBest: dexBest,
+      found: found, foundKind: fk, vault: vault, dexBest: dexBest, awake: (num(data.awake, 0) | 0) & 0x7FFF,
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -2016,7 +2223,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
     /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
     noteBest(state.sword, state.level);
-    state.vault.forEach(function(w){ noteBest(w, w.lv); });
+    state.vault.forEach(function(w){ noteBest(w, w.lv); noteAwake(w); });
     if (state.stats.bestSw) noteBest(state.stats.bestSw, state.stats.best);
   }
 
@@ -2053,6 +2260,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       y:st.bestSw ? (st.bestSw.kind ? [st.bestSw.seed, st.bestSw.el, st.bestSw.rar, st.bestSw.kind]
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
       v:state.vault.length ? state.vault.map(function(w){ return [w.seed, w.el, w.rar, w.kind, w.lv]; }) : undefined,
+      z:state.awake || undefined,
       h:state.dexBest.map(function(m){ return m.map(function(row){ return row.map(function(v){ return B32.charAt(v); }).join(''); }).join(''); }).join('').replace(/0+$/, '') || undefined,
       i:[state.items.bless, state.items.protect, state.items.master],
       a:[state.attend.last, state.attend.day, state.attend.total]
@@ -2085,6 +2293,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.v)) out.vault = d.v.filter(Array.isArray).map(function(a){ return { seed:a[0], el:a[1], rar:a[2], kind:a[3] | 0, lv:a[4] }; });
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
+    if (typeof d.z === 'number') out.awake = d.z;
     if (typeof d.h === 'string'){
       var i = 0;
       out.dexBest = KINDS.map(function(){
@@ -2560,6 +2769,54 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       b.setAttribute('aria-selected', String(i === k));
     });
     $('codexCount').textContent = '전체 ' + dexCount() + ' / ' + dexSize();
+    renderAwakeDex();
+  }
+  var awakeCells = null;
+  function buildAwakeDex(){
+    var grid = $('awakeGrid');
+    grid.textContent = '';
+    awakeCells = [];
+    KINDS.forEach(function(K, k){
+      var col = document.createElement('div');
+      col.className = 'awake-col';
+      var head = document.createElement('span');
+      head.textContent = K.name;
+      col.appendChild(head);
+      for (var f = 0; f < 3; f++){
+        var b = document.createElement('button'), cv = document.createElement('canvas');
+        b.type = 'button'; b.className = 'awake-cell';
+        cv.width = cv.height = 128;
+        b.appendChild(cv);
+        (function(k, f){
+          b.addEventListener('click', function(){
+            if (!(state.awake & (1 << (k * 3 + f)))) return;
+            var sw = awakeSample(k, f);
+            openShow(sw, '+' + (MAX + 1) + ' 각성 무기', KINDS[k].name + ' · 각성 ' + (f + 1) + '형 (속성 색은 무기마다 달라요)');
+          });
+        })(k, f);
+        col.appendChild(b);
+        awakeCells[k * 3 + f] = { cell:b, cv:cv, drawn:null };
+      }
+      grid.appendChild(col);
+    });
+  }
+  function renderAwakeDex(){
+    if (!awakeCells) buildAwakeDex();
+    var n = 0, queued = dexQueue.length > 0;
+    awakeCells.forEach(function(c, i){
+      var on = !!(state.awake & (1 << i)), want = on ? 'on' : 'off';
+      if (on) n++;
+      if (c.drawn === want) return;
+      c.drawn = want;
+      c.cell.classList.toggle('on', on);
+      var k = Math.floor(i / 3), f = i % 3, sw = awakeSample(k, f);
+      c.cell.title = on ? sw.name + ' (+' + (MAX + 1) + ' 각성)' : KINDS[k].name + ' 각성 ' + (f + 1) + '형 · 아직 못 만듦';
+      c.cell.setAttribute('aria-label', c.cell.title);
+      c.cell.setAttribute('aria-disabled', String(!on));
+      dexQueue.push(function(){ if (c.drawn === want) renderStill(c.cv, sw, !on); });
+    });
+    $('awakeCount').textContent = n + ' / 15';
+    if (!queued && dexQueue.length) requestAnimationFrame(pumpDex);
   }
 
   var chartBuilt = false;
@@ -2759,6 +3016,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.vault.splice(vaultSel[1], 1);
     vaultSel = [];
     noteBest(made, made.lv);
+    noteAwake(made);
     if (made.lv > state.stats.best){
       state.stats.best = made.lv;
       state.stats.bestSw = { seed:made.seed, el:made.el, rar:made.rar, kind:made.kind };
@@ -2767,7 +3025,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     flash('ok', 'rgba(255,190,240,.9)');
     burst(46, 'ok', '#FFB02E');
     fanfare(4); quake();
-    reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
+    if (sw.awake){
+      reveal('+' + made.lv + ' 각성!', sw.name, josa(sw.was, '이', '가') + ' 깨어났습니다', '#FF5FD0', true);
+      openShow(sw, '+' + made.lv + ' 각성!', josa(sw.was, '이', '가') + ' 새로운 모습으로 깨어났어요');
+    } else reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
     verdictSword('ok', '합성 성공! +' + made.lv + ' ', sw, ' (재료: ' + nameB + ')');
     pushLog('synth', '합성', '+' + a.lv + ' ×2 → +' + made.lv + ' ' + sw.name, null);
     render(); save();
@@ -2813,7 +3074,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         var lv = document.createElement('span'); lv.className = 'lv'; lv.textContent = '+' + w.lv;
         var rr = document.createElement('span'); rr.className = 'rr'; rr.style.color = sw.R.color; rr.textContent = sw.R.name + ' · ' + sw.E.name;
         var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = sw.name;
-        b.appendChild(lv); b.appendChild(rr); b.appendChild(nm);
+        b.appendChild(lv);
+        if (sw.awake){ var aw = document.createElement('span'); aw.className = 'aw'; aw.textContent = '각성'; b.appendChild(aw); }
+        b.appendChild(rr); b.appendChild(nm);
         b.addEventListener('click', function(){ pickVault(i); });
         grid.appendChild(b);
         renderStill(cv, sw, false);
@@ -2821,8 +3084,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     $('vaultCount').textContent = V.length + ' / ' + VAULT_MAX;
     $('vaultLead').textContent = V.length
-      ? '두 자루를 고르면 합성할 수 있어요. 먼저 고른 무기의 모습으로 한 단계 올라가고, 두 번째 무기는 재료로 사라져요.'
-      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 +' + (MAX + 1) + ' 이 됩니다.';
+      ? '두 자루를 고르면 합성할 수 있어요. 먼저 고른 무기가 +' + (MAX + 1) + ' 로 각성해 새 모습이 되고, 두 번째 무기는 재료로 사라져요.'
+      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 +' + (MAX + 1) + ' 로 각성합니다.';
     var a = V[vaultSel[0]], c = V[vaultSel[1]], sb = $('synthBtn'), note = $('synthNote');
     if (vaultSel.length === 2 && a && c){
       var okSynth = a.lv === c.lv && a.lv < SYNTH_MAX;
@@ -2833,6 +3096,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       sb.disabled = true;
       note.textContent = V.length < 2 ? '+' + MAX + ' 두 자루가 필요해요' : '두 자루를 골라 주세요';
     }
+    $('vaultLookBtn').disabled = vaultSel.length !== 1;
     var vb = $('vaultSellBtn'), vn = $('vaultSellNote');
     if (vaultSel.length === 1 && a){
       vb.disabled = rolling;
@@ -3546,6 +3810,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('synthBtn').addEventListener('click', synthesize);
+  $('vaultLookBtn').addEventListener('click', vaultLook);
+  $('showClose').addEventListener('click', closeShow);
+  $('show').addEventListener('click', function(e){ if (e.target === this) closeShow(); });
   $('vaultSellBtn').addEventListener('click', function(){
     if (rolling || vaultSel.length !== 1) return;
     if (!vaultSellArmed){
@@ -3676,6 +3943,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   document.addEventListener('keydown', function(e){
+    if (!$('show').hidden){
+      if (e.key === 'Escape'){ e.preventDefault(); closeShow(); }
+      else if (e.key === 'Tab'){ e.preventDefault(); $('showClose').focus(); }     // 창이 열려 있으면 닫기 버튼에 머묾
+      return;
+    }
     if (e.key !== ' ' && e.key !== 'Enter') return;
     var el = document.activeElement, tag = el && el.tagName;
     if (tag === 'BUTTON' || tag === 'SUMMARY' || tag === 'TEXTAREA' || tag === 'INPUT') return;

@@ -95,6 +95,53 @@ expect('이름 13자 → 거부', write(t1, 'ranking/' + u1, rk(5, 0, name='가'
 expect('남의 랭킹 쓰기 → 거부', write(t2, 'ranking/' + u1, rk(20, 0), ['at']), False)
 expect('알 수 없는 컬렉션 쓰기 → 거부', write(t1, 'cheat/' + u1, {'gold': 1}), False)
 
+# ── 결투장 ──
+def update_c(token, path, value=True, extra=None):
+    fields = {'c': value}
+    fields.update(extra or {})
+    w = {'update': {'name': 'projects/demo-sword-forge/databases/(default)/documents/' + path,
+                    'fields': {k: val(v) for k, v in fields.items()}},
+         'updateMask': {'fieldPaths': list(fields)}, 'currentDocument': {'exists': True}}
+    st, d = call(FS + ':commit', {'writes': [w]}, token)
+    return st
+
+def query(token, coll, eqs):
+    q = {'structuredQuery': {'from': [{'collectionId': coll}], 'where': {'compositeFilter': {'op': 'AND', 'filters': [
+        {'fieldFilter': {'field': {'fieldPath': f}, 'op': 'EQUAL', 'value': val(v)}} for f, v in eqs]}}, 'limit': 50}}
+    st, d = call(FS + ':runQuery', q, token)
+    return st
+
+ar = lambda lv, rar, **kw: dict({'name': '성연', 'lv': lv, 'rar': rar, 'el': 3, 'kind': 1, 'seed': 4242,
+                                 'pw': lv + rar + (2 if lv > 20 else 0)}, **kw)
+u3, t3 = user()
+expect('대표 무기 올리기 → 허용', write(t1, 'arena/' + u1, ar(15, 2), ['at']), True)
+expect('+21 각성 대표 무기 (힘 = 21 + 등급 + 2) → 허용', write(t2, 'arena/' + u2, ar(21, 4), ['at']), True)
+expect('힘 부풀리기 → 거부', write(t1, 'arena/' + u1, ar(15, 2, pw=30), ['at']), False)
+expect('단계 +22 → 거부', write(t1, 'arena/' + u1, ar(22, 0), ['at']), False)
+expect('씨앗이 32비트를 넘음 → 거부', write(t1, 'arena/' + u1, ar(5, 0, seed=4294967296), ['at']), False)
+expect('남의 대표 무기 쓰기 → 거부', write(t2, 'arena/' + u1, ar(1, 0), ['at']), False)
+expect('모르는 필드 → 거부', write(t1, 'arena/' + u1, ar(5, 0, gold=1), ['at']), False)
+expect('로그인 안 해도 대표 무기 보기 → 허용', read(None, 'arena/' + u2), True)
+
+du = lambda a, d, win=True, **kw: dict({'a': a, 'd': d, 'an': '성연', 'dn': '상대', 'ap': 17, 'dp': 27, 'aw': '+15 얼음달 도끼',
+                                       'win': win, 'gold': 1200000, 'def': 0, 'c': False}, **kw)
+expect('결투 기록 남기기 (도전한 사람 = 나) → 허용', write(t1, 'duels/d1', du(u1, u2), ['at']), True)
+expect('진 결투 기록 (방어 보상 def) → 허용', write(t1, 'duels/d2', du(u1, u2, win=False, gold=0, **{'def': 360000}), ['at']), True)
+expect('남인 척 기록 (a ≠ 나) → 거부', write(t3, 'duels/d3', du(u1, u2), ['at']), False)
+expect('나에게 도전 → 거부', write(t1, 'duels/d4', du(u1, u1), ['at']), False)
+expect('결투장에 없는 사람에게 도전 → 거부', write(t1, 'duels/d5', du(u1, u3), ['at']), False)
+expect('보상 받음으로 만들기(c=true) → 거부', write(t1, 'duels/d6', du(u1, u2, c=True), ['at']), False)
+expect('보상 부풀리기(1억 초과) → 거부', write(t1, 'duels/d7', du(u1, u2, gold=100000001), ['at']), False)
+expect('도전한 사람은 기록을 볼 수 있음', read(t1, 'duels/d1'), True)
+expect('방어한 사람도 볼 수 있음', read(t2, 'duels/d1'), True)
+expect('다른 사람은 못 봄', read(t3, 'duels/d1'), False)
+expect('방어한 사람: 내게 온 안 받은 도전 목록 → 허용', query(t2, 'duels', [('d', u2), ('c', False)]), True)
+expect('남에게 온 도전 목록 → 거부', query(t3, 'duels', [('d', u2), ('c', False)]), False)
+expect('도전한 사람은 보상 받음(c)을 못 바꿈', update_c(t1, 'duels/d2'), False)
+expect('방어한 사람이 다른 값까지 바꾸기 → 거부', update_c(t2, 'duels/d2', True, {'def': 9000000}), False)
+expect('방어한 사람이 보상 받음(c) 켜기 → 허용', update_c(t2, 'duels/d2'), True)
+expect('이미 받은 보상 다시 받기 → 거부', update_c(t2, 'duels/d2'), False)
+
 for r, n, s in results: print('%s  %s  (HTTP %d)' % (r, n, s))
 fails = [n for r, n, _ in results if r == 'FAIL']
 print('\n%d/%d 통과' % (len(results) - len(fails), len(results)) + ('' if not fails else '  실패: ' + ', '.join(fails)))

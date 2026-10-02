@@ -8,6 +8,7 @@ rules_version = '2';
 //  - 출석: 서버 시간(한국 시간 기준) 하루 한 번, 7칸 주기로 한 칸씩만 진행됩니다.
 //          기기 날짜를 바꿔도 소용없습니다.
 //  - 랭킹: 누구나 볼 수 있고, 자기 기록만 올릴 수 있으며, 범위를 벗어난 값은 거부합니다.
+//  - 결투장: 각자 대표 무기를 올려 두고(누구나 봄), 도전 기록은 도전한 사람만 만들고 두 사람만 봅니다.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -59,6 +60,47 @@ service cloud.firestore {
         && request.resource.data.rar is int && request.resource.data.rar >= 0 && request.resource.data.rar <= 4
         && request.resource.data.el is int && request.resource.data.el >= 0 && request.resource.data.el <= 9
         && request.resource.data.at == request.time;
+    }
+
+    // 결투장 대표 무기: 누구나 볼 수 있고 자기 것만 올립니다. 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
+    match /arena/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid)
+        && onlyKeys(['name', 'lv', 'rar', 'el', 'kind', 'seed', 'pw', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+        && request.resource.data.lv is int && request.resource.data.lv >= 0 && request.resource.data.lv <= 21
+        && request.resource.data.rar is int && request.resource.data.rar >= 0 && request.resource.data.rar <= 4
+        && request.resource.data.el is int && request.resource.data.el >= 0 && request.resource.data.el <= 9
+        && request.resource.data.kind is int && request.resource.data.kind >= 0 && request.resource.data.kind <= 4
+        && request.resource.data.seed is int && request.resource.data.seed >= 0 && request.resource.data.seed <= 4294967295
+        && request.resource.data.pw == request.resource.data.lv + request.resource.data.rar + (request.resource.data.lv > 20 ? 2 : 0)
+        && request.resource.data.at == request.time;
+      allow delete: if isOwner(uid);
+    }
+
+    // 결투 기록: 도전한 사람(a)이 만들고, 두 사람만 봅니다. 상대(d)는 결투장에 있는 사람이어야 합니다.
+    // 방어한 사람은 "보상 받음(c)"만 켤 수 있습니다(한 번만).
+    match /duels/{id} {
+      allow read: if signedIn() && (resource.data.a == request.auth.uid || resource.data.d == request.auth.uid);
+      allow create: if signedIn()
+        && onlyKeys(['a', 'd', 'an', 'dn', 'ap', 'dp', 'aw', 'win', 'gold', 'def', 'c', 'at'])
+        && request.resource.data.a == request.auth.uid
+        && request.resource.data.d is string && request.resource.data.d != request.auth.uid
+        && exists(/databases/$(database)/documents/arena/$(request.resource.data.d))
+        && request.resource.data.an is string && request.resource.data.an.size() <= 12
+        && request.resource.data.dn is string && request.resource.data.dn.size() <= 12
+        && request.resource.data.aw is string && request.resource.data.aw.size() <= 40
+        && request.resource.data.ap is int && request.resource.data.ap >= 0 && request.resource.data.ap <= 30
+        && request.resource.data.dp is int && request.resource.data.dp >= 0 && request.resource.data.dp <= 30
+        && request.resource.data.win is bool
+        && request.resource.data.gold is int && request.resource.data.gold >= 0 && request.resource.data.gold <= 100000000
+        && request.resource.data.def is int && request.resource.data.def >= 0 && request.resource.data.def <= 10000000
+        && request.resource.data.c == false
+        && request.resource.data.at == request.time;
+      allow update: if signedIn() && resource.data.d == request.auth.uid && resource.data.c == false
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['c'])
+        && request.resource.data.c == true;
     }
   }
 }

@@ -363,6 +363,76 @@ img{max-width:100%}
 .online-note a{color:var(--quench);font-weight:600}
 .btn-ghost.small{font-size:11.5px;padding:4px 9px}
 .rank{padding:16px 15px}
+.hunt{padding:16px 15px 16px}
+.hunt-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hunt-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;color:var(--ash)}
+.hunt-head .count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:700;color:#7FDD8A}
+.hunt-sta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 10px}
+.pips{display:flex;gap:3px;flex:1 1 auto;max-width:220px}
+.pips i{flex:1 1 0;height:7px;border-radius:3px;background:var(--iron-2);box-shadow:0 0 0 1px var(--line) inset}
+.pips i.on{background:linear-gradient(180deg,#9BF0A6,#4FB861);box-shadow:0 0 6px rgba(111,208,127,.45)}
+.hunt-sta .regen{font-family:var(--font-mono);font-size:11px;color:var(--ash)}
+.hunt-stage{
+  position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px;
+  padding:10px 8px 12px;border-radius:var(--r-md);
+  background:radial-gradient(110% 90% at 50% 100%,rgba(111,208,127,.08),transparent 60%),var(--ink);
+  box-shadow:0 0 0 1px var(--line) inset;
+}
+.fighter{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.fighter canvas{width:100%;max-width:120px;aspect-ratio:1;image-rendering:pixelated}
+.fighter .hp{width:86%;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.fighter .hp i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#4FB861,#9BF0A6);transition:width .3s ease}
+.fighter.mob .hp i{background:linear-gradient(90deg,#C94A40,#F08A6A)}
+.fighter .fname{font-size:11.5px;font-weight:700;text-align:center;line-height:1.25;overflow-wrap:anywhere}
+.fighter .fpow{font-family:var(--font-mono);font-size:10.5px;color:var(--ash)}
+.fighter.hit canvas{animation:hunt-hit .32s ease}
+@keyframes hunt-hit{0%{transform:translateX(0);filter:none}25%{transform:translateX(-5px);filter:brightness(2.2)}60%{transform:translateX(4px)}100%{transform:none;filter:none}}
+.hunt-stage.won .fighter.mob canvas{opacity:.28;filter:grayscale(1);transition:opacity .4s,filter .4s}
+.hunt-stage.lost .fighter.me canvas{opacity:.35;filter:grayscale(1);transition:opacity .4s,filter .4s}
+.hunt-vs{font-family:var(--font-display);font-size:18px;color:var(--ember);opacity:.8}
+.hunt-result{grid-column:1 / -1;margin:2px 0 0;min-height:1.3em;text-align:center;font-size:13.5px;font-weight:800}
+.hunt-result.good{color:#9BF0A6;text-shadow:0 0 10px rgba(111,208,127,.4)}
+.hunt-result.bad{color:#F08A6A}
+.hunt-lead{margin:8px 2px;font-size:12px;color:var(--ash-2)}
+.btn-hunt{
+  width:100%;color:#06180B;
+  background:linear-gradient(180deg,#8BE597,#45A957);
+  box-shadow:0 0 0 1px rgba(170,255,180,.3) inset,0 6px 20px rgba(80,180,100,.25);
+}
+.hunt-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+@media (min-width:820px){.hunt-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mcard{
+  display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px 6px;min-width:0;cursor:pointer;
+  font:inherit;color:var(--parch);background:var(--iron-2);border:1px solid var(--line);border-radius:var(--r-sm);
+}
+.mcard canvas{width:100%;max-width:56px;aspect-ratio:1;image-rendering:pixelated}
+.mcard .mn{font-size:10.5px;font-weight:700;line-height:1.2;text-align:center;overflow-wrap:anywhere}
+.mcard .mp{font-family:var(--font-mono);font-size:11.5px;font-weight:800}
+.mcard .mp.good{color:#9BF0A6}.mcard .mp.mid{color:var(--gold)}.mcard .mp.bad{color:#F08A6A}
+.mcard .mg{font-family:var(--font-mono);font-size:9.5px;color:var(--ash)}
+.mcard.sel{outline:2px solid #7FDD8A;outline-offset:-1px;background:color-mix(in srgb, #7FDD8A 10%, var(--iron-2))}
+.mcard.locked{opacity:.45}
+.mcard:hover{border-color:var(--ash)}
+.hunt-note{margin:10px 2px 0;font-size:11px;color:var(--ash);line-height:1.5}
+.t-duel{background:rgba(111,208,127,.16);color:#7FDD8A}
+.t-duellose{background:rgba(201,74,64,.14);color:#E07A70}
+.duel.off .hunt-stage,.duel.off .hunt-sta,.duel.off .duel-foot,.duel.off .duel-list{display:none}
+.duel-news{margin:0 0 10px;padding:8px 10px;border-radius:var(--r-sm);font-size:12.5px;font-weight:700;color:#9BF0A6;background:rgba(111,208,127,.1)}
+.duel-list{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.foe{
+  display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px;padding:5px 8px 5px 4px;cursor:pointer;
+  font:inherit;color:var(--parch);text-align:left;background:var(--iron-2);border:1px solid var(--line);border-radius:var(--r-sm);
+}
+.foe canvas{width:44px;height:44px}
+.foe .fi{display:flex;flex-direction:column;min-width:0}
+.foe .fi b{font-size:12.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foe .fw{font-size:11px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foe .fs{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--font-mono);font-size:10px;color:var(--ash)}
+.foe .fs b{font-size:13px}
+.foe .fs b.good{color:#9BF0A6}.foe .fs b.mid{color:var(--gold)}.foe .fs b.bad{color:#F08A6A}
+.foe.sel{outline:2px solid #7FDD8A;outline-offset:-1px;background:color-mix(in srgb, #7FDD8A 10%, var(--iron-2))}
+.foe:hover{border-color:var(--ash)}
+.duel-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:11.5px;color:var(--ash)}
 .rank-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
 .rank-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 .rank-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;max-height:340px;overflow-y:auto}
@@ -457,6 +527,8 @@ img{max-width:100%}
 .t-gift{background:rgba(217,164,65,.2);color:#F4C95E}
 .t-vault{background:color-mix(in srgb, var(--r2) 18%, transparent);color:var(--r2)}
 .t-synth{background:linear-gradient(90deg,#FF5FD0,#FFB02E,#5FE8FF);color:#140A10}
+.t-hunt{background:rgba(111,208,127,.16);color:#7FDD8A}
+.t-huntlose{background:rgba(201,74,64,.14);color:#E07A70}
 .t-r0{background:rgba(168,162,154,.16);color:var(--r0)}
 .t-r1{background:color-mix(in srgb, var(--r1) 20%, transparent);color:var(--r1)}
 .t-r2{background:color-mix(in srgb, var(--r2) 20%, transparent);color:var(--r2)}
@@ -813,6 +885,61 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     </section>
 
     <div class="side">
+      <section class="panel hunt duel" id="duel" aria-labelledby="duelTitle">
+        <div class="hunt-head">
+          <h2 id="duelTitle">결투장 &middot; 다른 사람과 겨뤄 골드 벌기</h2>
+          <span class="count" id="duelSta">기력 10 / 10</span>
+        </div>
+        <div class="hunt-sta"><span class="pips" id="duelPips" aria-hidden="true"></span><span class="regen" id="duelRegen"></span></div>
+        <p class="duel-news" id="duelNews" hidden></p>
+        <div class="hunt-stage" id="duelStage">
+          <div class="fighter me">
+            <canvas id="duelMe" width="160" height="160"></canvas>
+            <div class="hp"><i id="duelHpMe"></i></div>
+            <span class="fname" id="duelMeName"></span><span class="fpow" id="duelMePow"></span>
+          </div>
+          <div class="hunt-vs">VS</div>
+          <div class="fighter mob">
+            <canvas id="duelFoe" width="160" height="160"></canvas>
+            <div class="hp"><i id="duelHpFoe"></i></div>
+            <span class="fname" id="duelFoeName"></span><span class="fpow" id="duelFoePow"></span>
+          </div>
+          <p class="hunt-result" id="duelResult" aria-live="polite"></p>
+        </div>
+        <p class="hunt-lead" id="duelLead"></p>
+        <button class="btn btn-hunt" id="duelBtn" type="button">도전하기<span class="cost" id="duelCost">기력 1</span></button>
+        <div class="duel-list" id="duelList" role="listbox" aria-label="상대 고르기"></div>
+        <div class="duel-foot"><span id="duelStatus"></span><button class="btn-ghost small" id="duelRefresh" type="button">새로고침</button></div>
+        <p class="hunt-note">대표 무기 = 지금 무기와 무기고 중 가장 센 무기. 힘 = 단계 + 등급(희귀 1 · 영웅 2 · 전설 3 · 신화 4) + 각성 2.
+          승률 = 50% + (내 힘 − 상대 힘) × 15%p (5% ~ 95%). 상대가 강할수록 보상이 커요. 누가 나에게 도전했다가 지면 다음에 접속할 때 방어 보상을 받아요.</p>
+      </section>
+
+      <section class="panel hunt" id="hunt" aria-labelledby="huntTitle" hidden>
+        <div class="hunt-head">
+          <h2 id="huntTitle">사냥터 &middot; 몬스터 잡고 골드 벌기</h2>
+          <span class="count" id="huntSta">기력 10 / 10</span>
+        </div>
+        <div class="hunt-sta"><span class="pips" id="huntPips" aria-hidden="true"></span><span class="regen" id="huntRegen"></span></div>
+        <div class="hunt-stage" id="huntStage">
+          <div class="fighter me">
+            <canvas id="huntMe" width="160" height="160"></canvas>
+            <div class="hp"><i id="hpMe"></i></div>
+            <span class="fname" id="huntMeName"></span><span class="fpow" id="huntMePow"></span>
+          </div>
+          <div class="hunt-vs">VS</div>
+          <div class="fighter mob">
+            <canvas id="huntMob" width="160" height="160"></canvas>
+            <div class="hp"><i id="hpMob"></i></div>
+            <span class="fname" id="huntMobName"></span><span class="fpow" id="huntMobPow"></span>
+          </div>
+          <p class="hunt-result" id="huntResult" aria-live="polite"></p>
+        </div>
+        <p class="hunt-lead" id="huntLead"></p>
+        <button class="btn btn-hunt" id="huntBtn" type="button">싸우기<span class="cost" id="huntCost">기력 1</span></button>
+        <div class="hunt-list" id="huntList" role="listbox" aria-label="몬스터 고르기"></div>
+        <p class="hunt-note">승률 = 50% + (내 힘 − 몬스터 힘) × 15%p, 최대 95%. 내 힘 = 무기 단계 + 등급(희귀 1 · 영웅 2 · 전설 3 · 신화 4) + 각성 2 + 약점 속성 3. 져도 무기는 그대로예요.</p>
+      </section>
+
       <section class="panel rank" id="rank" hidden>
         <div class="rank-head">
           <h2>랭킹 &middot; 최고 강화</h2>
@@ -840,6 +967,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <li><span class="sk">누적 강화 비용</span><span class="sv" id="stSpent">0 G</span></li>
             <li><span class="sk">누적 판매 수익</span><span class="sv" id="stEarned">0 G</span></li>
             <li><span class="sk">최고 보유 골드</span><span class="sv" id="stPeak">0 G</span></li>
+            <li><span class="sk">결투 이김 / 도전 · 방어</span><span class="sv" id="stDuel">0 / 0 · 0 / 0</span></li>
           </ul>
         </section>
       </aside>
@@ -975,6 +1103,40 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   ];
   var MAX = LEVELS.length - 1;
   /* +20 무기는 무기고에 모아 두고, 같은 단계 두 자루를 합성해 한 단계 위로 만듭니다 (강화로는 +20 까지) */
+  /* ═════════ 결투장 · 사냥터 ═════════
+     힘 = 무기 단계 + 등급 보너스(RAR_POWER) + 각성 2 (지금 무기와 무기고 중 가장 센 무기가 나감)
+     기력은 ENERGY_REGEN 마다 1씩 ENERGY_MAX 까지 차고, 한 번 싸울 때 1 씁니다. 져도 무기는 그대로입니다.
+     (저장하는 것은 "기력이 가득 차는 시각" 하나뿐이라, 시간이 흘러 기력이 차도 저장 내용은 바뀌지 않습니다)
+
+     결투장(사람끼리): 로그인한 사람은 가장 센 무기를 대표 무기로 올려 둡니다(Firestore arena/{uid}).
+     다른 사람의 대표 무기에 도전해 이기면 DUEL_GOLD[min(상대 힘, 내 힘 + 2)] 를 받습니다. 상대는 접속해 있지 않아도 됩니다.
+     승률 = 50% + (내 힘 − 상대 힘) × 15%p (5% ~ 95%).
+     방어: 누가 나에게 도전했다가 지면 그 사람이 받았을 보상의 DUEL_DEF 만큼을 다음에 접속할 때 받습니다(duels).
+
+     사냥터(몬스터): 지금은 잠가 두었습니다. HUNT_OPEN 을 true 로 바꾸면 열립니다.
+     pw 몬스터 힘 · gold 이기면 받는 골드 · weak 약점 속성(ELEMENTS 번호, 맞으면 내 힘 +3)
+     승률 = 50% + 힘 차이 × 15%p, 최대 95% (0% 가 되는 몬스터는 도전할 수 없음) */
+  var ENERGY_MAX = 10, ENERGY_REGEN = 6 * 60 * 1000;
+  var DUEL_GOLD = [200, 350, 700, 1300, 2200, 3700, 6000, 9500, 15000, 22000, 34000, 50000, 74000, 110000,
+                   160000, 240000, 350000, 530000, 780000, 1200000, 1800000, 2600000, 3900000, 5900000, 8900000, 13000000];
+  var DUEL_DEF = .3, DUEL_SHOW = 8;
+  var HUNT_OPEN = false;
+  var MONSTERS = [
+    { key:'slime',     pw:0,  gold:200,     weak:0 },
+    { key:'goblin',    pw:2,  gold:800,     weak:2 },
+    { key:'wolf',      pw:4,  gold:2500,    weak:9 },
+    { key:'orc',       pw:6,  gold:6000,    weak:5 },
+    { key:'troll',     pw:8,  gold:15000,   weak:6 },
+    { key:'ogre',      pw:10, gold:35000,   weak:7 },
+    { key:'cyclops',   pw:12, gold:75000,   weak:8 },
+    { key:'lich',      pw:14, gold:160000,  weak:4 },
+    { key:'hydra',     pw:16, gold:350000,  weak:0 },
+    { key:'firegiant', pw:18, gold:800000,  weak:1 },
+    { key:'dragon',    pw:20, gold:1800000, weak:3 },
+    { key:'demonlord', pw:23, gold:4500000, weak:4 }
+  ];
+  var RAR_POWER = [0, 1, 2, 3, 4];
+  var HUNT_DROP = [{ item:'protect', p:.03 }, { item:'bless', p:.06 }];   // 이겼을 때 가끔 아이템
   var SYNTH_MAX = 21;                        // 합성으로 만들 수 있는 가장 높은 단계 (랭킹 규칙의 best 상한과 같게)
   var VAULT_MAX = 12;                        // 무기고 칸 수
   function levelPrice(lv){ return lv <= MAX ? LEVELS[lv].price : Math.round(LEVELS[MAX].price * Math.pow(2.5, lv - MAX)); }
@@ -1032,6 +1194,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var AWAKEN_DATA = {"aw_sword_heaven":{"P":[6.54,57.46],"T":[57.46,6.54],"g":24.5,"h":4.45,"s":0.0,"n":64,"ko":"천공의 성검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAiUlEQVR42tWOvQ0CMRSDnVyKKyhuACRuE7IYYrUbJQUDpAzolEdhewIqnhTlk/1+DPxUid/yyIQrBLs7QkqCIBsutrYp2G3V09OdSoIg66GgEVYc7L2FrN1Qp1LG8KSgoBNWNMLmNffQiRoOMakkTOc/HWMQCrqVRvh4H57OHQCwAHi/pAz8e30B1yAiZXkrAeoAAAAASUVORK5CYII="},"aw_sword_abyss":{"P":[6.19,57.81],"T":[57.81,6.19],"g":26.0,"h":5.16,"s":-0.0,"n":64,"ko":"심연의 마검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAc0lEQVR42t3OIRKAIBAF0A8yI9EbSLRbTA7Bg3sEb+AGg5FIYBwDf/UGBjc9/rKwwFflYSsGRWSnEyZGmIyFiTuINugUiFmPmYlR2EQsQviJd3f94dJ3HhTCZMImwgnhV073ukbQVgzvNjXJANAAODf8t24TUxalBTsKJwAAAABJRU5ErkJggg=="},"aw_sword_dragon":{"P":[6.97,57.03],"T":[57.03,6.97],"g":23.3,"h":3.39,"s":0.0,"n":64,"ko":"창세의 용검","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAgElEQVR42t3NuxHDIBRE0UWakYk8dGBKoROXYpemElSCQocKCRhwwN0OHPklnNn3QfpNBZ7XMnF34yGSp5NOEoytgVhBEsgXKCfb481Pg5nNiB0kgdxAqd4+ZxIEFu2zcxtsRSN132kgV1Au39tnEnxm7WLG6A2MKkmrpM+hf6kvrTEidw3ST6UAAAAASUVORK5CYII="},"aw_axe_titan":{"P":[4.17,59.83],"T":[55.44,8.56],"g":42.5,"h":18.59,"s":0.0,"n":64,"ko":"거신의 양날도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAvklEQVR42tXQsW3DMBSE4U9Pgq3OLoMggDyBZ/AoGSEjJKNkExUuUmYEjaBSCAgxBUkDGSGv4eHnkYd7/JmNgKMqnhp5XaslL4X0qmdQydjImYPAhVHgxlWP2efzPcpP74KOfhMEw1qypAWOOXdzITnPcMqJQ0BiDM423jDlxWnHlHR5D9yFHS8cc4rypjWd8layLrWgm0pad6xNLI+rrmzBR11HbuaH2IvopEa2Jr6bmMvR7zVr+GmhX/7T/ALRGjPKRIOWRwAAAABJRU5ErkJggg=="},"aw_axe_chaos":{"P":[5.48,59.48],"T":[58.52,6.45],"g":38.5,"h":10.11,"s":-5.98,"n":64,"ko":"혼돈의 처형도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAZUlEQVR42u2OIQ6AMAxF3xjJFJxgCVdAIjn6jsAJyOTkJAoQa8mSIZF89fpfmxReYy/oADwCkxF1SGMSYAE3hGIcoh4YFbwCCkvTZB1ioyKzNqtCUNir5XLel8fydlbKAiT+fJobFv4N14KPIokAAAAASUVORK5CYII="},"aw_axe_thunder":{"P":[5.66,59.42],"T":[58.34,6.74],"g":42.0,"h":12.94,"s":-4.3,"n":64,"ko":"뇌신의 도끼","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAXUlEQVR42u3NsQ2DMBgF4c92EQokMkDYJEU2YRGKLBYJZaLUUcSfwmYAOgquOumd9NhLejYpyBA8QJaWAjkuY2uG2vhcm/RTXd7zvcra3RREvL4/SLk9he3i5KD8AUdnDY0L/Q4TAAAAAElFTkSuQmCC"},"aw_staff_star":{"P":[3.3,60.28],"T":[59.87,3.72],"g":53.0,"h":8.34,"s":-0.06,"n":64,"ko":"성좌의 지팡이","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEoklEQVR42u1aXWhTZxh+vpCFuKyhuOAUyloSt9E4GFLQi6ETcTcDGUTHYGBwccO7CRMnA2Eb7EfYKkNRdtWxjvWiqw1NGXqRljAZXWSgxZpaRooZTRrStIs1x6RJ4d2FPd/OyV8TTdLvnPSFA8k5OTl53ud5f743H6BxkzI5KnU+HJkn6NnCkXmSMjkiIpIyOVICDkfmiYhI905oaQU8CVDNOqVeP7ycWoQH/7TxXClfaEoBFnM7WcztJX98ufOaV4ASOOVjtDDYo3KCfE3K5Eh+Xc4ZmswBMnDKx+iHd21F4GWTMjku7+vjE1SNInQDvtAJ18cn6LtLfVU5waAFRyS9h4sck878W/Kz8cQif33U7Vk3NxhEZj/9MAQAuHo1UnT9UTZfl+eIr4DlAADg9MgqpGyKlXPCo2xexX61lcUoOvu5OX9ZqW/f9rwK+N/h+wCAqbvTuHNnqiJ4+4vbEY7Mk0F05itZPLFYM3gAcHTuYLP/xOHo3MGMWpD/7m4LxruBg+dBchh4fdfw6q5u/tGpu9MAoAI/1N9XFDZKJwgbAoVmd9owG0r+39FlU+yzMx/TF99e4OfWY72cMWFzQPSKKv5ve8dgd9rQ5Q5zVuUSd9TtUd0/1N/HHbXes4RVQGHyszttxb39GsCh/j4qdV52UCVHCJkEpWyKbd07DAAwOb/E8swkD4H7/Y6iRZGUTTHloawkS0EXLOZ27a0A5TZ4ZdJDRET7LxN9sOc5Wpn08EO5+Ck85Hu5CsqsBIVOgknvYdje+QsAcO/mDFZjOdX1paALpo5D6pusBx6HUOgcfvzax5fBz5qfgZTJUTyxyCuA8A6YDSVx5Mpj8Kl7vxdd5+CtB3jJzIXO4bZ3DLemJd49WraYIGVyZNliYppQgMXcTktBFwDg5Q/bOPPu1628GgCAVW4XZnoxG0ri1rTEv6OwdS7XJjMRwf88OAQA+L73AqJzEfz5jZkviHZ3W1RAC+30yGrVJVA4ByiZN3Ucws49XyEejVa8p/dtIwddC3AhZT/s89Owz0/733iLFgZ7KPh557pDjaed/DDRmD95sQ03An7OvGYZbTTz9TImCvNvfhSHfedL+PWXn1qH+QfLkop5XUxyq25zFwc4+OMnTm0YeNZs4AAQS0QxFpjAvuxZAFAtcfXNej6mYt7h2LXhsmfNZF7u8ERinjUDfPphCN5rIVV7G49G9S97ZZ1fGOyhlUmPcNne2GjwsuyPXH4B0blg6zIvQsIrZYZmMO90BTFwLC0kUawR4OX2FgCcrqDQCxtDI5j/LfIeTl5sUzEvatyzRjBfOMwQOemxese8b2QUNwJ+DBxL4+D5B8JnfFZP5jeHGU0eZmxoIyQzb+pI4P1PgojORdDlbiHmC4cZWmP+iXOA/Ne1949t8I2MAoCmx1isFuCbw4y1YcbxE6eE7e3rrgCRhxkNrwKFwwzfyCjOBLKtu6RVbjjQi7Fa2ls9Ms8qxfy+7FlYX3kNALB173ALZfu1/TVyttdqk1OzApR7dOUt6l3usK7bW2MR+OUAbl76VLULQ8/SV0+ECsCX2qKu+xBQvm+JWr9pm9ba9h8UY+P/xWd4OAAAAABJRU5ErkJggg==","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAYklEQVR42u3OsQ2AMAxE0R9H1DBCRmEMhqFiMRoGoUBiBgRyKOxQhJ6Ka+7Jiq0AAJMVcScCkNtZbKSddY9jZawmpILLOyi2LsEBD6SgKTgdWQ2Kf4NjoU56HRz8MZvw59PcTakPp8eAakkAAAAASUVORK5CYII="},"aw_staff_tree":{"P":[5.84,58.16],"T":[58.16,5.84],"g":51.0,"h":9.4,"s":0.0,"n":64,"ko":"세계수의 지팡이","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFbUlEQVR42u1bXUhbZxh+jnUiyywSZPRH0JVeiNVRutyM0ouyIdkuitB1eLWLUbe2MBiD3vSiS3+8EnZfFGFuZaF1IN3NwaG5yHQ3xzBM1GA0ydkSE1wSQ7KkB53NLvT79p2Tc+KmJuc7wRcCx+/kKM/787zP+yYCx1bfZmtuLVW631AvIPWA2ppbS1cnnRWd0FAP4B8F76Fl4IwKKDkHgBOXmgyd0FgP4PVSnpxL7gXs+LZQULKCpR1AgBEgbERHn71AcSWF6xdbcO7USXgCCcwEfZDcCyiupMq4gHXGCStFOvzmJorenKupsdklDjlxuuklvsv9jsxSBsrPWSwntzC3msd6roS2X8L4Q1Gw49sCzYj3bUijiFJw27X9t/LAciWQWcoAAMQhJ+RIHJ5AArIY133v1Z7TkPbuseWQd6+rMkDgvXUVlKxA2FxyL+BWVkA4mcOPv+UBABubG/S55EYaobUorn/4AQDgyc1ejIiL+POzbmSWMiiupMr4QOA13UkN593rAICOhz3ILGXwxk9RJApNAIC/Xm7S54rKtq4TiDnaGyDFXpWRIZdtcCboAwDYu+307OO5TUPwAPB682uqnx8Mf6MivEHnBTjaG8raIXcOKChZwdMvIrwQo2fikBMAKHg27SvZR598qgIc31SsIYQKSlaQ7wcQm1yhZ55AouIzRWUbyY204f0pKYo7864yjuFWCRaUrLDj24I45MS01w8p9opmg/fXeVrzWvChtSgCi8vw+wOq33fR/QXlElYZWqINhpM5ei1H4kg2LePKu++URT20FtVviZNOjD57odsJuHeAHFH3+dVYBpGtgCFwvejbXbMIhtLI73EI2wm4LQFbc2uJkJ+cKqjIcGJ8DKG1KH0R4FrwE+NjKgItKFlB2wYbrRR9thwCi8uqc23UCXg5EsdcKA1gt+4t5QBiHW02SLG8yiFf3/2KtjqtTYyP0WvXD/PoenoNd7ouYSbog6dfLHEvhUkJPLnZS1vYuVMnMWyg+/VMHHJi5PkslcwdD3v+zaz7AcoDAs+RJ06YknbrvM/RWfaez0f9qpmB1DwBz47PLQNnAEA1EHHvADLjv3dlNxumvX5VJtx1ngUADItxPAreQ+7Lb/G9N0JJr9JOgftpkETTiBg73jpLnSLd6qUjr2Pg7V312C8aboK4ngZZ4HIkjtVYBufb7ViN7e4DzrfbVbognMxhLpRG19NrkNwLsHfbDcdfrh3Agp/2+hFO5qgGIFLY0V4uXcg9MjKTEVqb7lw7QEtgcqqAx7f7dMlMb24wqvH9jDsdMO31U/DkWg+s0QD1f/9eI2+EF07mKHhPIKG7xTlKE3giPAK6o80GOVWoOnhTM0ALntX5RL1VG7xp06CW8Ei7Y6NeC/Cmj8PTXj8Gb1ymet8ME3hI/VoRnqkO0JO3ciSOKSlaM8IzzQF6bE9UHlFxZoCviQO08pZdb5sV9ZqRoJbtPYEEHt/u29vwmA++Zl2AtDgjeWumCdWKPEt4I89n0efoxGosYxrb10wJ6s3zcqpgOtvXpAS0hEcWFkTe8gb+SB2gJTyywwsnczWXt6aSICtveSO8qpCg0QLTTHlbMwcYLTBZlccz+EM5QPXhJaPpicIzU95WnQO0hDciLqLP0alSeFYAf2gSZBeYbAZYyRoOE312gWmVmj8wB2jZnggdKxHegaWw0QKTh3m+6iWgJ2/NWmDW3AFG8nZKilo25fctAfazN7bPW0neHpgE2a+lkCkunMxh8Mblsj1ePURftwtoM4B8IYHXef7IOYCAI+BHxEV6r97AVyRBAp60uXqq+/8sfMjL1X+htN8/INZdBli9vx95Nhx74diOrS7tH+qpPrhneLj6AAAAAElFTkSuQmCC","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAMUlEQVR42mNgoCr4AaUZ/zAwMTAwMDAwMUEZLIxQBgMDPgYEMP+DicAYf/8wjIJBCABe0wYHogz9+AAAAABJRU5ErkJggg=="},"aw_staff_lich":{"P":[3.96,60.04],"T":[60.04,3.96],"g":53.0,"h":7.28,"s":0.0,"n":64,"ko":"리치왕의 지팡이","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAGbUlEQVR42u2ae2yTVRjGfy1F62qkwoIOxtqwUcY2jFFENBomIUbmQLmYwWJmnLooiUZiINEoAjGIgIsmgqgBMqIb1xEGGYgK9a5NBXZrt7riNssslQ4Y2xgb8vnHco7tGBu3td83OcmS9rt1z3ne93mf93wHboz/99Bp8Z82Gc1Ka/sp3eVeG/r9cu9TLXCT0aw8nDpX6Q7sUtcriqK0nu1QWs92KPsO/HzRfXotgc+btZx7Eh/jkHdfn0yajGal5exJAGKMg+Xxpavyw6JCr6UI8DXWSfA9RYA4ZjKalcDJQNg5fyDY4zP1WmK/yvvrf+yecYUxaTKalZZja+UxfyBIW3snbe2dHG3w87u3jsoqNxUVlWHPNmgFvLPsO+r/Lgtjv25TItYcrwLQcsbFiZ3T5X2/e+vCPldWuXt8vkEr4R9s/qvPa6w5XjlBszOmsXRVvjwnmN++aUOYfhi0kvvdR4frTXbsqKc7+yI9aLZz68j5zMnJlfd0B696H2AympWMSXkAVHl/pf7vMgn44/eWyuuesjl5fXUNReUGBPhP5r/Ca7vO05cHUHUEtLaf0pX+8qmSMSmP060BAo1OHPYSaLbz3PROed363RO4Kel2mj5LCAN/OaZHMxowxDRcfrZ/6wfSiCn/kNEpsdx7/gQvfVFH+n1jGaPfSlG5Iaws9jYRqreFJqNZMcfE4andjcNeQvrMBbS1d+LY+xEAblcNL931FGwuYWPJlxQkK+xf/xA3xU+lw/c1zTVlUhw12wuYjGZlT+Fi0mcuAKCtvRN/IEjDb0VYkpJZvSKfCSV/0vF4kCLvUOYlNgFIDegtAvRaAF/hKMTtqpHGRtR2t6umSwTnZOCcMYpn35jBysxzFHmHXiSAmp0AgDvibTw24wkK3n8ZfyDI9z//Js+tXpHPtu2lVHkaABidEoswSS3H1hLqDjWrAUL9LUnJ7CvZBUCly8uaL74C4GiDn9zZkwHYv/4hHn3uB8boG3khY5ickFCTFJoSei2AF6O+tppxKWMZlzJWHhMp8frKAgCO7PyGeYlNFJUbmLLiNNYcbxj4jEl52usGj/s8WJKSsSQls2T5ui5j5GngaIMffyAY5vsX7blZegDxF2qqSn/5FM1EgAD/bO6r8vvGDR8AkPXkI+TOnizBv7voGVJtCaTaEsIWT0QzlTEpT3aTmtAAof53xNtw2EtYsnydBF9fWw0QJn6ptgTs33elQ2ri/cSPsMpnOcu+45B3X48lUdUTALCncDGWpGTqa6tZsnwdS954UZY/IYYFxU4G6QYTH5vCsNviLuogRRutiSoggFc4CqmvrZbgBehKlxeAgmJnWM/QW6nTzEKoyWhWWptqFZPRrBwszleOlpcqB4vzFZPRrMzPnqqE5vX1+k2D2pg/7vNQ4SgEkDVfMN4fTBrUAj7Q6GT4iAlS4AAWvrOl30NYr0bm3a4a3K4anpk1od9/X6cG5o/7PLLcAWRmL4uYgA2KNvM5WekAuA79yLbtpei5wIjYWyhzN0ZEvQ1qYj4tJTEieR/VCBDMT773TsxDY8OYr3R5I8Z8VDRA2NtQOytEL9LMR60KjJ+YLcELtRfuLhqOzRDJsO9ubyNV66MaAd3DXoDPzF4WVeYjEgGhnj10EkRj01/2VhUT0N3ehjKvpg5N1985L0boYqYamO+3CVCDvY2aEVKLvY2KBojXV5ak5Kjb24hPgMloVrx3Pwgrv6Y48z9jk5aSqIpS168aIMEDn7vKmRgzBJvVQtb5WpyVAVWDv+YJCAXvqevarmKzWuTnaaeOqX5BUn+t4N2LpuKpq8dmtbB5SpymwF91FRBqP639AslVTXz79HgG7a8g7Y8WHG2neb41qJmlaN3VMi9YXza6g7kH/sJmtZB45CfV5/w1RUBozq+5J4a4wz7S/mjBZrXwuasc+z8dmtuNPehqwBdnjmLKFhc2q4X5t57gXLWPtztaNLkVXXel4LuHvpYE76omQAjeXvNIWeZEvdc6+D5TQDQ2OVnpnHwgga1n/cQd9jFysFFzan/FVlgwL/bmiPFWfNc7eGdli+bBX3ICelu3F6+lBwL4XiPguM+DiIBt20s10dhcFw0Q7Lc2B+XKrZ4LLHxniyr7+evaC4RuSwt9cTEQme81BUTYAwMu5/vsBh32EtyuGil4oXvtBuLQXar8DWTWb4wb48aQ418z3gg2jM1aHgAAAABJRU5ErkJggg==","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAO0lEQVR42mNgIAg+QGnGH0wQBhMDE0wOnfEPpub/B4Lm8sB0CSGZwwzR/RNm5wGYlAK6Xf8fMIyCAQcAbXQKvnzHbzIAAAAASUVORK5CYII="},"aw_spear_sky":{"P":[2.3,61.7],"T":[61.7,2.3],"g":54.5,"h":3.04,"s":0.0,"n":64,"ko":"천룡의 창","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEbklEQVR42u2bb2gbdRjHv5d2MfRmekpgGw22NGxlCTpHYIpMZX9AVEQEi4ijgzEZKmOwyhQR/ANzL5YqWKkDS16EbpNoLGPQ+aIt+1OEqazNtJHKEhPottakS5rl2jSdPL6Yd+TSxiXp3fq7S553CQmXz/Pv+9xzvwA1q1nVGG8RiLcIVLXgRES3ZkWFE+qNDg4AmfkkACCZnsPn3b3VFXHJbs2K1L7nrSUlYDIifGY+KUd9dDyCZHoOB955tzoin29Xfg+TOJ+jpkc2Lht9w/SAwlofHY8AABofbMCmNheeema3fqEqiToRUTh2U458segz2wN4i0CZ26F7OkGqd8lGxyPY6mrFXHYRnx49XtK12G2C6fOoFP7r3j4M/nhWTv2B709DzKY4/TSyxRu0ENxXNG2Lpb04nyNPt7ek1GfeAXG/my5/3LwEQG14E4u1DwDWti1lp/0Xx4+V3fHrWa79VqcNUZ8NLR1hhcyVAl9q3TM9CeZngRbwTGZAbnJwiRO6Xo5pAs9cBojZFPfwEz8o3hvrH8KBb+OawDM7CqcnggCASCiBbR9FFaOtmvBMOkDMpriWjjBFfQ58MzCDNa9G4PrnqOyU505swF/XJlSBBwAmpyP55uZ6DxJDXbC1/wq8cQhvXvPi3NQG1eCZzID8WQDp84iEEkhu3IGRqZsICTm5a+1a/A6dZ+6s+Hocyw7IhT4EAOx4sQ8AEDM1I3L2aYz1D+HxV3bJ35EaZyWZwKQDoj6HYgZITwQRCSUAQAGeb2b7bqxtelvRS3TnAN4iUObwEVzynsTmLy2wtm1BeiKIQCCGzjN3EPU5io7JhQrS0hEuyQkca/AAMD08gp2/DOLC6UcRCNwdgqR6j/occja0Om2yXI7+ISo+p6sMKITvC13F5YXbOPiQHT/PzcIr/o3YmgaI2RQnKcTw+40ydCXgzDigGLy/8z35vT+jMTyfuq6AK7zVrVQK61mEH+DuzaLWhsfEInzm8BFMD4/I0d/U0oxPzGuhxXbHxGrk1+3cjr7QVc1/i4k1eEkGC21bQ6P+HcBbBDonNC0LL9X09PAIupOTuOQ9iT3OxwAAjrGfoHvjLQLRzCmK+93ksdrJY7VT+wON8uKStwg09eQL5LHaiT74jDxWu/xay+f63P2MfP509+zrv8naXkza1O74qyKD+TXftb8He3vvjqqF8FqDrooDChsegGUjv5pmul/wUsNjCV4zB/yf1LH2jI5TG1zScj3AayJzNHOKLq53yRKWL3WGNt4i0MX1Lor73bQQ3EfOOrMu4Dm1a77rqx7s7V1X1lZG102wmNRJmxzWjVMTvvDGRg9Nj9MCXk/dnqsEvCZ1NanTl9SpUgJ6lroVy6DepW5FGWAEqavYAUaRurIdUJO6xRs1qTOS1JUNL62l4343xf3u6oGXTmlLe3tnnZlOvGYzvgPkEfe/U9pxv5ucdWaqhj8aKtbiif6XEAjEsHUzz9z2VvNJMDc5KE92+ScvjG6qn7iomc7sXzPkFlHFWOz5AAAAAElFTkSuQmCC","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAXElEQVR42mNgIAgkmKCMBCjN+AEqwsYAZXDARARgIgkPGCGM/wchIowMByACzP+halhgDA4GKEPgH5Sh8Admzg8ow+ED1PL/BxiYIYpvQg3kh2n/C2OwMIwCOgEAyEERMNDWN9YAAAAASUVORK5CYII="},"aw_spear_trident":{"P":[2.62,61.38],"T":[61.38,2.62],"g":53.5,"h":8.69,"s":0.0,"n":64,"ko":"해신의 삼지창","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAE8UlEQVR42u2ZXWhbZRjH/6mlBIMsYr2Ym6Y2tpuNG5spUgau4PRm4MUGcyJbkWwi06GIihtOzEU33bQtW6FO7LwoI4VgE9oL0X6tbOA4062GdWnTLjHRpa1Nv5LlNB9VHi/0HE5PT9Ikm+2bj+cuOW8gv+fj/z7Pc4CC5YZp1FrSqLWUt+BERDeG3EmdkFNOkoITEVls3SvCExHNBvkl54qzFT4cmRM/t9t7YLfZE54FgHBkDnOhBTQ2t2Z/5IV0P1F/liy2bjpRf3ZZ9OUZMhvkad+BI8vOFWWrI7YbylFV9TQ2V+oVSyMcmYOQJXOhBbz59gf4/rt28NF5VU7UvBB1Qfjkz4UsESKvFP2sS3sBSgqjBC6c4yNx2vBERVL44mwSPEHspKnMR+dVGrWWBm95AAAjo25srtRjk/5xVG4yYMfOF7Nf8ISUTxZJoRyIiPhInL5s/nbF6DMtgtLIf3LyHFwjIwlFTKPW0pVfrmO7oRwL0UV81XoRHPdzwugzrwXyBieTyCv9TqoXTDpBqbvLBF6j1i7pD9LtGtcu6ovjRDMWujHkXqb26cBLnSm/IZSaJrYcsDhOAatxCUy68NJzs0GeLLZusXNksh+QwtOMhTizjjizTvGPpgov15LZIK8YfXZugdAAEBrAtebjGBzmEzpKrvZNX3yG+alA0ha33d4D7x+TbKt+zGEizqwjIqIf+q/S+f2lFHOYltR0qpGXj7/7DhxZcVfAhBM4s474SFwsgZjDJDohE3giEms+K+7+mMNE5/eXkts3QW7fBHFmHQWsRuLMOnL7JtKGT0XxVaw5wdumh8c5DQDYtmcXSrZeQG0L8NrlR3ExUIPfbrsS1nw63SPTw1B5VSkAoGTrBfG7d7ynUO0/ivnpB1eEb7f3pATP3CzAR+dVZXVuAIDHOY3aFqC2BRi55kLc3w8A8LbpoXTfSyMvnxiTGZMZcEV9GngWqKx/CG2qRsT9/dgBG5oOrxedUFbnFp2Qbtoz6wCNWkvjU34AwO93JnFpRofq2FEAQNPh9XjmozEMna4AAMxyewEAtx74GADwysG3ACDttVcRq/ANDecAAJ2NW9DZuAWDwzwmp2YAAM996kXI5QAAGP4+iY26yozgmbkFlOA9t8dwnftJTHkA6Ojw4aUzNzHm9uLhy69i255d+NXeBwB44fNgRgtPFcvwApAgev3H1uG91glUPVaCN3Y/IrbM73f+lfG2V8U6vNImp//YOgDA4DB/T/BrHvlgiKdgiKebTje9fuhd2lm7O6WWVTrrZ+2y09bVmxH8/TbVWsCH/S2Y7mvAN95DGHW5kqZ9TpmQ9rauXoo5TBSwGkmvN6xpKhetJrwgeBVPPYmqvRwAYNLvz5/Is1Dzqw6e1/C0OM6M2q/6LaBRa0kYWBp+rM5ftQ9YjRRzmNZc7VftFpCrfc3xKEIuBz6s/hM5b8kEL6dFr6D2/73SsnX15he8dLARXmLo9Yb8ghfS/tSZFgpYjRSwGrMKvvhe4KXLjFGXCzVfRwtqnxeix3p7+7+1woVlBmPLjFVrhQvLjMIyo7DMyFl4VWGZkSDts2GZcV9vAY1aS+G7ToTvOtE3cDVvlhnLZ4HQAJ6PNqDm5Sg2bNShrO7fV9S5mvpFcvj4nV54nNOwHAyLNZ/LdV8sb3E7OnzIJ1NJNUD+MOe7vIIVDP8AnJzDsXt3bUAAAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAj0lEQVR42u2OKw4CQRBE33RvGMQmIBEE8AhA4OYy3AIHR5sDINAIMmIPMJJPIIhuDAkOSamXqlR3wRct31BGAoAyMyPmag7qEA8oAOvTypwEAYC62AhAqN7WvGustL+PDULdAiBaLgLwbBzoZ2u101AUQObdAIBeivb0cePqUyfIByRPhtUXtuejX+SvH+gF/NEbazxCARcAAAAASUVORK5CYII="},"aw_spear_reaper":{"P":[5.18,62.6],"T":[58.82,8.97],"g":61.07,"h":10.81,"s":-6.92,"n":64,"ko":"사신의 대낫","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEY0lEQVR42u2bXUhbZxjHf8f2wlYQS0kb1unEdE6T9KKzsxeb2K0Xq64wzMZoHXQwmGN0MAQHhUDH0tWFtribMUZvpIOuVxWUofaqTqGbIw5C3YnaZETq/KyzkzULBDy7kHOWaT6MJuec92zP1SE55yT/33me5/++L++RMEmUFJcp2c55En8s5ft3JbOI/fOvlU3nrazG2Fe6l5XVGADlBw/lHYZkhOiRwBgAR11VGa9RhacKFcZOQUh6iR8JjHHUVUUsntA+7x0Y2nTuqZMvsq90b1YA0YfzADQcq9sRCEkP8Q8XfuP98x34L1/kQSQKwLOOSu0c+4H92vGJk69px+0dH1NT7aCy3J5SfHI0HKvbFgTJqJoHePPcuwAcOeLG7arVoNgP7Gd+cZkzZ88B8GrzaZzOWg1GKgDbhWBIE8wE5tOrXRqMZBCVVYdp8bQAUFPtSHvPXCEYCiATlGQQalzw+jQIqUBMTEUAeK/1rS1DMB2AbCAueH0Am7JBFa9GMgT1XqmgmBbARhC3+wfSZkNNtSMtgJLiMqXN08nMbJT+H69vgmB6AMkgbvcP/MtBNpaEGrIcAuCLzz6hzdNJIDjMz5FBMTMgWzaoEGQ5RPf1LwF46un1716qbCEQHGZ5dY7ppaD4ADZmQzKE6K9hrnQ0AfDM4RoArvm7GBpJpBUPUCQigCfxx9IbzU3aoOr48Re40tHEiZZ26ps+ZDo8AYDb6cB2cC7jvYQEkAzBd/kq9++PAxCLJ5hfXCYkT3LN3wWAq7pCTBvcaikszgZYmJkCYLCvF4APvF8TiydobnDjqq7gRk/AWiWQKqbDE9Q6n2NcjhCLJxj5YWxL1+0WXfhPQ31a45sOT+B2OmhucGvpn+npA+wSOf3bPJ3cvHWPl185xB+/PwLg0dIyrK0x8P0DgqHZrENiSWTxADOzUe6MduP3ehiXI9zoCeS0PiCJLv6XyOh6D1gKbmthRLKK+O2uCBX9l8ULA6BQ4oUAUEjxpgdQaPGmBqCHeNMC0Eu8KQHoKd50APQWbyoARog3xUhQXeczQrzhGaAuaDzvOGWIeMMzoKS4TPnu24sAnP+o95/FDZ3EG5767a1fKQ2uM8rdni7lbk+XUrrHpmxlp4jwJZDc8Oy2Cl5/+3MA/F6P7v9FMlJ8PubzQgEwyuoMB2C01RnaA8xgdYZ3e7XLO8sbldI9NsVZ3qh7tzekBNSaDwSH8V2q1z4/3eozzZMvKrT4jVYXkidNlaFSocWbwep0BWBGq9MFgJmtruA94H+rM7nVFbQERLC6gpWAKFZXkAwQyeryDkA0q8sbAFGtLlPsykX84myAxjo7N2/dY21NsYTV5dQE1Q1Jy6tz3BnttoTPS7nUvKhWt6MMsILVbSsDsjU8kawuZwDJW1DfOfsNdluFZcf2RenEq+G7VG+ZhpdTD1iYmWI6PEFInsTv9Vh2Vrc7nfjBvl7G5fX3cLLtt7UcAPWFg1y3nVpqfi/CXD4f8Tf42k64qOtw4QAAAABJRU5ErkJggg==","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAVUlEQVR42u2NsQ2AMAwEj0QiJSOwBh2MziiICShTRHkKvxArIHGNT++3DG/WI2ZRgwQs5JANdgAGyaVJV0hW9b0aCaIezN1SulfttPRq0fN/dPLzFW4uVxR4T+lpsAAAAABJRU5ErkJggg=="},"aw_mace_sun":{"P":[6.65,57.35],"T":[57.35,6.65],"g":47.5,"h":9.4,"s":0.0,"n":64,"ko":"태양신의 철퇴","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFXUlEQVR42u2bbUhbZxTH/wldG5fgUhXZ4sDaUWy6zm4ozKGOsQ1sytrNubGXD2WTQQf7MnR1jAm2sFeL/TKwZZR1FNHSTVMt6MrqHKu1dRQ00SYESXyZriEmU9MbjS/w7EN6H+9N7o0xrfrcmAP5ct/0d55z/uecJzdA0pKmWNNq9GRLwwfmF8mDOkGtBNC1QiZMZGg1ekIIIc6xuyInyB0XnovVCcxHwFxwCY9npsPqsEuubEtHJz2u1egJNz8N17g7MVIgEJxRZe7MBICoThDCA4C5vTPmv7FNaWlx8tRplB0xwTXuhrm9E4ODQwAAHv5q9601PU/FcmkLBGdUWo2eeKY9AIAz5xpR9b5GdP3ixDUAwIT+aww7RzF0x47a45X03vCIYtoBQlgA4MOfz/XSkuyVi/1/ipzgd1gAAGVnn0B/b48oKuaCS3B7fMjLNUY4Qc1izrs9PgCAZ9qDlo5OcJMNYniJCEjNPQAAqH9xEFaHncK7xt04c65REp5JDQgEZ1R5uUZiddhXDqa+JIa21cDvsMBl8wIAni17hUYAAPxe/Qx2HbuCoTuhZ/ApoQgNEKbDyVOnQzkvcIDXfBgZb98Whbb3fCF278ugDum3B9A4VYg3yt6MCs+sA4TixU02UAcI4Xlzjbsx7BzFzr/epcf67QEAQFXbclQBZCoFRNCC/AW6qeC5bF5kyNx/Pb0Wup7qiCap5IV8XlCJlDO2sQLPQ8uZt6se+z8fxlxwCY9qHqEpsJrxgirUlLxcI+GdoGIpAlo6xB1c88Vf8OMnM9j+5KtYnLiGAXMXMj4UNzp87QcAXU81bo8EUZAT6hV4HeCt9nglmxHA/1Plh0yixuWtoxURdX7YOSq6j4cHgAs3/Nhn2L6iBb09tCdQRCMUHhFWhx2pfa+JRc/mxfX02ojrw1cfALjiOuVWAavDjt0GQms+Dy9Uea64joIDiIAvO2Lic17WCWqW4YWrzsMLrfX7jyXhbz52FPufNtJ0iTZFMjcLcPPTuNp9C6Ul2Vi01dBz579pj/k5VW3LEArqnqd2yUaCijX4D45V4edvC0R9Pp1/HBa0tIzJPoMrrsPg4BB+vfATpDZOyg+Z2HWAsBni7tngNR+mA44QvnGqEDU1X9IKcNnciv7eHrpPMOwclQTVavREEeMwd89Gx11vVz3VgPD21jPtgdvjg7m9k9Z3q8NO817KCcy3wkL4v3/4QqT2l6dCKy3c6BD2BMIpMrxXYN60Gj0hS/+GPr4m0ncim5x9J4NoNXriHLtLfvvjZsSucGB+MeI4f05qt5hZ8GjwcjDRHBA+WLG/6r4mSfjVYB7WSm+6BoRKXWjQ6bcHUNW2LBKvWITsQUzFguDx9T7t+dY1AcuVNqYjQE7tnzNq45ogFaX0qwkeEtViFbzNsA1NgdUEbzNMtdE5H6/gKTICHqbgKS7nk4LHoOBtaAqwKHjrLoKsC966RkBS8Las4PmaSLkxixh0KWTqUj7Tgrcu8AuWClJuzCKVRbnEoEtRHLwqXngAOJgTyu+mi6XIKWoGAMwu71DUlKaOB56bbMDBHC2K9xqQnaZDTlEzRm68B/NnmYqLZHU88Hx5+8fjx9h/HABgwNyFl7+bVdaMHs/qlxuzyNSlfLJgqSAGXQox6FIUrfbqWMG1Gj35yrQHxXsNMH06Ar/DIgr7hF15KbXny17fiezEr/NSYV9gSNtaU92CpYIUGNKoExIJXL1qX3//Hb2PStQ4UGHDgLkroRZaXgTvv5snfEVldnlHwpU62Wkw9NV0veir6URUe1U0Dah/fcU/rG5orOssEP7jBSQtaUlLWtISy/4HDZ00jgmI1S4AAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAl0lEQVR42u2PMQrCQBBFX8ZANiDGMo2wx0gT8Cg5iFa2nsbKMuANvIArsbCMYKGwGIsZEAvJBfzV4/Pmw8BIEpDv5pAadFsmAMhip87Um3xbqTLzeRCAZ/NSiMRWh7ONyoOrSQAydzwJQDWnEoDQc1W5CLb8OKssg6xFIV0KgCN6AEpKBYq9Xd0vBk3/+UKbNv789J/RvAGtmCAHG3eoDgAAAABJRU5ErkJggg=="},"aw_mace_doom":{"P":[5.66,58.34],"T":[58.34,5.66],"g":51.5,"h":13.64,"s":0.0,"n":64,"ko":"파멸의 전투망치","src":"data:image/png;base64,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","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAc0lEQVR42u2OMQ5AUBBEH34QiZ/oNKLUKhWOpHEDF5M4jkKhEhFB8Xdbnc5ULzuTnYF3NYAPECkwiFXC5APcBAQAaXIUBmCpIwl1pcBsXcZrq9H96Q+xvElhlQpWuYRaGluBLRM4Tw0bHXsp5GrtCr++0QN6exDuZzO7jAAAAABJRU5ErkJggg=="},"aw_mace_meteor":{"P":[6.58,57.42],"T":[57.42,6.58],"g":48.3,"h":6.57,"s":0.0,"n":64,"ko":"유성의 모닝스타","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFmUlEQVR42u2YfWxTVRjGfx2gHR2zjDCWDoSxjQHjQ7cRiCSYqREFI9mIJE6JOkOMIdH4FWNEp2EiGgH5CMZAIjHQmYV0MskU2CJxIjb7Yji7rdBlYevSfbTrurZ0jHj8Y/S6rWsHitvtx5M0Off03vY+7/u8zznvgQgiiCCCIIdKqRZhQXIsoiqlWgghREgHwUuytsE0gqh33tbn8huc8QITFSxB6HW4WTAvgcrqGh9irW2WMYPmvN5LW6c5YIlMDQbyLo9dMW9OomjrNKP7/jRv7PgYW91ZAOr+bOHT3V+wNGMVhtoqiajzei+9Djd7Dx4N+NuKYCqDI9piWs8dl+bau6zS2HxrXPDVCR5MX0ivw80r29+m7GQRLo9dEXQBGC3b9196GgB9gxGA1csW+QThzO919PY7OXTsJCW6knHJy7YEVEq1aOs0S9c/VVyg9dxx9A1G9h4vISF+FnmPr5OCUNtkAuBqu5mWaxZWLU8jWj3ntv5L1gqorK6hyWgaIXtvEADefD6HTpudiw2NuD2DrEhZAMBsdSzddgcWq3tcBSjkXvcvbFzL3PhZI+b1DUa0Z39hunIabs8gACtSFrBs4f0AdNrsdNsd7Dx4jG15W0aYaVCuAt66H47pymnSuPJijTTutNlH3FdZPfRdk9HEtrwtYnQQZK+A5ckJVFRf9nuPpcvKFVMr27duHtov9DsBmDkjBgDPFBUPrXvMryEq5Ercm72jBa9JJjccJ8p+5oqpVbpOTR6q/4T4WVi6rKxansbMGTFYrG6/8pdlCXh3cABFJecwd1nJWJzsc99zG7KpqL4sGZ838154FRCIvGw94INPDgyt62Wn0Uz5Z5MzHN12B5Zb87PVscxWx0rzXjz76rvsKywgqHoBl8eu2FdYwL7CAgy1VRQfWhq4RxiW+eHkAZqbmjiiLQ7YC8iyGfJK1tlvkJx99Gc08dHk4+ank7Z4sbQS+AuC7LvBe+Y+xv5nrvvML5qnkYxuLBhqq4ZUZGikyWgKzp1g67dD5hebtpJLJRXkHRkc97m4+ekYaqskFXkz788Io+RKvqPLTKXyMwAczfU8kPMo2YkO5ih6xnwmI3sTGdmbWL/hKZ9yCrQKRMmVPEBqShJr3vMA8M2uUrKSlNT3TGfnwWNkZG/CM0WFxerGYnVTdrKInNyc4D/66nO4RJ/DJf4wmMSLL78u1j28QXhPgLwfW59L7Cjc73PcpVKqhVZ39o7OB6fKhTiAN/PX2i3s2XOAlqtXqNH/NqJ+A5FzeeyKsfb7ss+6GOwQA/X5Qlda7pN5f8+EzCmwSqkWutJyMVCfL7qLM0VycnpA8iGF4TW/6/PDUhAmknzUZJIfXvPG5maW5uppMfQQVpkfy+1Dmngg8pPxToqJJO80Hwag5EI8qSlJfpe6kM2+rrRcdBdnioH6/PB2++7izAl3+0nbCY7l9mu+9vBOVqcskqP4P4kH2t4GalFDQvJisEPoSstl4/YTqgCVUi1s+lwA9pzJwtjcHF5u3+dw+Ti+XN0+6m6TH32Y4WiuR7vVGdnehi15ub/71P9KHGBJXBQV5y8CUHrqh/AwPJVSLYRVKwbq88XmJYlCExMdVJm/KwHYvCRRcnpNTLTQxEQHHXnFv5V94ZOpAJzQm/jxyyRi01YSt1oXdLKPulPyTvNhbPpcfm3qoK3Lwfz7olmZb+BSSQVhKfssTVxQL3WKcJT9HZWASqkWzn5DyMpecTuZfyJJhfa79QAkrS1CExtNo+2vMGhprVohrFqRpYkTWZq4STm3n9R+Xgx2CGHViu7iTGmd1380P6QC4N8DHOcBuNFeTouhhw83qui7eS+P7O4LKdn77QVutJcD5Tia66lrdEnzoVbzfgNwqaRiBPG3Tt0MScNTjLcChGrmI4gggggiAP4GG++21HAnjPMAAAAASUVORK5CYII=","m":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABAAQAAAACCEkxzAAAAcklEQVR42u2OsQmAQBRD392B2nmFA4gTOIKNWwmupr2FI1g4go2gaPH/txcsTZOQBBJ4j0a5HggAlG3pAVgrjWJu5QQPEKbCynGWJIwSAYuI7loAcOEQP3VYx+GUe3V8I+I6bSuzcq1b6b7pi+y58+NL3BlBDuTK10W8AAAAAElFTkSuQmCC"}};
   var AWAKEN_FORMS = [["aw_sword_heaven","aw_sword_abyss","aw_sword_dragon"],["aw_axe_titan","aw_axe_chaos","aw_axe_thunder"],["aw_staff_star","aw_staff_tree","aw_staff_lich"],["aw_spear_sky","aw_spear_trident","aw_spear_reaper"],["aw_mace_sun","aw_mace_doom","aw_mace_meteor"]];
   /* AWAKEN-SPRITES:END */
+
+  /* MONSTER-SPRITES:BEGIN — tools/build_monsters.py 가 만든 구역입니다. 손으로 고치지 마세요. */
+  var MONSTER_DATA = {"slime":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEKklEQVR42u2XT0ibZxzHPzGaGmpIYjILNcKMrzVocJ1rJIytBErXw+jYWqEgbLuUHeyhh3W97FB28DJ2GBQ8lME2DysDoYeydm6USfGQLc7aESRqjDJjqKkmZmZNGkjfHfR5fN8k/klx26W/y/vneZ/f9/v+vt/3+T0vvIj/OQzPMUc9yJyGaoG/+DlLU4+Zs6YitwtGAJKTOQCCC6uMfPRyVbn3S0AVwKWAAOHo5vHiaU8pEcNBENCBi9CSCI7FaXDVyzFB5Mrphj0xavYDXk1k43m+/HqK4MIqW3PV562A2ndjUV74W50VJQhHV8nG82SiMfmsVXHT4KrHqzjxtzp3rUTtTuCu/nGpr1dxbuq9gE5zEZloDKviliS04MGFVTxXJ4h8fkKtRGInAvgDLgkUHItLIHM6BEDO7qM50IlXcZKNb4NbFbfMIUzqVZxEqvCAfPtsPE82nteB5+w+Tn7yMdcGz9HXaeDt7r/xH33M5YEunQ8EeXH0XJ2o6IeKJmxw1evKLBze+N6HXBs8xzvnW1hfnqHNU4+x3UO4poWRaZXLA11kojH5vPCHkLEaD8g3F8msihuv4mR9eQbokODJyRxexYnHtEak4KA50KmbL88VqiMgNM1E2TZYwMWxs8cpzkUwtnsozkUILhwGIFJwbL7psyVG72+U5Qtr1olq1gGd/k9++YHZ21O829UOgLHdA7MPNuWafYD32RIAxywzmNMhadjdeomxdNDSO0xNrYWnqTRWxc3TVBrj/BDFXAKT5SU2HmX4cfIRHW92UJyL4GjpwV2/xqrNTThdR2z5EG2Hn7AYvovR3ExdPkFdPkHR4kE1Bygs3wL4bKeFSHX1j8vym9MhCin9W7z+1vvyvOeMn29+ytGtPuQPwyt0qw9ZSSZY+vMvCqkQpkYfAIVUiGLbAFbFTfy7N3TYFSUwp0MY54fKwNuOn+LOzUvyemRaleBHVu4yMRFhfupe2TwRhdD3WHqHdVLUVNK7NMH6WhCA3+8NYnP4uXPzEivJBO6lX1lJJsiOXqH11ROYfBf0DWvuuswlFihzOqQjYSjVH8A4P4Sp0UchFZLgO4XN4Wd9Lchrpz7lSNNRXYXEuFYKQF4n565LD6iW3mH5uRnnh8qANEQM+9gdGbRjNoefYtuA9JSWQG2lz62guWdq9JGz+7Btk1D3AhTnojqi9Dm7D7NGHsBQqzVezu7TlShn99EY6CR161sdKZvDX1oZHaC27E1bR5PvArloTADLSlYsp6t/HH/AJduptucLos2BzrJ72k6oXU3N6VAZ8G4bErXvxiLBsbiuxfoDLl2D0Y5lojHOXDwpCY9+dV/XtgE2fvugIl5FAlutU9dQMtGYSFIWrv5x2bSWx6Z1C5jwUDUE9nL3jvsH7cZUK48w3EH9mPzrPysv4j+NfwBmYTJAZMxnrwAAAABJRU5ErkJggg==","ko":"슬라임"},"goblin":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEUklEQVR42u2XXWxTZRjHf2dulNKvFZcuczksLsIKdtPtbJHCIBqIgC4hxpBAHFtCTAwJFyRy4W680piQqFyoZIkXXswgMcZEBsyZuYQMJallsu7oSmUwDjho1tJ2bc/Wdn29IGs2itiO3sl7c5I3z+f/+T/P+xx4cp6c//uRHkNXlMLOShXF0YP7mJiaJpTU8fzmXbGtshVkK97Y9Qrupo0462p4eo2R3dvb82RKGYC42CwvGhVtrQq6ngZgKjiD0VgBQFurkpPpc9YUHEShCHDGVUtbq0L1pB+AX8f+RNfT6Hqa5usq1ZN+2loVzrhquaXPFVyC8kKE+mfidFSZab0doLPOzpU7AX4yVhBK6rwZvsm2KjMQ5525O5wOxrA8JZWUA9JH2j36Z+Jo81ncn7zOL5FkrgwjER33h5vxJdL0/h0F4OR0rGBSFsNccbjGijaf5bUqEy+YVhFOZ1GTKUYiOpXlEn3B2aLtSsX2fY9sx5dI015pzCHQaKogklmgv9zG88/WMXBhpBRzZrlzWZaF1WoVnQ6L8Hq9wmQyCZPJJM6ePSt6ZLuwWq1i9/Z24drkFEcP7hOuTU5RSCcU1IavbttMWWaOhg3r+WFOwuPxMDAwQG9vL+Pj40QyC9jtdkJJnZ1KIxNT0+xUGul0WP6zHQuBSHQ6LCSaW7k8No6jdh3+qwG+XmdBS2XQ9BSfRxfY4Va4PDFJi7OeW6EYDTevstlq5FJMX+SGtJI2FJ0OCy7zar4LxWhpcnF5bJyGDet562ogJ7TDrRDQpmlx1hPVM3RHNC4BzRYDwFJyFlSCxdqJToeFw7WVRNMZqif9fP/jMC1NLlLxKIf27sJut3No7y4C2n3IJ6c0npn4nSN/BekLznLydoRmi+GRpXgwAHH8+HG8Xi8Xm2VkQzn9M3F8iTT94TgA3cHr1NfJDHtGaXHWM+wZZb1cw7BnFMuaNXlwj87OF0dC85cf8+mel7mSSKHNZ5Y6lwBmUgscC99gldlGQJvOfQ+kohwTsWX8Wgr9Z885HopCXgAvnToHQCyTpS84u8w5QKjrCGOxOU5IYXpN85yQwnxgmKPKuJqv6l6ku7t7mSP36fM5MhZCQklRlPvK+cwVro1OVFWloesI55JJbDYbqqoSjUbZsmULNlXlD9/YMoNDQ0NstRhwnz5Pn6I83iTs6upiyj9O+849DJ4/x779B/j2m1NsamzKOQ5H7nFt8sZS24/cnMqKGYfX/BMk04ILPw+h6zqqqqLrOoODg1TfCBCO3GNjZOZhSUr/lmxRCHSsNRNtcNF+y7+sMxYfKdlQhjafzeNNSRYSgP0OCwdC1/PuT07HkA1lbLWZqCwv2fvzcBR6ZLvoWGsWSwYWgPhiQ7Xoke0P3pcUAdHnrEE2rqLRVJFXQk1P4Uuk6VhrLmoxLXgrvnv3LrFslvjb7+JLpPMEfIk02997n8pyCa/XW/L/AlGArliJ/X8AjyftQ/24eOcAAAAASUVORK5CYII=","ko":"고블린"},"wolf":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACaUlEQVR42t1WUbXrIBAceioACUhAAhKQgIRIWAmREAmRsBKQgAQc8H66nA1J2nvb9H48ftomaWZ2dnYA+F9XSqmllNqr58yVoNM0tVornHMAgJwzrLUAgGVZzFcJpJQ6eK21X7fWopQCAFjXdYd3v6JqqZKIDADEGJtzrgN77+XxNpIw3/bCNE0NAEopsNai1rpRwvyVKcUfI4HbX0/Hox3tMg88kx0A5nk2Ur145aseEHDpNwAIuLUWRLTBNt+oWoPLKqVgXddd4Ze0gIg2Eo85AKCH01j0/YqqBVBG7UgJReD9IJLQkXHSANJjIaHJDOZrWgXzW2OVUqBTTirTpEQN7/3munMO0zT9zgM6anWaCbC+Nso9qnS0bq8cLSAaQL6P4NZahBB273tG4naWVtpgIn2MsUsvleo+hxBQSgERdYI5574tKxLtR1EcY+wbSYxxV5XcCyHAe9/BAYCZd1XXWnUQnXsg57yRW3q6rutmnPT4DS82ABozw3sP5xxyznpbPiegHa/HJ+e8A5bej/GqScj/Qgg42g96C5i5Sf8FQDMupcgIbfqpnjFnJ64YY1fytAUhBMPMLaUEIuoVi4SPnW0TOs/GSy8xqxSgyW4UYGYQUTeVsC2lgJn1C1BrPRy5k/PiIfjuBzM3HTDyKU6f57nvaDJqtVYsy/L2ztoVWJblFLzWugHX+fAAf3vdBFzk1OCcUp8ADT4a6ZNzxU2ZsFe8hABOCY4IzAxmPkxLnYrvrntPswcwADiVZiO4jtlP5d9IR0RNz/zwcgOgEVE3JDN/ZL6j3rVX94XUEL2XEfjJalefqv8Bp4PvKugxtjcAAAAASUVORK5CYII=","ko":"늑대"},"orc":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEEElEQVR42q2Xb2gbdRjHP9eqFF/sfsyZtS6Sq12LirZ5Ny3MCwq27I0ngnSgbVrY8M0wDvvS5hw4hI15IGwouDalIPjGeyHYVjbaFw73akmFoemfXNdIY+jiNYORUvF8keVIuna7SxP48ePye+75Ps/39/w7ifp/zo5nqR4lUr3gU6ODdLYd4sgzAoDg0Fhd+poaAf7XXZubl87uxkrDDHAqa+xk/55CU6ODNbJVa19X4GQT51xPTyeuYfy+wNMXP3EF7n/6FbFXuxl9uwfgIXaOnb20J5bkh/Z0Nk9XMMCF2RTfDr0FwOnENQAXPJ3NA9AVDPDBhcnH4vgJGieTyfDr5TidbYcACLx7hvyPXwOwuL5RY8C576c96fcbtU4mk2HihXb3j+hK2agK+ANgz7qf8Ju27e3tztToIJFXjgIwdznO4sVJnIH+uhzzzYCqqnS0bPNm99EayrOFIgDLpSeZn5/3rLvJL7ht2xwfOMX1hSWuLyyRLRTJForcbXmW4wOnsG0bVVU91wTPdWCkr5eOlm2EEBiG4QJWdsuyMAwDIQQdLdueC5PnNJz/8gxjPy9gWRbhcBjLsmoENE0jmUySTCb54eP33Kx4kIp74jR7NEB/6bkD/JJaQVEUcrkcmqZRKpWIRqPkcjmmp6cplUq0traysnqH9sMHSWfzdBwJcGt5TQc+r/cKnKnRQf78+z4AlmURi8UwTdOl3bIsFEUhFou5zFSCM3jwwL6uwK392UKRqzM3kGUZIQSKohCNRjFNE03T0HUdANu22dzcZKSv1wVffeowiURiV7ymRzWe8fFxhs9fqTkMiyIRsVbjvWEY6LqOwh3CopyOV2duADB8/gqKonhmwG21i+sbpLN5pK5jWJZV8QA1JKGI8opOLDERLdcDy3bcfX7Vqeh24vE4J+R7fDPzW8Uo6ZEMVIN3BQPV4BKALboh/CGW7TwEHol9B8obNfpOyPdYXN/YMxZ2ZoEe6e4knc2TLRT5bPInUqmU6w1AqVQil8tBaw+R6BhmsoD2UZy5P/7BNE1s2wZga2tLB/gPie3tf8kWitxaXmNnNkiPmfWqzx1Zlt18t20bIUTNi0IIIpEIpmnWGD7S17sr/b5HMVmWnVAo5MjlAHVUVa3ZK2ehUGjnJOQ0ZB4Y6mlizn4eIYRLdYUF27bRdb1cju2F6kBs3FDa3PoaX7yvomkaQgh0XUcIQSwWQ1EUDMPgnZfb6Hjxdc86fc0DlUh20jdJpVIMDw8DVNovYyf76QoGdsaT1DAGVm/PuuNY1RVK1SCdbYdYvT2LGvJ2u567YaUA7VJs/Mjs/8OkSvGe54BrSMOCcBeFntnbrwFOXG324pFUzYwiJOJqc2OyoLrR+JFvaBD6eNfXZ/v/ivbx+7tcpIIAAAAASUVORK5CYII=","ko":"오크 전사"},"troll":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADfklEQVR42rWXLZL0NhCGH08FDDRcKBjoIygscI8gGLhH0BEWBgp+cGBg5waGCwUXGn5MAd2yZY89dqoSVbk0ttru7rff/hk4XVIgl/k2ertPJToK//sKQ4GkSsNQ1KBUwhvF95Tolt0s/G+M0g9KyT8o+QelItHet0aAFEVHCsT17xfrdqQ8ZjrIALivAgFAGqlM+o74HmSC6DxED+FD5aKHGCGKhe3fIv9WvSqFYJ7M4UgF757CAGIy3jyXZpddI7ojBGQC+SiQ/yYmvz4PA6QPIBPeIvkn+B6iHyC9V/ICftmjoULsLpKg8dw79ToMDRLBvA6Lx96Zx0FlwmDPvHGivnvCAV2/QVIPEfMkDUC23eHuAE49DA+VCw+T6VVOQk1fQ+QCCQH8Z0s41+xufpq+oyrzCfKkZ+O3Khq+wIsaHiY1LEYL0ZIZr+MRfSFGZXbq7RmNR9J4ZYqq3PAF4x/UTCKMkD4bfigXbicGGPTvgHQgnaYXazh90vvxuz5Q5T4ZQrIorql5HYHqqXQtQxdWC/gMrldDfVKR6afu4+8w/AX93bhknMF31wzIFdbWAClzUQoPO29Dku2agLHTTKmhmNTYaynZFpYtS52lll2rFI1L+m3fmfuJEvF2Wg/mwrK1LYBk9aglYnqH4U8Lgdv/XpyZXE4MECOM59mbBN7pB8NDcz5M+ry/w/irxn71Ob9kRZQmpc54sBuGpttVuIe3Bt5g96vVVEspQLldywKU6etDhTI8lFQ+a+qFj7lb0t+PytwchhMD4uuzalwaLOaV1VZ2xa+933n39noUMwPyxO60Ex5GUqcxb7mD1HiXRXkEcRd6gU4zBrssrJ89jGWFjk+W8zVr2sYz7FfY8DgyoPFSghYgyd26aNjkUzNAPPC+wFx54DPQN4jVSphrU9pTLiezXJ33wnIp25ernQfbsyBP+20Ne2Vn5Fi5NZQwqjde2vh3M8Q1Q/r7hXyvFsftLHeAUDvpqFxDtPp7Ox++QiDGuTs1yrr9ymjeiLMYx21n7WZZ11vM5XAeVQNCm/exm+/P+oPk47Y+t+v2vbOR7LXiQpiWmjB8HSk/Iu+u/I1rqzx1xv0ya2k4mPfZyMoyqGzWLwZNd6q8Tj/xU3dxS2fbeppsD4N1yXFdD5aQbPSG3X8vxuLK9u3+ZGxz7rey5dI/o2sxffmNclX2H1V1PbzqCqKgAAAAAElFTkSuQmCC","ko":"트롤"},"ogre":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEQUlEQVR42q2XX0hbVxzHPzGpMmGpndIHb2JEvLAKA4fQEfug7MHhoCA+2LFA5sv6Kgksjz74aFmCL3uosLmAsL6MwMBCH0byMO+QyQIbrpAgpuaWdajNLBR0SvZgfsdz889Y+4NLzj3n3PP9/v6fuGaHaVlWspT199lhXM3mWxHPZcDt5AK9PdfB3we7z3B9OlcGKK8tqbnne/9ihOfLrZJwtWIBAQfo/fADBWTvlzC6u85IAfj7eP77HwAY4fmWLNHGJaS357oC10W97z47J/O2XCDar/74GICv7n+mxuNjQQDH2oOHPwBgJxdackXLMSBgMja6u0hv5jG6uwhNT2Lvl2r2vbUgtPdLbEXiAGxV5oxKTEgcbEXiag2ARJSNRJTbkXhTK7QUA2uRODvgeJbD82p9OTxfs75WIXylINTzeyqbpXpsF3LkdvYarr9xGgqwBF8jv6YzVlO/pzMWsZTVNB1rCKxkKW8kohjdXcrHAtQoMC9avx2JNyThIKAXHAEXEwOY/T0OYrrIfPybBwR9HWyfmBgBk/GRQez9UkMSbReB24UcdiGnQOz9kgIXctXzfq+7htxGIlrTMxQBHVw/yC7kiKUsNa7WWicr4vM6Mzu9mT8nmVyoIeGpt7ka3AiY2IUc6YyFETAdLtEtIbJ7eEosZbE4VTkXGB8ZBKipDR5dC91fIotTQUVCjwH9OyHyy+PvGPW1s148BlAKrM6ZpDfzmP09NWTbqg8zursUqC71wMW09eYd51biqN6+NrlAiNb2fgkjYNYl0SwGRPvdw1Os4pFaW50LE5qeJDQ9qZpW0zRcnQtjF3KEpicddUB8L+YGuP/9zzz84mMHuMRA5MlLVufCyq0SK6GlpCMdPdVXqdBSsryRiNZoK6moy+f97/Do0TIzQ52sF48Z9bXz9a+vCPo6zk2vEa53hqdRCRWN//nrJ36rmNTvdfPi7z9Vug143YwNdQIoC8wMdarfWMpiUTtXgrLlXgCQmLhB8fBEaeX3utk9PFXFRjTXzW8Vjwj6Oog8eXlh9a3bDcVHiYkb+L1ugr4OrOIRfq+b9eKxIiGaC7AQFLI6qPZc3I5XspRnKqa1ikdsn5gEfR1KWyEh+S7zst/vdWMVj0hM3Lh8O17JUtY/9HvdbJ+YDHhy+L1uMgcDjL23XXNQ5mCAAc9ZkG2fmFx7/VR3gUuzbnMLzA7jkg//63wfgGuvn9ZoLKAyFu2latYDb/lGpJPouxPm5q27rBePuXnrriK2XjwmlrIY9bWTORjACJjcu/fl2T1gZJCNRLTeuZe/lEqpLb5qJ98knUT67oTrNqhLWWAlS3lxKnjWBSvtOf/uJ44OWYkf10ffvnB8m9vZI72ZJ7SUlKlyI+2bWkC6H3UKiV5KZ4dxxVJWWVqvuMBOLug3oTf7XyBm1EtoswumXchhBEzHveJKt+JmReoq+3X5H7T9YpGzspvcAAAAAElFTkSuQmCC","ko":"쌍두 오우거"},"cyclops":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEv0lEQVR42rWXX0hbdxTHP7dk0LFBgrllJWFEO+UOGsWQpXspND6V2ZeVwNzqH/bUwZh1dbIOYTIclI2NivrSbhRGUGkLDlZopQ+lFnyZISgqlUtCm6yLuBKLQkcdZdw95P5+/m6Sq6awA+Emv/x+53zPOd9zfudq1C5WlTWNl5RaD1qF5DAB3QvAWnGLwsYmx85femmdWi1eF5LDBMINpZX1pw4QmVyRpnpdBbMv3Qf2Y3x+pJ8LxyMlz9efOowDBP0+ubmQHGZ+pN8tVTVFwAKYH+lnevoe3w1+DIfrnDtcohAzQqwVtwj2DO1py7Nbrgsbm3Khc/AyF27McPHOG1zvfRWAjvHnDJ78i3/MMWJGiEyuKAEFdC+TfT001esE/T6CPUNWNRDVUFnW7VE4XMfayiPp2a37KX7o/4jXOr7mk5+2Abhy9iDeu2OOKKgpCejeUtTsSGntfRU2PdU8F4cCutcRBYC/r3/LtbdKVcBdqhovbGwSM0I7KbP1FZLDFZGongIbsVCYyRU5dSIGwGw6y637KQBOnYgRjzY69s6ms441VZcoX7cUWJN9PY7Dar3PprOSYKqoBASq7lElZeZFqWoVEWiq1x2GU2aeoN9HINxA3PY+kyuylF4GoCXaLM/Fo40EdK8szWqpCeheR8lW9AFhTBzO5IpSQSDcwJmTUQmyJdpMPNpIPNpIzAjJcwLEVxd/YTadBSj9b68XNjYpJIdlmXvU8ItGIzYupZdpqm9z5DFmhCDRthNmQTRljzC8lF4mHj29K6k9avjVfC6ll3n8bJtMrugoq7XiFkG/T9Z6eTMShluizZKs5aRWQXhEqxUeCc8fP9tmanGVN18/KJtJysxLcC3RZrmuSiZXJJFok6SUKVQqIOj3Yd0eRWvvszTZeBTizKazdI4mBVOtC8cjFaQrN6pGUvy2dTg6ogpEa+8rkVAwV829Wqrfzy1UVErQ7yNmhIgZIeLRRprqdQcwxQGtczRZYVzY9KhhEt7YBh0t01xdxVxd5fJkorTwcIXURriizjO5Ij/+PLnnLShsegSzXbyXkn/+gplfP2Thxu/K6kOu/PanY4/brRvsGZJcEyUuAQhGB3QvJNpQQw5YXWd6AVi4MePQGvngXfLXHjnWjr7/KZFWg6OLJhNT446+r1aTSJdMQUD3MnUnXU4waTzSajC5CJ0HZ4i8cwSOHGIgWUfXNzsEDhthVswVwkYpNRNTZTesIqLqDgDasfOXSJl5mup1pqfvOYxHWg26O0p57+5I8ODtzxmYMxhI1hFpNVhYNKVBAUI8bfBWOfHU75rbtCs8L5fujgQr5goLi+ZOKmwg4j8RCYAvvvxMlrMYaO25AEBzG8msrjO9nIu9IkMlSDqWeiENlou6rn6fmBqXIMpvYbeRjEirQcz419HHAd47lGXd5YwKqhrAahOY61S8sGiW8mRfTmo7dVHuAC+eivc1jeWafdBBHCETU+NCcVXDT25eJfjHHE9uXt3tbWrvsVz0cPUWK3sLqhBxb6ii9JX9p0D0/aDfJ/u4culoLh8Azp09TUu0WT7tAaSmCDiuaJEGJQJaDS+uNZPQKiSHpbcpMy8nGaVJ7WZA2ytCe76Y/A9v1a7yH1KthobseDeLAAAAAElFTkSuQmCC","ko":"사이클롭스"},"lich":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACuElEQVR42rVXbZHrMAzcdA6AIQhCIBhCIAhCIByEQhCEQBAEHwNDCAO9P5VH8SVp2t7zTKeT+EOrXUlWBnw2rHseXj1g6A8jItRarxxmOef2UGu9um8zbn6YmcHMsCwLmHnPu80gIjBzA0xEn3FJRFZKMSKyZVmMiOxsrYiYqlqt1VTV19vbWppZM87MpwAAGBFZrdWIyIjoyp5TCfDz84N5ni9T+f39jZwzVLX9p5TwLgvGzFZKMWa+QqWpqjGzqWqTYBzHl2XYZME8z1BVlFLOotmcJRFBrRWqClUFAKSUfP+ljOgX2P1+xzzPR5uNiEBEWNcV67q2iZQSUkqotSKlBCLCsixPQdxekWkcRwBAzhnrujajKSWs6woiasZrrXist78AsCk6IuK1AtM0YZqmFogAGjMO6gzEV/8iGoqeE1HTlpmbMVX1CggAGMexrXM2iAiqanty3I6q3AN189y9qrVCRBrQnDOYGcyMnDNKKW1tjJUjOSIDJiK43+/Nk6hvz5KItECL81EKB+6MPNjZMLGRQFVbgXEK40FxXc4ZtVZM09SY8fh4GDCXbZomlFJieu5KMIjIL29jQMU5P0xVsSxLqwdxOCgP1L0qe8OHI7J0NB71oMkQY+EXgOhl9Lpnpo8Nj5cQwIOzVErZgHiZgZgBveeRgT02vHh10g2nANxQ9DB2O+5tD/JIDn+/1zH1AAZPo57yI1bccCzNe2sje6eVcE/vqwD2LrtH3h9eSl9HBs76PDcWPT8Bfnobfp1NdrQNe9r2WeOg+4r37m04hN/TerDDgH0K4FIc7IHp0+8lAM+CMF5SR6X75a440s7MfqnY1Ux4VjnfCsIr1HsP+AkLuy2YiBy12CYi8UNk8wv77H8EoYlIa8NDmg7eAakqRMQlfOm7YC+FhqNvgt54P39U+/vxD7RzDEIUvzjgAAAAAElFTkSuQmCC","ko":"리치"},"hydra":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADIElEQVR42r2WP4jbMBTGP5kOtxxozKilu6EEstU3HHQpHITsXjIGCrcEbqiXQJZAIWMX3xwKhVsKWTwGykHGg1s03mjIcps7SE+WZNlO0msfBMfWn/fT03ufxHBYwLHH5wof3jP8J4sazmXpvndZX/vJAF0wfe3HwAT61ACrrZpQcNWxkMB4eNxWdMHaTmXZgHAjIDhQSFQfcyARqvNqW2G2cclPgQ04DQMIDgCovhbqPd+rZyFrp32wP343HY2HDIVU7YIrIGuuyJ+c3d+AXQnlgCBk6Q5sg5UlDMRso6L3+FwhEQq0kGasC5CIeoL5zll5Zrd59EFYoIag6Ok2A2xBRJht6gSa74BPA/X/YcqwnrDs9pqlNECWrbApOaS56JnvAcHBrgTY/Y2bRwAiM+F8Bwz0wIepk1D5esKyRK+0Bdb0IYg0rqNHkZjv6vG6jSG/qYzzeACsJ6xVESm01J9fNGDT2abKBVewdmV8/q6S8NcLsBwZsAjjIcNy1HTeJjI2LDm32oWXZMYepgyyVGNp6xKhk3A8ZMZ5l8jYsLJUme7BOtsQgogHDkRTivtEZjxkaZ8iUr6EbD1REMsRMB6y8FkQEpmupLRh8317BGwIvago6DwkMh5EdnvNgrBZojpQ+0mnYZfIkKbbchuClaWCOPKodgE6FNEJKclsCJa2oecQagJ0KKJROfolohU2oZygPOiBiBqrDyhivp6wVHCkskRmT+7DPr1CCI6EDh2KRoe9c95CimhlfqsiUuklgCwkCjtHuqrBAVBloUqpTZTcvsC3XYV4oKKiraBokuOeuVjjVnyqzTaVLUy5X+++Xd7V/w8LbwvOMcEhQt99HbAdW9/+DkCXovT3ORGqLSvqSJ98LT/WZIlcn4JCcJUP5jJiLiDVv8uB1bbCzyeAXyChREzjWsQER2skDos3iAD0xaR8NVEwOkHVQEAqEpUdkfMjQFJMl1WSbHUpUN/2L8CXUb0ltD1ZARwW7GyAbHVXAUAmY6v+PMVL41oN7eQkqdZXtvMjcHkXTKws008Z+/tfy/2bJmEf1GHBtAYEgf8ALxIWYw6u5CsAAAAASUVORK5CYII=","ko":"히드라"},"firegiant":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFiklEQVR42pWXTWwbRRTHf+v9sJuldpNqW2kbO4iPiLa09AByVaWVACFOgMQhAlEkeqpQ6ZUDJ04oygmJQ1VxACnlK4ceuKIICXpoTg1FikoEErZTixKSKptsHK+9Hg7emcw6jtOOtFp7dt57//d/HzMDjz9EnweAjdmS2E/4UdawcTu9SBMSV4eGxLTniRuFgrhRKIhpzxOAuH/5sNi4XRIbsyWhy+sG+xnP9DN+8GzV0IWCuVAap+i6+FGk1vtRxLTn8eHXm1CFYC6EalfPxmxJUNKUl3YD2QVACgPcv3xYAEzNNDjvOBRdF4C646RE/ChiIp/nkw/+AxIQA1g9OFk1JAijX4yCuZD8qy7BXMjUTIOFdps3CgX8KOJwJo15tdOh7jjUwpBKHDNmmpRtm5ffsZQO9b7kQjUBcLskqGoM9Mb92pUGUzMN9f+7cI2643Bta4vVTofVTofPwq6ntTCkbNtqbd1x+Pn7Nu+9/4CpmQbXrjQUu5TSIUjFmhIEX4V8czPDqXab3y1LeVYz27zrjgBwqt1W3utGawkgGSrJmFwnWZFhyl9ydxiQyTM10+BUu81qp5NKtl7aBxmvhWEqXPL9zc3MjvEEiCWVHLu+atxPavp3y1LGi65LJQgoxt2lt4KAmtlloBhbTOTzCkjRdbkVBN25RF4H6kcRwVxnpyKqYOo50Fxocetum6DV4n6nQ+bAAfwoYnhoiGqzSSmb5axhcM50OGc6nLQsNkxThanabDJmmhxPdDbE7p7zw50mEy/YZA87HJysGpZeflMzDUWhTC5ctxvzfJ5bQQDAw0TxsGHA9jZjpslEPo8fRd0STbzvDY0fRRRdl/yrB1RPMPXSq/yVBaDgOAStFgvtNkNxzLOWxdFOh6dMk00h+KfTYdgwmMjnKWWzHAeeFIKGEByMY+qOw7ebm6xEEYcyGcq2reZrYcjSTwYvTdh8NGJ9mtGTQqIdlHRl2+aMZTGZy+FHEafa7VSmyzyRTBVdVyWhntSyWVl6AlbiGDQQm1ZMJTZSZVV3HIqOQz35Lw3rdD8UgmHDUMmqg9sJ8QGOXV819E4ozjtON65anAHOWJYSrMSxMjBmmgqczBnZDWXvmCCb2j9kG/ejiLe+LOyUoUwqKTxsGDwUgl8TwYX1dQXujGXtMiqHlAe4sxVzhy3eTED1bmTBXKgakZj2PCZzOYquy5hpMpnLqYW/akJjpqmoLNs2ZdtmIp9nzDTVtxdffoofm03ZaY0fm81dxuuOw7HrqzudUH7UFyWGDYDXXnmah0Io72phyHyrxXyrpWJfiWO8C2OcOBrve+aQMpaOSE+y2SST5ThxNOb1z5/Hf+5Ear5+b3FH6fwm0Ne48fHKirg6NETZtqk7DpXt7TSAWhji2zZ+FDHfaukUigunx1l8YML8JrCoGes/Fh+YXDg9zi93l4S+4RVdF6IIP4pUuIyes14KtTQOMOp1d8K3R9colp9I05mAWXxgcq9VYPxIjqV/t/l27rbSc6NQ2AX04vp6qgp6DyfiwulxRr0RpXD8SI6byyMs31lToJZX1njlpK++jyfC40dyOgupMOvlaOx18pWe9w5pbHllTc31A7L0bzfGOgvTnocfRVxcX1dODwTwwp/L6qQjO91vz4wqg71Dn9d//3J3SYHoZTuzVyKNeiOUbTvVx4uuy6E/Knsmnw6qH0DZFwYey3UFdcdRh069R+yhPAVevjXv2QvRnjegac+jt1HNbm/LEqU3TyTt4t7f/bqo8dgA3sxmU623FoZ8sbU10PvzPXeG/UBkBimTG4js49qmY+zxAPBGocCwYai3zuSjMqDapl6zGgPGgIvroPFIDIhpz1Pezrda+FFELQxZSO4D+xgw9mNoPwb2vz4Pzp3HGv8D6I4aFNy1u3oAAAAASUVORK5CYII=","ko":"화염 거인"},"dragon":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFd0lEQVR42pVXP2gbVxz+3jlQOEu4g1SRYLp4qPBUblGJ5HjKImLsVFBKuBBCJg+hjhfHspcOuUQdXJIMnjxVZFMa4aChJoMSH1hDLpuixYOCKCjyYmTddvc6nH4/v5NOTvrgELr35/u93/u+7/1O4OImR/6LiD5xwTwxYR3u0yIm8iNlME96tTGAiHcjAySvVzdj8NomfDuF7k4cdTPGQV1S59TNGNLG+Ya2HzweDv4mtDPpvYE8unVhANsPHsNrmzipVJHM6Hhy8yUOj6d483UzhsXymRQquN30eVBuzkPRceG1TYjOAd7tDpA2BJIZHXL2Oko3X6LouJOOgLP09s4voXXVtSkD0jJ0lPYFgDC4b6fQq1TRciQWVqchrn4A/I/A0S11wYlc8DsvYDd9ZOc1AB4Oj6dU8HMOFB0XuTlvLDoAaDnB+uKnF7h9ZR63ZwsAgNc1HV7bHOWHVAknOgcAALvp4545hY0leTFvLEOXdTMmAcjuTlzWzZj07ZT07ZQ0L38rfz36UVqGLn07JetmTHZ34jI/E2fSdnfiagBSIaHMz8R53gRVnIOqQdAkAvTaZgicgqbAVGCvbfI6lqFzEJahcxCaAo6WI2E3fY6ICJd7tIKF1WkAwEmlymR8XdNxeDyFhdVpbPz9M3oNF3UzBt9OsQKoBTwAntzv4555TkhNPeuAiMBi+Qx1MwY5e53P8kbexV7ZQzKjI7Xeh5bt4kY+4Eqv4UL7/g+0HMkyPqlUkVrvIz8TD70n8lqGDgBSIwkSOEW6sDoNbfYug28sSTx8HoeW7SI/E5jJxpJEbs5DorCMz3/+ALvpI5nRQ+RVs6lulnA0VZshn7z6AZ+frkDLdrGxFOyAwInZaUPg4fM4TipV7JU9Ti15BjX1WNW5IScsOu4wLUFMQlwBAHR3AsDUeh+WoSM7L9lYso5Eyxmw1oNdu8g9WoHoHMAyPBSdPnLQ0Wu4kRsd1a4qk9BDjLcMndWiqoCYTrIlBalrKOxnnFH3kkOPBqmitC+Qm/NCVkpHQiohqy7ti1Bfr+Gyi2rZLqJuyNHbcOy8CLx22mfSlfbD4L2Gy4GW9gVajsS73QGTmdQUcR2LyOOgFKvOqBqTegz00Dt1rNc2pfTejJmP2rSo0O7+DibWYvmM05YoLDOZSNtkUIfHUyHp7ZU9iM4BPj9dwbvdActuNIhL4RriX8D/CHl0C72Gi9R6P5yzzgGDpA2BRGEZYvYu0o0V5Joe0sYUUA6GFh1XZnc1HpvM6OgOpZda7/MNylbs2ykAl/H2TrDLZ582WYJEzl7DZf0mCstBx7AwIRkOfUICEIvlM84QZa3lSGytWVEVlJRba1ZINup/kpp63qrc1H5V1sO6jiVqGTq/CwWggI2RUiUaEdO3U9Jrmww+6gdRmyDgCViYVC3wTkeB1Pf5meDXa5tjdUJUMIQnvlSKEw/oqqaySmE1X2S5ueA+oItnxHxkVHmvjabbMnS6KuG1TXz32yskCstMPjKmtCGQNgTspo/aaZ89vuVI9Bou5Ox1SO9NlPGIKBmGquLaaR91MwbROYAP4HDrFU8gS94re3yJ0VxyUrsJ3EMViUJoc5HVs6aCFx0XtdM+a7fXcHFSqQ4X9TntlAUqXhfLZ9xHv8mMjpNKlbM5qV2iqJVSWdbNWOgyoYWHroiaM+bpcrF8BsvQh0eloddwkczoyDoDwJkcgBhJkezuxEPgaUNgrxwq1cVF35G04+y8xg4YcROO3QWCCNhyJJ7c7zPr98ohxosvfMzyWLvpMyGVYxjTv6Y4FgbXtnHtr37oFwD+SRTxNW1rzUJpX2BwbRub74NK6dmnTWy+H2BrzaIP1olH8DVN/I9P+a9a5z+TBgUSPA7fVQAAAABJRU5ErkJggg==","ko":"황금 드래곤"},"demonlord":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACzklEQVR42p2XvXXbMBSFP+ioSJnSnbFJ4A1UqguyQTYQtUE2CNO5zAZGNvAIz51HSIcUJCjg6YGkg3N0CEDgvff9AaBjow2BvPQTDiBDduAS5C+AA1fm9mAVHIDD2uIhkH0cG/LEBFKeup+rvtV8HBujjltWN/Mt6fIMhpC9bfGAPJNzmn5FqSa/zP2rAklqLidywdvywuIBf8bJM/nxAS4DQORXEZFaMgCZnz/TPcHb+4S3x6tNCIqIMv7qIwDfAF+t0+Rv7y2onG+Jqi2XMTbeNVWWBeFT5PEBnkIroIh4SRP5cJ4J5v8uwJ8pN1zBrUmLCBnjfRWUPwDS35FrmJJMFHkArgHi+d4z1zlUQltJmyFoLIxxiflLBnE3ggBcMjy5m+WiRHhgnAEkRfw4rgso7i/EUoE9uXsvFPLQ5ugSBlF9Zlwt5KDrSRRQIbjkTFL9sFHjooQsBiZLQLotrq0va5275WvdTwYpRs5Y80sVRMjeWODVTme1tHPH8+pZ3HvUcUPFUHtkDZyOlTWeDvGx7O+yAeBXQNfeS+BCxeHVO4ceeVTZKsYPY2y1GqtZm1QVLHU+B71Xu2uh0J4KkGOMrmfQwXJZPR7nsVeJpPu9XOmFbgmB7LBsBFcL2QqB73gjGh49GArNYzNW8/4DIdDvdi8kzamYWA4kIA/VPrEloueBFON+AeomZJLKfyRmjNH1r2TWtqpUb5XcHlHDGKqcCCseSPuJU2ffxyhJH0aGMeADhJjc0VI+7LAuGeOw4plBJoTX11f4/J0QgZSmsyB1yGX78HHtZfj+3tAQAz9Op2avORbSHrHY5NYXkKtLWBP/Pp1qrFwwjoN6UT6Y5XrvGA3iNTxnAcXthHOaWAxXswPjaLlx3HHdKuSa+DQTh34lFAEZcFYs87BSTrV6EcmaWFeT9M8XAGddy53M1umbki497/3a53jeyCMH8A+nsmP4r3hfTwAAAABJRU5ErkJggg==","ko":"마왕"}};
+  /* MONSTER-SPRITES:END */
 
   var CREATURES = ['용','불사조','늑대','사자','독수리','거인','악마','천사','히드라',
                    '그리핀','유니콘','크라켄','타이탄','와이번','백호','흑룡','봉황'];
@@ -2044,6 +2210,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
       gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
+      energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 },
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -2142,6 +2309,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     cloudQueue();
     onlineQueueSave();
     queueRank();
+    queueArena();
     touchSaveState();
   }
   function loadLocal(){
@@ -2185,13 +2353,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         });
       });
     });
-    var it = data.items || {}, at = data.attend || {};
+    var it = data.items || {}, at = data.attend || {}, hu = data.hunt || {}, en = data.energy || {}, du = data.duel || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
     state = {
       gold: num(data.gold, base.gold),
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
       found: found, foundKind: fk, vault: vault, dexBest: dexBest, awake: (num(data.awake, 0) | 0) & 0x7FFF,
+      energy: { full: num(en.full, 0) },
+      duel: { n: num(du.n, 0) | 0, w: num(du.w, 0) | 0, dn: num(du.dn, 0) | 0, dw: num(du.dw, 0) | 0 },
+      hunt: { n: num(hu.n, 0) | 0, w: num(hu.w, 0) | 0,
+              sel: typeof hu.sel === 'number' && hu.sel >= -1 && hu.sel < MONSTERS.length ? hu.sel | 0 : -1 },
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -2261,6 +2433,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
       v:state.vault.length ? state.vault.map(function(w){ return [w.seed, w.el, w.rar, w.kind, w.lv]; }) : undefined,
       z:state.awake || undefined,
+      j:[Math.round(state.energy.full / 1000), state.duel.n, state.duel.w, state.duel.dn, state.duel.dw, state.hunt.n, state.hunt.w],
       h:state.dexBest.map(function(m){ return m.map(function(row){ return row.map(function(v){ return B32.charAt(v); }).join(''); }).join(''); }).join('').replace(/0+$/, '') || undefined,
       i:[state.items.bless, state.items.protect, state.items.master],
       a:[state.attend.last, state.attend.day, state.attend.total]
@@ -2294,6 +2467,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
     if (typeof d.z === 'number') out.awake = d.z;
+    if (Array.isArray(d.j) && d.j.length === 7){
+      out.energy = { full:d.j[0] * 1000 };
+      out.duel = { n:d.j[1], w:d.j[2], dn:d.j[3], dw:d.j[4] };
+      out.hunt = { n:d.j[5], w:d.j[6], sel:state.hunt ? state.hunt.sel : -1 };
+    }
     if (typeof d.h === 'string'){
       var i = 0;
       out.dexBest = KINDS.map(function(){
@@ -2621,11 +2799,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('stSpent').textContent = gold(st.spent);
     $('stEarned').textContent = gold(st.earned);
     $('stPeak').textContent = gold(st.peak);
+    $('stDuel').textContent = fmt(state.duel.w) + ' / ' + fmt(state.duel.n) + ' · ' + fmt(state.duel.dw) + ' / ' + fmt(state.duel.dn);
 
     renderLog();
     renderAttend();
     renderCodex();
     renderVault();
+    renderDuel();
+    renderHunt();
     renderChart();
   }
 
@@ -3107,6 +3288,466 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       vn.textContent = '한 자루를 골라 주세요';
     }
   }
+  /* ═════════ 결투장 (사람끼리) ═════════ */
+  var dueling = false, duelPick = '', duelWho = '';
+  function duelChance(mine, theirs){ return Math.max(.05, Math.min(.95, .5 + .15 * (mine - theirs))); }
+  function duelGold(mine, theirs){ return DUEL_GOLD[Math.max(0, Math.min(DUEL_GOLD.length - 1, Math.min(theirs, mine + 2)))]; }
+  function arenaOk(x){
+    return x && typeof x.name === 'string' && x.name.length >= 1 && x.name.length <= 12 &&
+      [x.lv, x.rar, x.el, x.kind, x.seed, x.pw].every(function(v){ return typeof v === 'number' && isFinite(v); }) &&
+      x.lv >= 0 && x.lv <= SYNTH_MAX && x.rar >= 0 && x.rar < RARITIES.length && x.el >= 0 && x.el < ELEMENTS.length &&
+      x.kind >= 0 && x.kind < KINDS.length && x.pw === weaponPower(x, x.lv);
+  }
+  function arenaSword(x){ return makeSword(x.seed >>> 0, x.lv, x.el, x.rar, x.kind); }
+  /* 내 대표 무기 (가장 센 무기) */
+  function arenaPayload(){
+    var c = champion();
+    return { name:currentName(), lv:c.lv, rar:c.w.rar | 0, el:c.w.el | 0, kind:swordKind(c.w), seed:c.w.seed >>> 0, pw:c.p };
+  }
+  function queueArena(now){
+    if (!online.user || online.conflict) return;
+    clearTimeout(online.arenaTimer);
+    online.arenaTimer = setTimeout(sendArena, now ? 300 : 3000);
+  }
+  function sendArena(force){
+    if (!online.user || online.conflict) return;
+    var p = arenaPayload(), key = JSON.stringify(p);
+    if (key === online.arenaSent && !force) return;
+    var F = online.fb, uid = online.user.uid;
+    F.setDoc(F.doc(online.db, 'arena', uid), Object.assign({}, p, { at:F.serverTimestamp() })).then(function(){
+      if (!isUser(uid)) return;
+      online.arenaSent = key; online.arenaDenied = false;
+      renderDuel();
+    }, function(e){
+      if (!isUser(uid)) return;
+      online.arenaDenied = !!(e && e.code === 'permission-denied');
+      renderDuel();
+    });
+  }
+  function loadArena(manual){
+    if (!online.on) return;
+    var F = online.fb;
+    online.arenaBusy = true;
+    if (manual) renderDuel();
+    F.getDocs(F.query(F.collection(online.db, 'arena'), F.orderBy('at', 'desc'), F.limit(40))).then(function(qs){
+      online.arena = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; }).filter(arenaOk);
+      online.arenaBusy = false; online.arenaReadDenied = false; online.arenaAt = Date.now();
+      renderDuel();
+    }, function(e){
+      online.arenaBusy = false;
+      online.arenaReadDenied = !!(e && e.code === 'permission-denied');
+      if (!online.arena) online.arena = [];
+      renderDuel();
+    });
+  }
+  /* 나와 힘이 비슷한 사람부터 보여 줍니다 */
+  function duelFoes(){
+    var me = online.user && online.user.uid, mine = champion().p;
+    return (online.arena || []).filter(function(x){ return x.uid !== me; }).sort(function(a, b){
+      return Math.abs(a.pw - mine) - Math.abs(b.pw - mine) || b.pw - a.pw;
+    }).slice(0, DUEL_SHOW);
+  }
+  /* 내가 없는 동안 들어온 도전: 막아 낸 만큼 방어 보상을 받고, 받았다고 표시합니다 */
+  function claimDuels(){
+    if (!online.user || online.conflict) return;
+    var F = online.fb, uid = online.user.uid;
+    F.getDocs(F.query(F.collection(online.db, 'duels'), F.where('d', '==', uid), F.where('c', '==', false), F.limit(50))).then(function(qs){
+      if (!isUser(uid) || !qs.docs.length) return;
+      var batch = F.writeBatch(online.db), held = 0, lost = 0, got = 0, names = [];
+      qs.docs.forEach(function(d){
+        var x = d.data();
+        batch.update(d.ref, { c:true });
+        if (x.win){ lost++; return; }
+        held++;
+        got += Math.max(0, Math.min(DUEL_GOLD[DUEL_GOLD.length - 1], x.def | 0));
+        if (names.indexOf(x.an) < 0 && names.length < 3) names.push(String(x.an || '').slice(0, 12));
+      });
+      return batch.commit().then(function(){
+        if (!isUser(uid)) return;
+        state.duel.dn += held + lost; state.duel.dw += held;
+        if (got){
+          state.gold += got;
+          state.stats.earned += got;
+          if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+        }
+        if (held) pushLog('duel', '방어', names.join(', ') + (held > names.length ? ' 외' : '') + ' 도전 ' + held + '번 막아 냄 +' + gold(got), null);
+        if (lost) pushLog('duellose', '방어', '도전 ' + lost + '번은 막지 못했어요', null);
+        online.duelNews = (held ? '내가 없는 동안 ' + held + '번 막아 내서 ' + gold(got) + '을 받았어요' : '') +
+                          (lost ? (held ? ' · ' : '') + lost + '번은 졌어요 (잃은 것은 없어요)' : '');
+        render(); save();
+      });
+    }, function(){ /* 규칙이 아직 없거나 연결이 끊김 — 다음 접속 때 다시 */ });
+  }
+  /* 로그인 전이면 로그인, 아니면 고른 상대에게 도전 */
+  function duelAction(){
+    if (online.on && !online.user){ onlineLogin(); return; }
+    duelFight();
+  }
+  function renderDuel(){
+    var box = $('duel');
+    energyTick();
+    energyText();
+    var lead = $('duelLead'), btn = $('duelBtn'), cost = $('duelCost'), list = $('duelList'), status = $('duelStatus');
+    var news = $('duelNews');
+    news.hidden = !online.duelNews; news.textContent = online.duelNews || '';
+    var c = champion(), me = makeSword(c.w.seed, c.lv, c.w.el, c.w.rar, c.w.kind);
+    if (!online.on){
+      box.classList.add('off');
+      lead.textContent = ONLINE_POSSIBLE ? '온라인 기능을 불러오지 못해 결투장을 열 수 없어요.' : '결투장은 웹사이트에서 구글로 로그인하면 열려요. (다른 사람과 겨루는 기능)';
+      btn.hidden = true; list.textContent = ''; status.textContent = '';
+      $('duelRefresh').hidden = true;
+      return;
+    }
+    box.classList.remove('off');
+    btn.hidden = false; $('duelRefresh').hidden = false;
+    var foes = duelFoes();
+    if (!foes.some(function(x){ return x.uid === duelPick; })) duelPick = foes.length ? foes[0].uid : '';
+    var foe = foes.filter(function(x){ return x.uid === duelPick; })[0] || null;
+    /* 상대 목록 */
+    var sig = JSON.stringify([foes.map(function(x){ return [x.uid, x.pw, x.lv, x.seed, x.name]; }), duelPick, c.p, Object.keys(SPR).length]);
+    if (sig !== list.dataset.sig){
+      list.dataset.sig = sig;
+      list.textContent = '';
+      foes.forEach(function(x){
+        var sw = arenaSword(x), p = duelChance(c.p, x.pw), b = document.createElement('button');
+        b.type = 'button'; b.className = 'foe' + (x.uid === duelPick ? ' sel' : '');
+        b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(x.uid === duelPick));
+        var cv = document.createElement('canvas'); cv.width = cv.height = 96;
+        var info = document.createElement('span'); info.className = 'fi';
+        var nm = document.createElement('b'); nm.textContent = x.name;
+        var wp = document.createElement('span'); wp.className = 'fw'; wp.textContent = '+' + x.lv + ' ' + sw.name;
+        wp.style.color = sw.R.color;
+        info.appendChild(nm); info.appendChild(wp);
+        var st = document.createElement('span'); st.className = 'fs';
+        var pc = document.createElement('b'); pc.className = p >= .65 ? 'good' : p >= .35 ? 'mid' : 'bad'; pc.textContent = Math.round(p * 100) + '%';
+        var pw = document.createElement('span'); pw.textContent = '힘 ' + x.pw + ' · ' + gold(duelGold(c.p, x.pw));
+        st.appendChild(pc); st.appendChild(pw);
+        b.appendChild(cv); b.appendChild(info); b.appendChild(st);
+        b.title = x.name + ' · +' + x.lv + ' ' + sw.name + ' · 힘 ' + x.pw + ' · 승률 ' + Math.round(p * 100) + '% · 이기면 ' + gold(duelGold(c.p, x.pw));
+        b.addEventListener('click', function(){ if (dueling) return; duelPick = x.uid; renderDuel(); });
+        list.appendChild(b);
+        renderStill(cv, sw, false);
+      });
+    }
+    /* 무대: 내 대표 무기 vs 고른 상대 */
+    if (!dueling){
+      var who = JSON.stringify([c.w.seed, c.lv, c.w.el, c.w.rar, foe && foe.uid, foe && foe.seed, foe && foe.lv]);
+      renderStill($('duelMe'), me, false);
+      $('duelMeName').textContent = '+' + c.lv + ' ' + me.name;
+      $('duelMePow').textContent = '내 힘 ' + c.p + (c.vault >= 0 ? ' · 무기고' : '');
+      if (foe){
+        var fs = arenaSword(foe);
+        renderStill($('duelFoe'), fs, false);
+        $('duelFoeName').textContent = foe.name + ' · +' + foe.lv + ' ' + fs.name;
+        $('duelFoePow').textContent = '힘 ' + foe.pw;
+      } else {
+        var fx = $('duelFoe').getContext('2d'); fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, 160, 160);
+        $('duelFoeName').textContent = '상대 없음'; $('duelFoePow').textContent = '';
+      }
+      if (who !== duelWho){
+        duelWho = who;
+        $('duelHpMe').style.width = '100%'; $('duelHpFoe').style.width = '100%';
+        $('duelStage').classList.remove('won', 'lost');
+        $('duelResult').textContent = '';
+      }
+    }
+    var p = foe ? duelChance(c.p, foe.pw) : 0;
+    if (!online.user){
+      lead.textContent = '구글로 로그인하면 내 가장 센 무기가 대표 무기로 올라가고, 다른 사람에게 도전할 수 있어요.';
+      btn.disabled = !online.authReady; btn.firstChild.nodeValue = '구글로 로그인하고 도전하기';
+      cost.textContent = foes.length ? foes.length + '명이 기다리는 중' : '결투장 둘러보기';
+    } else {
+      btn.firstChild.nodeValue = '도전하기';
+      lead.textContent = online.arenaDenied || online.arenaReadDenied
+        ? '결투장을 쓰려면 관리자가 Firebase 규칙을 새로 게시해야 해요. (README 의 firestore.rules)'
+        : foe ? foe.name + '님의 대표 무기와 겨뤄요. 이기면 ' + gold(duelGold(c.p, foe.pw)) + ', 져도 잃는 건 기력 1뿐이에요.'
+              : online.arenaBusy ? '상대를 찾는 중…' : '아직 대표 무기를 올린 다른 사람이 없어요. 친구에게 이 게임 주소를 보내 보세요!';
+      btn.disabled = dueling || hunting || rolling || !foe || energyNow() < 1 || online.arenaDenied;
+      cost.textContent = energyNow() < 1 ? '기력이 없어요 · ' + energyLeft() + ' 뒤 1 회복'
+                       : foe ? '기력 1 · 승률 ' + Math.round(p * 100) + '%' : '상대 없음';
+    }
+    status.textContent = online.arenaBusy ? '불러오는 중…' : online.arena ? '결투장 ' + (online.arena.filter(function(x){ return !online.user || x.uid !== online.user.uid; }).length) + '명' : '';
+  }
+  function duelFight(){
+    if (dueling || hunting || rolling || !online.user || online.arenaDenied) return;
+    var foe = duelFoes().filter(function(x){ return x.uid === duelPick; })[0];
+    if (!foe) return;
+    var c = champion(), p = duelChance(c.p, foe.pw);
+    if (!useEnergy()) return;
+    var win = Math.random() < p, got = win ? duelGold(c.p, foe.pw) : 0;
+    var def = win ? 0 : Math.round(duelGold(foe.pw, c.p) * DUEL_DEF);
+    var me = makeSword(c.w.seed, c.lv, c.w.el, c.w.rar, c.w.kind), F = online.fb, uid = online.user.uid;
+    state.duel.n += 1;
+    if (win){
+      state.duel.w += 1;
+      state.gold += got;
+      state.stats.earned += got;
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      pushLog('duel', '결투', foe.name + '님에게 이김 +' + gold(got), null);
+    } else pushLog('duellose', '결투', foe.name + '님에게 짐 (기력 -1)', null);
+    save();                                                    // 결과는 바로 저장 (연출 도중에 닫아도 그대로)
+    F.addDoc(F.collection(online.db, 'duels'), {
+      a:uid, d:foe.uid, an:currentName().slice(0, 12), dn:String(foe.name).slice(0, 12), ap:c.p, dp:foe.pw,
+      aw:('+' + c.lv + ' ' + me.name).slice(0, 40), win:win, gold:got, def:def, c:false, at:F.serverTimestamp()
+    }).catch(function(){ /* 기록을 못 남겨도 결과는 그대로 */ });
+    var text = win ? '승리! ' + foe.name + '님을 이겼어요 +' + gold(got) : '패배… ' + foe.name + '님이 더 강했어요. 무기는 무사해요';
+    dueling = true;
+    var stage = $('duelStage'), res = $('duelResult');
+    res.textContent = ''; res.className = 'hunt-result';
+    stage.classList.remove('won', 'lost');
+    $('duelHpMe').style.width = '100%'; $('duelHpFoe').style.width = '100%';
+    renderDuel();
+    function finish(){
+      dueling = false;
+      $('duelHpMe').style.width = win ? '36%' : '0%';
+      $('duelHpFoe').style.width = win ? '0%' : '40%';
+      stage.classList.add(win ? 'won' : 'lost');
+      res.textContent = text;
+      res.className = 'hunt-result ' + (win ? 'good' : 'bad');
+      if (win){ tone(660, .12, 'triangle', .06); tone(990, .2, 'triangle', .05, .1); }
+      else tone(196, .25, 'sawtooth', .04);
+      render();
+    }
+    if (reduced()){ finish(); return; }
+    var hpMe = 100, hpFoe = 100, k = 0, meEl = stage.querySelector('.fighter.me'), foeEl = stage.querySelector('.fighter.mob');
+    function hit(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+    (function step(){
+      if (k >= 4){ finish(); return; }
+      var last = k === 3;
+      if (k % 2 === 0){
+        hpFoe = last && win ? 0 : Math.max(win ? 8 : 40, hpFoe - (win ? 30 : 18) - Math.random() * 8);
+        hit(foeEl); tone(520, .05, 'square', .04);
+        $('duelHpFoe').style.width = hpFoe + '%';
+      } else {
+        hpMe = last && !win ? 0 : Math.max(win ? 35 : 6, hpMe - (win ? 16 : 34) - Math.random() * 8);
+        hit(meEl); tone(260, .06, 'square', .04);
+        $('duelHpMe').style.width = hpMe + '%';
+      }
+      if (last){ $('duelHpMe').style.width = (win ? hpMe : 0) + '%'; $('duelHpFoe').style.width = (win ? 0 : hpFoe) + '%'; }
+      k++;
+      setTimeout(step, 380);
+    })();
+  }
+
+  /* ═════════ 사냥터 (몬스터, 지금은 잠금) ═════════ */
+  var hunting = false, huntTimer = null, MSPR = {};
+  function loadMonsters(done){
+    var keys = Object.keys(MONSTER_DATA), left = keys.length;
+    if (!left){ done(); return; }
+    keys.forEach(function(k){
+      var img = new Image();
+      img.onload = img.onerror = function(){
+        if (img.naturalWidth){
+          var c = document.createElement('canvas');
+          c.width = c.height = 32;
+          c.getContext('2d').drawImage(img, 0, 0);
+          MSPR[k] = c;
+        }
+        if (--left === 0) done();
+      };
+      img.src = MONSTER_DATA[k].src;
+    });
+  }
+  function drawMonster(cv, key){
+    var x = cv.getContext('2d');
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.clearRect(0, 0, cv.width, cv.height);
+    if (!MSPR[key]) return;
+    x.imageSmoothingEnabled = false;
+    var m = Math.round(cv.width * .06);
+    x.drawImage(MSPR[key], m, m, cv.width - m * 2, cv.height - m * 2);
+  }
+  /* 기력: 가득 차는 시각(full)만 저장하고, 지금 기력은 남은 시간으로 계산합니다 */
+  function energyNow(){
+    var rem = Math.max(0, state.energy.full - Date.now());
+    return Math.max(0, ENERGY_MAX - Math.ceil(rem / ENERGY_REGEN));
+  }
+  function energyNextMs(){
+    var rem = state.energy.full - Date.now();
+    return rem <= 0 ? 0 : rem - (Math.ceil(rem / ENERGY_REGEN) - 1) * ENERGY_REGEN;
+  }
+  var energyShown = -1;
+  /* 화면에 보인 뒤로 기력이 찼으면 true (표시만 바뀜, 저장 내용은 그대로) */
+  function energyTick(){
+    var n = energyNow(), changed = energyShown >= 0 && n !== energyShown;
+    energyShown = n;
+    return changed;
+  }
+  function useEnergy(){
+    if (energyNow() < 1) return false;
+    state.energy.full = Math.max(state.energy.full, Date.now()) + ENERGY_REGEN;
+    energyShown = energyNow();
+    return true;
+  }
+  function weaponPower(w, lv){ return lv + RAR_POWER[w.rar] + (lv > MAX ? 2 : 0); }
+  /* 지금 무기와 무기고 중 가장 센 무기 (같으면 지금 무기) */
+  function champion(){
+    var best = { w:state.sword, lv:state.level, vault:-1, p:weaponPower(state.sword, state.level) };
+    state.vault.forEach(function(v, i){
+      var p = weaponPower(v, v.lv);
+      if (p > best.p) best = { w:v, lv:v.lv, vault:i, p:p };
+    });
+    return best;
+  }
+  function huntPower(w, lv, M){ return weaponPower(w, lv) + (M && w.el === M.weak ? 3 : 0); }
+  /* 지금 무기와 무기고 무기 중 이 몬스터에게 가장 센 무기 */
+  function huntChampion(M){
+    var best = { w:state.sword, lv:state.level, vault:-1, p:huntPower(state.sword, state.level, M) };
+    state.vault.forEach(function(v, i){
+      var p = huntPower(v, v.lv, M);
+      if (p > best.p) best = { w:v, lv:v.lv, vault:i, p:p };
+    });
+    return best;
+  }
+  function huntChance(P, M){ return Math.max(0, Math.min(.95, .5 + .15 * (P - M.pw))); }
+  function huntDefault(){
+    var pick = 0;
+    MONSTERS.forEach(function(M, i){ if (huntChance(huntChampion(M).p, M) >= .5) pick = i; });
+    return pick;
+  }
+  function huntSel(){
+    var i = state.hunt.sel;
+    return i >= 0 && i < MONSTERS.length ? i : huntDefault();
+  }
+  function mmss(ms){ var s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  function energyLeft(){ return mmss(energyNextMs()); }
+  /* 기력 표시 (결투장·사냥터 둘 다) */
+  function energyText(){
+    var n = energyNow();
+    energyShown = n;
+    ['duel', 'hunt'].forEach(function(px){
+      $(px + 'Sta').textContent = '기력 ' + n + ' / ' + ENERGY_MAX;
+      $(px + 'Regen').textContent = n >= ENERGY_MAX ? '가득 참' : '다음 기력 ' + energyLeft();
+      var pips = $(px + 'Pips');
+      if (pips.children.length !== ENERGY_MAX){
+        pips.textContent = '';
+        for (var i = 0; i < ENERGY_MAX; i++) pips.appendChild(document.createElement('i'));
+      }
+      Array.prototype.forEach.call(pips.children, function(e, i){ e.classList.toggle('on', i < n); });
+    });
+  }
+  var huntSig = '', huntWho = '';
+  function renderHunt(){
+    $('hunt').hidden = !HUNT_OPEN;
+    if (!HUNT_OPEN) return;
+    energyTick();
+    energyText();
+    var si = huntSel(), M = MONSTERS[si], ch = huntChampion(M), p = huntChance(ch.p, M);
+    var nMon = Object.keys(MSPR).length;
+    var sig = JSON.stringify([state.level, state.sword, state.vault, si, Object.keys(SPR).length, nMon]);
+    if (sig !== huntSig){
+      huntSig = sig;
+      var list = $('huntList');
+      if (list.children.length !== MONSTERS.length){
+        list.textContent = '';
+        MONSTERS.forEach(function(M2, i){
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'mcard';
+          b.setAttribute('role', 'option');
+          var cv = document.createElement('canvas'); cv.width = cv.height = 64;
+          var nm = document.createElement('span'); nm.className = 'mn';
+          var pc = document.createElement('span'); pc.className = 'mp';
+          var gd = document.createElement('span'); gd.className = 'mg';
+          b.appendChild(cv); b.appendChild(nm); b.appendChild(pc); b.appendChild(gd);
+          b.addEventListener('click', function(){ if (hunting) return; state.hunt.sel = i; renderHunt(); save(); });
+          list.appendChild(b);
+        });
+      }
+      MONSTERS.forEach(function(M2, i){
+        var b = list.children[i], c2 = huntChampion(M2), p2 = huntChance(c2.p, M2), D = MONSTER_DATA[M2.key] || { ko:M2.key };
+        if (b.dataset.drawn !== String(nMon)){ drawMonster(b.firstChild, M2.key); b.dataset.drawn = String(nMon); }
+        b.classList.toggle('sel', i === si);
+        b.classList.toggle('locked', p2 <= 0);
+        b.setAttribute('aria-selected', String(i === si));
+        b.children[1].textContent = D.ko;
+        b.children[2].textContent = p2 > 0 ? Math.round(p2 * 100) + '%' : '너무 강함';
+        b.children[2].className = 'mp' + (p2 >= .65 ? ' good' : p2 >= .35 ? ' mid' : ' bad');
+        b.children[3].textContent = gold(M2.gold);
+        b.title = D.ko + ' · 힘 ' + M2.pw + ' · 약점 ' + ELEMENTS[M2.weak].name + ' · 이기면 ' + gold(M2.gold) + (p2 > 0 ? ' · 승률 ' + Math.round(p2 * 100) + '%' : ' · 지금은 너무 강해요');
+      });
+      if (!hunting){
+        var sw = makeSword(ch.w.seed, ch.lv, ch.w.el, ch.w.rar, ch.w.kind), D = MONSTER_DATA[M.key] || { ko:M.key };
+        var who = JSON.stringify([si, ch.w.seed, ch.lv, ch.w.el, ch.w.rar]);
+        renderStill($('huntMe'), sw, false);
+        drawMonster($('huntMob'), M.key);
+        $('huntMeName').textContent = '+' + ch.lv + ' ' + sw.name;
+        $('huntMobName').textContent = D.ko;
+        if (who !== huntWho){                                   // 상대나 나가는 무기가 바뀌면 지난 결과를 지움
+          huntWho = who;
+          $('hpMe').style.width = '100%'; $('hpMob').style.width = '100%';
+          $('huntStage').classList.remove('won', 'lost');
+          $('huntResult').textContent = '';
+        }
+        $('huntMePow').textContent = '힘 ' + ch.p + (ch.w.el === M.weak ? ' (약점 +3)' : '');
+        $('huntMobPow').textContent = '힘 ' + M.pw;
+        $('huntLead').textContent = D.ko + ' · 약점 ' + ELEMENTS[M.weak].name + ' 속성 · 이기면 ' + gold(M.gold) + ' (가끔 축복서·방지권)' +
+          (ch.vault >= 0 ? ' · 무기고에서 가장 센 무기가 나가요' : '');
+      }
+    }
+    var btn = $('huntBtn');
+    btn.disabled = hunting || dueling || rolling || energyNow() < 1 || p <= 0;
+    $('huntCost').textContent = energyNow() < 1 ? '기력이 없어요 · ' + energyLeft() + ' 뒤 1 회복'
+                              : p <= 0 ? '지금은 너무 강해요' : '기력 1 · 승률 ' + Math.round(p * 100) + '%';
+  }
+  function huntFight(){
+    if (!HUNT_OPEN || hunting || dueling || rolling) return;
+    var h = state.hunt, si = huntSel(), M = MONSTERS[si], ch = huntChampion(M), p = huntChance(ch.p, M);
+    if (p <= 0 || !useEnergy()) return;
+    h.n += 1;
+    var win = Math.random() < p, drop = null, D = MONSTER_DATA[M.key] || { ko:M.key };
+    if (win){
+      h.w += 1;
+      state.gold += M.gold;
+      state.stats.earned += M.gold;
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      var u = Math.random(), acc = 0;
+      HUNT_DROP.forEach(function(d){ if (!drop && u < (acc += d.p)) drop = d.item; });
+      if (drop) state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1);
+      pushLog('hunt', '사냥', D.ko + ' 처치 +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full : ''), null);
+    } else pushLog('huntlose', '사냥', D.ko + '에게 졌습니다 (기력 -1)', null);
+    save();                                                    // 결과는 바로 저장 (연출 도중에 닫아도 그대로)
+    var text = win ? '승리! +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full + ' 획득!' : '')
+                   : '패배… ' + josa(D.ko, '이', '가') + ' 더 강했어요. 무기는 무사해요';
+    hunting = true;
+    var stage = $('huntStage'), res = $('huntResult');
+    res.textContent = ''; res.className = 'hunt-result';
+    stage.classList.remove('won', 'lost');
+    $('hpMe').style.width = '100%'; $('hpMob').style.width = '100%';
+    renderHunt();
+    function finish(){
+      hunting = false;
+      $('hpMe').style.width = win ? '38%' : '0%';
+      $('hpMob').style.width = win ? '0%' : '42%';
+      stage.classList.add(win ? 'won' : 'lost');
+      res.textContent = text;
+      res.className = 'hunt-result ' + (win ? 'good' : 'bad');
+      if (win){ tone(660, .12, 'triangle', .06); tone(990, .2, 'triangle', .05, .1); if (drop) tone(1320, .2, 'triangle', .05, .25); }
+      else tone(196, .25, 'sawtooth', .04);
+      render();
+    }
+    if (reduced()){ finish(); return; }
+    /* 서너 번 주고받는 연출 — 결과는 이미 정해져 있고, 이긴 쪽이 마지막에 남도록 체력을 깎습니다 */
+    var hpMe = 100, hpMob = 100, turns = 4, k = 0;
+    var meEl = stage.querySelector('.fighter.me'), mobEl = stage.querySelector('.fighter.mob');
+    function hit(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+    (function step(){
+      if (k >= turns){ finish(); return; }
+      var last = k === turns - 1;
+      if (k % 2 === 0){
+        hpMob = last && win ? 0 : Math.max(win ? 8 : 40, hpMob - (win ? 30 : 18) - Math.random() * 8);
+        hit(mobEl); tone(520, .05, 'square', .04);
+        $('hpMob').style.width = hpMob + '%';
+      } else {
+        hpMe = last && !win ? 0 : Math.max(win ? 35 : 6, hpMe - (win ? 16 : 34) - Math.random() * 8);
+        hit(meEl); tone(260, .06, 'square', .04);
+        $('hpMe').style.width = hpMe + '%';
+      }
+      if (last && !win){ hpMe = 0; $('hpMe').style.width = '0%'; }
+      if (last && win){ hpMob = 0; $('hpMob').style.width = '0%'; }
+      k++;
+      huntTimer = setTimeout(step, 380);
+    })();
+  }
   function pickVault(i){
     var at = vaultSel.indexOf(i);
     if (at >= 0) vaultSel.splice(at, 1);
@@ -3270,7 +3911,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     on:false, failed:false, authReady:false, fb:null, auth:null, db:null, user:null, popupAt:0,
     attend:null, attendLoaded:false, attendError:false, claiming:false,
     saveTimer:null, saveBusy:false, saveFail:false, lastCode:'', conflict:'', dirtyAt:0,
-    myRank:null, pendingName:'', rankTimer:null, ranking:null, rankAt:0, rankError:false, note:''
+    myRank:null, pendingName:'', rankTimer:null, ranking:null, rankAt:0, rankError:false, note:'',
+    arena:null, arenaAt:0, arenaBusy:false, arenaTimer:null, arenaSent:'', arenaDenied:false, arenaReadDenied:false, duelNews:''
   };
 
   function onlineInit(){
@@ -3298,7 +3940,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         online.on = true;
         F.onAuthStateChanged(online.auth, onAuth);
         loadRanking();
-        setInterval(function(){ if (!document.hidden) loadRanking(); }, 180000);
+        loadArena();
+        setInterval(function(){ if (!document.hidden){ loadRanking(); loadArena(); } }, 180000);
         renderOnline();
         render();
       })
@@ -3310,6 +3953,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     online.user = user || null;
     online.attend = null; online.attendLoaded = false; online.attendError = false;
     online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
+    online.arenaSent = ''; online.arenaDenied = false; online.duelNews = '';
     online.dirtyAt = 0;
     renderOnline(); render();
     if (!user) return;
@@ -3323,6 +3967,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ]).then(function(){
       if (!isUser(uid)) return;
       queueRank(true);
+      sendArena(true);
+      claimDuels();
+      loadArena();
       renderOnline(); render();
     });
   }
@@ -3810,6 +4457,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('synthBtn').addEventListener('click', synthesize);
+  $('huntBtn').addEventListener('click', huntFight);
+  $('duelBtn').addEventListener('click', duelAction);
+  $('duelRefresh').addEventListener('click', function(){ loadArena(true); });
+  setInterval(function(){
+    if (energyTick()){ renderDuel(); renderHunt(); }
+    else if (energyNow() < ENERGY_MAX){ energyText(); if (energyNow() < 1){ renderHunt(); renderDuel(); } }
+  }, 1000);
   $('vaultLookBtn').addEventListener('click', vaultLook);
   $('showClose').addEventListener('click', closeShow);
   $('show').addEventListener('click', function(e){ if (e.target === this) closeShow(); });
@@ -3847,6 +4501,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     online.pendingName = v;
     renderOnline();
     sendRank();
+    queueArena(true);
   });
   function dayStamp(){ return dayKey(0) + '|' + kstKey(Date.now()); }
   var shownDay = dayStamp();
@@ -3965,6 +4620,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     kindList($('kindOdds'));
     rarityList($('multNote'), '판매가 = 기본 판매가 ×', function(R){ return '×' + R.mult; });
     touchSaveState();
+    loadMonsters(function(){ huntSig = ''; renderHunt(); });
     loadSprites(function(){
       takeCarry();
       render();

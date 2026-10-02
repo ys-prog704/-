@@ -864,6 +864,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <tbody id="chartBody"></tbody>
       </table>
     </div>
+    <p class="mult-note" id="profitNote">+7 이상에서 팔면 평균적으로 남아요. +16 까지는 그냥 강화해도 되고, +17 부터는 파괴 방지권을 쓰는 게 이득이에요.</p>
     <p class="mult-note" id="multNote"></p>
   </details>
 
@@ -877,29 +878,31 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 강화표 · 단계별 확률과 가격 ═════════
      s 성공 / x 파괴 (유지는 1-s-x), cost 시도 비용, price 일반 등급 판매가.
-     하락은 없습니다. +0~+3 은 실패해도 유지뿐이고, +4 부터 파괴될 수 있습니다. */
+     하락은 없습니다. +0~+3 은 실패해도 유지뿐이고, +4 부터 파괴될 수 있습니다.
+     판매가는 +7 부터 "한 단계 더 해서 파는 게 지금 파는 것보다 평균적으로 남도록" 정했습니다
+     (+6~+15 는 아이템 없이도, +16~+19 는 파괴 방지권을 쓰면 남음). */
   var LEVELS = [
     { s:1.00, x:0.00, cost:100,    price:0 },
     { s:0.95, x:0.00, cost:220,    price:180 },
     { s:0.90, x:0.00, cost:450,    price:430 },
     { s:0.85, x:0.00, cost:800,    price:980 },
     { s:0.80, x:0.02, cost:1400,   price:1900 },
-    { s:0.75, x:0.04, cost:2300,   price:3600 },
-    { s:0.70, x:0.08, cost:3700,   price:6600 },
-    { s:0.64, x:0.13, cost:5900,   price:12000 },
-    { s:0.58, x:0.18, cost:9200,   price:21000 },
-    { s:0.52, x:0.23, cost:14000,  price:37000 },
-    { s:0.46, x:0.27, cost:21000,  price:64000 },
-    { s:0.40, x:0.32, cost:31000,  price:110000 },
-    { s:0.34, x:0.37, cost:46000,  price:190000 },
-    { s:0.29, x:0.41, cost:68000,  price:330000 },
-    { s:0.24, x:0.45, cost:100000, price:570000 },
-    { s:0.19, x:0.50, cost:150000, price:980000 },
-    { s:0.15, x:0.54, cost:220000, price:1700000 },
-    { s:0.11, x:0.58, cost:330000, price:2900000 },
-    { s:0.08, x:0.61, cost:490000, price:5000000 },
-    { s:0.05, x:0.65, cost:730000, price:8700000 },
-    { s:null, x:null, cost:null,   price:16000000 }
+    { s:0.75, x:0.03, cost:2300,   price:3600 },
+    { s:0.70, x:0.04, cost:3700,   price:6600 },
+    { s:0.64, x:0.06, cost:5900,   price:16000 },
+    { s:0.58, x:0.08, cost:9200,   price:34000 },
+    { s:0.52, x:0.10, cost:14000,  price:69000 },
+    { s:0.46, x:0.12, cost:21000,  price:140000 },
+    { s:0.40, x:0.14, cost:31000,  price:280000 },
+    { s:0.34, x:0.16, cost:46000,  price:570000 },
+    { s:0.29, x:0.18, cost:68000,  price:1200000 },
+    { s:0.24, x:0.20, cost:100000, price:2600000 },
+    { s:0.19, x:0.22, cost:150000, price:6000000 },
+    { s:0.15, x:0.24, cost:220000, price:16000000 },
+    { s:0.11, x:0.26, cost:330000, price:27000000 },
+    { s:0.08, x:0.28, cost:490000, price:49000000 },
+    { s:0.05, x:0.30, cost:730000, price:92000000 },
+    { s:null, x:null, cost:null,   price:190000000 }
   ];
   var MAX = LEVELS.length - 1;
   /* +20 무기는 무기고에 모아 두고, 같은 단계 두 자루를 합성해 한 단계 위로 만듭니다 (강화로는 +20 까지) */

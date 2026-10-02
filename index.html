@@ -199,7 +199,6 @@ img{max-width:100%}
 }
 @keyframes pop-ok{0%{transform:scale(.82);filter:brightness(2.2)}35%{transform:scale(1.1);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
 @keyframes thud-keep{0%{transform:translateY(0)}40%{transform:translateY(7px)}100%{transform:translateY(0)}}
-@keyframes sag-down{0%{transform:translateY(0) rotate(0)}42%{transform:translateY(16px) rotate(-5deg)}100%{transform:translateY(0) rotate(0)}}
 @keyframes shatter{
   0%{transform:scale(1) rotate(0);opacity:1;filter:brightness(1)}
   22%{transform:scale(1.07) rotate(2.5deg);opacity:1;filter:brightness(2)}
@@ -208,7 +207,6 @@ img{max-width:100%}
 .is-rolling .swordcanvas{animation:forge-shake .16s linear infinite}
 .fx-success .swordcanvas{animation:pop-ok .6s cubic-bezier(.2,1.4,.4,1)}
 .fx-keep .swordcanvas{animation:thud-keep .34s ease-out}
-.fx-down .swordcanvas{animation:sag-down .5s ease-out}
 .fx-boom .swordcanvas{animation:shatter .62s cubic-bezier(.3,.1,.5,1) forwards}
 
 .spark{
@@ -251,7 +249,6 @@ img{max-width:100%}
 .seg{transition:flex-basis .32s ease;flex-grow:0;flex-shrink:0}
 .seg-s{background:linear-gradient(180deg,#6BB870,#4E8B52)}
 .seg-k{background:linear-gradient(180deg,#948A7E,#6B635A)}
-.seg-d{background:linear-gradient(180deg,#DBA052,#A86F2C)}
 .seg-x{background:linear-gradient(180deg,#D75B50,#93332C)}
 .marker{
   position:absolute;top:-4px;bottom:-4px;left:0;width:2px;margin-left:-1px;
@@ -259,12 +256,12 @@ img{max-width:100%}
   opacity:0;transition:opacity .2s;
 }
 .marker.on{opacity:1}
-.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:9px}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}
 .legend div{display:flex;flex-direction:column;gap:2px}
 .legend .k{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ash)}
 .legend .k i{width:7px;height:7px;border-radius:2px;flex:none}
 .legend .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
-.dot-s{background:#5FA463}.dot-k{background:#8A8076}.dot-d{background:#CE9140}.dot-x{background:#C94A40}
+.dot-s{background:#5FA463}.dot-k{background:#8A8076}.dot-x{background:#C94A40}
 .legend .hit{color:var(--parch)}
 .gacha-odds{
   margin:10px 0 0;font-size:11.5px;line-height:1.6;color:var(--ash);
@@ -552,7 +549,7 @@ thead th{background:var(--iron-2);font-size:10.5px;font-weight:600;letter-spacin
 tbody td{background:var(--iron);border-top:1px solid var(--line);font-family:var(--font-mono)}
 tbody tr.now td{background:var(--iron-3);color:var(--parch)}
 tbody tr.now td:first-child{color:var(--ember);font-weight:600}
-.c-s{color:var(--ok)}.c-d{color:var(--down)}.c-x{color:var(--boom)}.c-p{color:var(--gold)}
+.c-s{color:var(--ok)}.c-x{color:var(--boom)}.c-p{color:var(--gold)}
 .mult-note{margin:8px 2px 0;font-size:11.5px;color:var(--ash);display:flex;flex-wrap:wrap;gap:4px 12px}
 .mult-note b{font-weight:700}
 
@@ -669,14 +666,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <div class="oddsbar">
           <span class="seg seg-s" id="segS"></span>
           <span class="seg seg-k" id="segK"></span>
-          <span class="seg seg-d" id="segD"></span>
           <span class="seg seg-x" id="segX"></span>
           <i class="marker" id="marker" aria-hidden="true"></i>
         </div>
         <div class="legend">
           <div><span class="k"><i class="dot-s"></i>성공</span><span class="v c-s" id="valS">0%</span></div>
           <div><span class="k"><i class="dot-k"></i>유지</span><span class="v" id="valK">0%</span></div>
-          <div><span class="k"><i class="dot-d"></i>하락</span><span class="v c-d" id="valD">0%</span></div>
           <div><span class="k"><i class="dot-x"></i>파괴</span><span class="v c-x" id="valX">0%</span></div>
         </div>
         <p class="gacha-odds" id="gachaOdds"></p>
@@ -701,11 +696,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <span class="pr" id="prBless">0 G</span>
           </button>
           <button class="item i-protect" id="buyProtect" type="button">
-            <span><span class="nm">파괴 방지권</span><br><span class="ds">파괴 결과를 하락으로 대체</span></span>
+            <span><span class="nm">파괴 방지권</span><br><span class="ds">파괴 결과를 유지로 대체</span></span>
             <span class="pr" id="prProtect">0 G</span>
           </button>
           <button class="item i-master" id="buyMaster" type="button">
-            <span><span class="nm">장인의 손길</span><br><span class="ds">하락&middot;파괴를 모두 유지로 대체</span></span>
+            <span><span class="nm">장인의 손길</span><br><span class="ds">성공 확률 +15%p, 파괴는 유지로</span></span>
             <span class="pr" id="prMaster">0 G</span>
           </button>
         </div>
@@ -797,8 +792,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <thead>
           <tr>
             <th scope="col">단계</th>
-            <th scope="col">성공</th><th scope="col">유지</th>
-            <th scope="col">하락</th><th scope="col">파괴</th>
+            <th scope="col">성공</th><th scope="col">유지</th><th scope="col">파괴</th>
             <th scope="col">비용</th><th scope="col">기본 판매가</th>
           </tr>
         </thead>
@@ -817,29 +811,30 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   "use strict";
 
   /* ═════════ 강화표 · 단계별 확률과 가격 ═════════
-     s 성공 / d 하락 / x 파괴 (유지는 1-s-d-x), cost 시도 비용, price 일반 등급 판매가 */
+     s 성공 / x 파괴 (유지는 1-s-x), cost 시도 비용, price 일반 등급 판매가.
+     하락은 없습니다. +0~+3 은 실패해도 유지뿐이고, +4 부터 파괴될 수 있습니다. */
   var LEVELS = [
-    { s:1.00, d:0.00, x:0.00, cost:100,    price:0 },
-    { s:0.95, d:0.00, x:0.00, cost:220,    price:180 },
-    { s:0.90, d:0.00, x:0.00, cost:450,    price:430 },
-    { s:0.85, d:0.00, x:0.00, cost:800,    price:980 },
-    { s:0.80, d:0.10, x:0.00, cost:1400,   price:1900 },
-    { s:0.75, d:0.15, x:0.00, cost:2300,   price:3600 },
-    { s:0.70, d:0.18, x:0.04, cost:3700,   price:6600 },
-    { s:0.64, d:0.21, x:0.08, cost:5900,   price:12000 },
-    { s:0.58, d:0.24, x:0.12, cost:9200,   price:21000 },
-    { s:0.52, d:0.27, x:0.16, cost:14000,  price:37000 },
-    { s:0.46, d:0.29, x:0.20, cost:21000,  price:64000 },
-    { s:0.40, d:0.32, x:0.24, cost:31000,  price:110000 },
-    { s:0.34, d:0.34, x:0.28, cost:46000,  price:190000 },
-    { s:0.29, d:0.36, x:0.32, cost:68000,  price:330000 },
-    { s:0.24, d:0.37, x:0.36, cost:100000, price:570000 },
-    { s:0.19, d:0.38, x:0.40, cost:150000, price:980000 },
-    { s:0.15, d:0.39, x:0.44, cost:220000, price:1700000 },
-    { s:0.11, d:0.39, x:0.48, cost:330000, price:2900000 },
-    { s:0.08, d:0.38, x:0.52, cost:490000, price:5000000 },
-    { s:0.05, d:0.37, x:0.56, cost:730000, price:8700000 },
-    { s:null, d:null, x:null, cost:null,   price:16000000 }
+    { s:1.00, x:0.00, cost:100,    price:0 },
+    { s:0.95, x:0.00, cost:220,    price:180 },
+    { s:0.90, x:0.00, cost:450,    price:430 },
+    { s:0.85, x:0.00, cost:800,    price:980 },
+    { s:0.80, x:0.02, cost:1400,   price:1900 },
+    { s:0.75, x:0.04, cost:2300,   price:3600 },
+    { s:0.70, x:0.08, cost:3700,   price:6600 },
+    { s:0.64, x:0.13, cost:5900,   price:12000 },
+    { s:0.58, x:0.18, cost:9200,   price:21000 },
+    { s:0.52, x:0.23, cost:14000,  price:37000 },
+    { s:0.46, x:0.27, cost:21000,  price:64000 },
+    { s:0.40, x:0.32, cost:31000,  price:110000 },
+    { s:0.34, x:0.37, cost:46000,  price:190000 },
+    { s:0.29, x:0.41, cost:68000,  price:330000 },
+    { s:0.24, x:0.45, cost:100000, price:570000 },
+    { s:0.19, x:0.50, cost:150000, price:980000 },
+    { s:0.15, x:0.54, cost:220000, price:1700000 },
+    { s:0.11, x:0.58, cost:330000, price:2900000 },
+    { s:0.08, x:0.61, cost:490000, price:5000000 },
+    { s:0.05, x:0.65, cost:730000, price:8700000 },
+    { s:null, x:null, cost:null,   price:16000000 }
   ];
   var MAX = LEVELS.length - 1;
 
@@ -1820,20 +1815,21 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function sellPrice(){ return Math.round(LEVELS[state.level].price * RARITIES[state.sword.rar].mult); }
 
-  /* 보호 아이템은 확률을 재분배할 뿐, 네 구간의 합은 항상 1입니다. */
+  /* 아이템은 확률을 재분배할 뿐, 세 구간(성공·유지·파괴)의 합은 항상 1입니다.
+     축복 +10%p, 장인 +15%p 는 유지·파괴에서 비율대로 덜어 오고, 방지권·장인은 남은 파괴를 유지로 바꿉니다. */
   function odds(level, buffs){
     var row = LEVELS[level];
     if (row.s === null) return null;
-    var s = row.s, d = row.d, x = row.x;
-    var k = Math.max(0, 1 - s - d - x);
-    if (buffs.bless){
-      var add = Math.min(0.10, 1 - s), rest = k + d + x;
-      if (rest > 0){ var f = (rest - add) / rest; k *= f; d *= f; x *= f; }
+    var s = row.s, x = row.x, k = Math.max(0, 1 - s - x);
+    function boost(p){
+      var add = Math.min(p, 1 - s), rest = k + x;
+      if (rest > 0){ var f = (rest - add) / rest; k *= f; x *= f; }
       s += add;
     }
-    if (buffs.protect){ d += x; x = 0; }
-    if (buffs.master){ k += d + x; d = 0; x = 0; }
-    return { s:s, k:k, d:d, x:x };
+    if (buffs.bless) boost(0.10);
+    if (buffs.master) boost(0.15);
+    if (buffs.protect || buffs.master){ k += x; x = 0; }
+    return { s:s, k:k, x:x };
   }
   function itemPrice(key){
     var row = LEVELS[state.level];
@@ -2146,8 +2142,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     el.appendChild(document.createTextNode(sw.name + (tail || '')));
   }
   function highlight(kind){
-    var map = { success:'valS', keep:'valK', down:'valD', boom:'valX' };
-    ['valS','valK','valD','valX'].forEach(function(id){ $(id).classList.toggle('hit', id === map[kind]); });
+    var map = { success:'valS', keep:'valK', boom:'valX' };
+    ['valS','valK','valX'].forEach(function(id){ $(id).classList.toggle('hit', id === map[kind]); });
   }
   var revealTimer = null;
   function reveal(title, name, sub, color, myth){
@@ -2228,14 +2224,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       nf.appendChild(document.createTextNode(' \u00B7 ' + nx.short));
     } else nf.textContent = '이 ' + josa(sw.K.name, '은', '는') + ' 모든 변화를 깨웠습니다';
 
-    var parts = maxed ? { s:0, k:1, d:0, x:0 } : o;
+    var parts = maxed ? { s:0, k:1, x:0 } : o;
     $('segS').style.flexBasis = (parts.s * 100) + '%';
     $('segK').style.flexBasis = (parts.k * 100) + '%';
-    $('segD').style.flexBasis = (parts.d * 100) + '%';
     $('segX').style.flexBasis = (parts.x * 100) + '%';
     $('valS').textContent = maxed ? '—' : pct(o.s);
     $('valK').textContent = maxed ? '—' : pct(o.k);
-    $('valD').textContent = maxed ? '—' : pct(o.d);
     $('valX').textContent = maxed ? '—' : pct(o.x);
 
     var fb = $('forgeBtn');
@@ -2401,7 +2395,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           c.cell.classList.toggle('off', avail && !on);
           c.cell.classList.toggle('na', !avail);
           if (!avail){
-            c.cv.getContext('2d').clearRect(0, 0, c.cv.width, c.cv.height);
+            var cx = c.cv.getContext('2d');
+            cx.setTransform(1, 0, 0, 1, 0, 0);                  // 밝혀진 그림을 그리면 확대 설정이 남아 있으므로 먼저 되돌림
+            cx.clearRect(0, 0, c.cv.width, c.cv.height);
             c.cell.title = ELEMENTS[e].name + ' 속성에는 ' + RARITIES[r].name + ' ' + josa(K.name, '이', '가') + ' 없어요';
           } else (function(c, e, r, k, want, on){
             dexQueue.push(function(){
@@ -2441,7 +2437,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         tr.dataset.lv = String(i);
         [{ t:'+' + i },
          { t:o ? pct(o.s) : '—', c:'c-s' }, { t:o ? pct(o.k) : '—' },
-         { t:o ? pct(o.d) : '—', c:'c-d' }, { t:o ? pct(o.x) : '—', c:'c-x' },
+         { t:o ? pct(o.x) : '—', c:'c-x' },
          { t:row.cost === null ? '—' : fmt(row.cost) },
          { t:row.price > 0 ? fmt(row.price) : '—', c:'c-p' }
         ].forEach(function(cell){
@@ -2511,7 +2507,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var o = odds(state.level, state.buffs), r = Math.random(), kind;
     if (r < o.s) kind = 'success';
     else if (r < o.s + o.k) kind = 'keep';
-    else if (r < o.s + o.k + o.d) kind = 'down';
     else kind = 'boom';
 
     rolling = true;
@@ -2522,7 +2517,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     var anvil = $('anvil');
     anvil.classList.add('is-rolling');
-    anvil.classList.remove('fx-success','fx-keep','fx-down','fx-boom');
+    anvil.classList.remove('fx-success','fx-keep','fx-boom');
     verdict('keep', '망치질 중…');
     $('rollText').textContent = '굴리는 중…';
     $('forgeBtn').disabled = true;
@@ -2569,15 +2564,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       burst(7); tone(180, .17, 'sine', .085);
       verdict('keep', '실패했지만 단계는 유지되었습니다.');
       pushLog('keep', '유지', '+' + from + ' 유지', r);
-    } else if (kind === 'down'){
-      state.level = Math.max(0, from - 1);
-      currentSword();
-      anvil.classList.add('fx-down');
-      burst(12);
-      tone(250, .18, 'sawtooth', .06);
-      tone(160, .28, 'sawtooth', .055, .1);
-      verdict('down', '강화 실패 — 단계가 하락했습니다.');
-      pushLog('down', '하락', '+' + from + ' → +' + state.level, r);
     } else {
       var lost = currentSword();
       state.level = 0;
@@ -2594,7 +2580,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (state.gold > state.stats.peak) state.stats.peak = state.gold;
 
     setTimeout(function(){
-      anvil.classList.remove('fx-success','fx-keep','fx-down','fx-boom');
+      anvil.classList.remove('fx-success','fx-keep','fx-boom');
       if (replace){
         giveSword(rollSword());
         popIn(anvil);

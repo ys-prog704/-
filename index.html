@@ -362,7 +362,7 @@ img{max-width:100%}
 .btn-login{color:var(--parch);border-color:var(--ash)}
 .gis-box{min-height:44px;display:flex;align-items:center;border-radius:22px;color-scheme:light}   /* 어두운 화면에서 구글 창 뒤에 흰 바탕이 깔리지 않게 */
 .gis-box.probing{position:absolute;opacity:0;pointer-events:none}   /* 숨기면(visibility) 크롬이 구글 창을 멈춰서 버튼이 안 그려짐 */
-.gis-box.pulse{animation:gisPulse 1.1s ease-out 2}
+.gis-box.pulse,.room.pulse{animation:gisPulse 1.1s ease-out 2}
 @keyframes gisPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 70%, transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .online-note{
   margin-top:9px;padding:9px 11px;font-size:12px;line-height:1.55;
@@ -3570,12 +3570,23 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var ROOM_POST = { success:10, boom:8, sell:10, pull:3 };   // 이 단계(등급) 이상이면 봇이 알림: 성공 +10 · 파괴 +8 · 판매 +10 · 뽑기 전설
   var room = { id:'', name:'', joined:false, loaded:false, members:[], msgs:[], local:[], unsubM:null, unsubC:null, seen:{}, first:true,
                inviteId:'', inviteName:'', lastSend:0, sellArm:0, cmd:'', meTimer:null, meSent:'' };
+  var ROOM_INVITE = SAVE_KEY + ':invite';     // 초대 링크로 왔으면 들어갈 때까지 이 탭에 기억 (로그인하다 새로고침돼도 잊지 않게)
   var roomInvite = (function(){
-    var m = /[?&]room=([A-Za-z0-9]{10,40})(&|$)/.exec(location.search);
-    if (!m) return '';
-    try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])room=[^&]*(&|$)/, '$1').replace(/[?&]$/, '') + location.hash); } catch (e) {}
-    return m[1];
+    var m = /[?&]room=([A-Za-z0-9]{10,40})(&|$)/.exec(location.search), id = '';
+    if (m){
+      id = m[1];
+      try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])room=[^&]*(&|$)/, '$1').replace(/[?&]$/, '') + location.hash); } catch (e) {}
+      try { sessionStorage.setItem(ROOM_INVITE, id); } catch (e) {}
+    } else {
+      try { id = sessionStorage.getItem(ROOM_INVITE) || ''; } catch (e) {}
+    }
+    return /^[A-Za-z0-9]{10,40}$/.test(id) ? id : '';
   })();
+  /* keep: 이 탭에는 남겨 두고(새로고침하면 다시 시도) 지금만 내려놓기 */
+  function roomInviteDone(keep){
+    roomInvite = '';
+    if (!keep) try { sessionStorage.removeItem(ROOM_INVITE); } catch (e) {}
+  }
   function memberOk(x){ return arenaOk(x) && typeof x.best === 'number' && x.best >= 0 && x.best <= SYNTH_MAX; }
   function roomActive(){ return !!(online.user && room.id && room.joined); }
   function roomWho(){ return currentName() + '님'; }
@@ -3665,20 +3676,36 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       roomNote(e && e.code === 'permission-denied' ? '방을 만들려면 관리자가 Firebase 규칙을 새로 게시해야 해요.' : '방을 만들지 못했어요. 잠시 뒤 다시 해 주세요.');
     });
   }
-  function roomJoin(id, name){
+  function roomJoin(id, name, invited){
     if (!online.user || !id) return;
-    var F = online.fb, db = online.db, uid = online.user.uid, b = F.writeBatch(db);
-    b.set(F.doc(db, 'rooms', id, 'members', uid), Object.assign(roomMe(), { at:F.serverTimestamp() }));
+    var F = online.fb, db = online.db, uid = online.user.uid, b = F.writeBatch(db), me = roomMe();
+    b.set(F.doc(db, 'rooms', id, 'members', uid), Object.assign({}, me, { at:F.serverTimestamp() }));
     b.set(F.doc(F.collection(db, 'rooms', id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:'bot', at:F.serverTimestamp(),
-      text:roomWho() + '이 들어왔어요! 대표 무기 +' + roomMe().lv + ' · 최고 +' + roomMe().best });
-    $('roomJoinBtn').disabled = true;
+      text:roomWho() + '이 들어왔어요! 대표 무기 +' + me.lv + ' · 최고 +' + me.best });
+    room.joining = true;
+    renderRoom();
     b.commit().then(function(){
-      $('roomJoinBtn').disabled = false;
+      if (!isUser(uid)) return;
+      room.joining = false;
       room.inviteId = '';
       roomRemember(id, name);
       roomListen(id, name);
       save(); render();
-    }, function(){ $('roomJoinBtn').disabled = false; roomNote('방에 들어가지 못했어요. 링크를 다시 확인해 주세요.'); });
+      if (invited) roomShow();
+    }, function(){
+      if (!isUser(uid)) return;
+      room.joining = false;
+      room.inviteId = id; room.inviteName = name;                       // 초대 화면을 남겨 두어 다시 누를 수 있게
+      renderRoom();
+      roomNote('방에 들어가지 못했어요. 잠시 뒤 "들어가기"를 다시 눌러 주세요.');
+      if (invited) roomShow();
+    });
+  }
+  /* 단톡방으로 화면을 옮기고 잠깐 반짝 */
+  function roomShow(){
+    var box = $('room');
+    try { box.scrollIntoView({ behavior:reduced() ? 'auto' : 'smooth', block:'start' }); } catch (e) {}
+    box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse');
   }
   function roomLeave(){
     if (!online.user || !room.id) return;
@@ -3819,25 +3846,40 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     room.lastSend = Date.now();
     if (text.charAt(0) === '/') roomCommand(text); else roomSay(text, 'chat');
   }
-  /* 로그인했을 때: 초대 링크로 왔으면 그 방을, 아니면 마지막 방을 엽니다 */
+  /* 로그인했을 때: 초대 링크로 왔으면 그 방에 바로 들어가고(카톡의 "단톡방 들어가기"를 눌렀으니 다시 묻지 않음),
+     아니면 마지막 방을 엽니다 */
   function roomOnLogin(){
     if (!online.user) return;
-    var F = online.fb, db = online.db, uid = online.user.uid;
-    if (roomInvite){
-      var id = roomInvite;
-      roomInvite = '';
-      F.getDoc(F.doc(db, 'rooms', id)).then(function(d){
-        if (!d.exists()){ roomNote('초대받은 방을 찾을 수 없어요.'); return; }
-        var name = String(d.data().name || '대장간');
-        if (state.rooms.some(function(r){ return r.id === id; })){ roomRemember(id, name); roomListen(id, name); save(); return; }
-        F.getDoc(F.doc(db, 'rooms', id, 'members', uid)).then(function(m){
-          if (m.exists()){ roomRemember(id, name); roomListen(id, name); save(); }
-          else { room.inviteId = id; room.inviteName = name; renderRoom(); }
-        }, function(){ room.inviteId = id; room.inviteName = name; renderRoom(); });
-      }, function(){ roomNote('초대받은 방을 열지 못했어요. 관리자가 Firebase 규칙을 새로 게시했는지 확인해 주세요.'); });
-    }
+    if (!roomInvite){ roomOpenLast(); return; }
+    var F = online.fb, db = online.db, uid = online.user.uid, id = roomInvite;
+    room.joining = true;
+    renderRoom();
+    F.getDoc(F.doc(db, 'rooms', id)).then(function(d){
+      if (!isUser(uid)) return;
+      roomInviteDone();
+      if (!d.exists()){
+        room.joining = false; roomOpenLast();
+        roomNote('초대받은 방을 찾을 수 없어요. 방을 만든 친구에게 링크를 다시 받아 주세요.'); roomShow();
+        return;
+      }
+      var name = String(d.data().name || '대장간');
+      var open = function(){ room.joining = false; roomRemember(id, name); roomListen(id, name); save(); render(); roomShow(); };
+      if (state.rooms.some(function(r){ return r.id === id; })){ open(); return; }
+      F.getDoc(F.doc(db, 'rooms', id, 'members', uid)).then(function(m){
+        if (!isUser(uid)) return;
+        if (m.exists()) open(); else roomJoin(id, name, true);
+      }, function(){ if (isUser(uid)) roomJoin(id, name, true); });       // 아직 방 사람이 아니면 읽기가 막힘 → 들어가기
+    }, function(){
+      if (!isUser(uid)) return;
+      roomInviteDone(true);
+      room.joining = false; roomOpenLast();
+      roomNote('초대받은 방을 열지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.'); roomShow();
+    });
+  }
+  function roomOpenLast(){
     var cur = state.rooms.filter(function(r){ return r.id === state.roomId; })[0] || state.rooms[0];
     if (cur && room.id !== cur.id){ state.roomId = cur.id; roomListen(cur.id, cur.name); }
+    else renderRoom();
   }
   function shareRoom(){
     if (!room.id) return;
@@ -3888,17 +3930,27 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     if (!online.user){
       gate.hidden = false; chat.hidden = true; bar.hidden = true; count.textContent = '';
-      lead.textContent = roomInvite ? '단톡방 초대를 받았어요! 구글로 로그인하면 바로 들어갈 수 있어요.'
+      var kakao = /KAKAOTALK/i.test(navigator.userAgent), pre = roomInvite ? '단톡방 초대를 받았어요! ' : '';
+      if (inAppBrowser()){                                   // 앱 안 브라우저는 구글이 로그인을 막음 → 크롬·사파리로
+        lead.textContent = pre + (kakao ? '카카오톡 안에서는 구글 로그인이 막혀 있어서, 크롬·사파리로 열어야 ' + (roomInvite ? '들어갈 수 있어요.' : '단톡방을 쓸 수 있어요.')
+                                        : '이 앱 안의 브라우저에서는 구글 로그인이 막혀 있어요. 오른쪽 위 메뉴의 "다른 브라우저로 열기"를 눌러 주세요.');
+        join.hidden = !kakao; join.disabled = false; join.textContent = '크롬·사파리로 열기';
+        return;
+      }
+      lead.textContent = roomInvite ? pre + '구글로 로그인하면 바로 들어가요.'
                                     : '구글로 로그인하면 방을 만들고 카톡으로 친구들을 초대할 수 있어요. 방 사람들의 강화 소식을 대장간봇이 알려 줘요.';
-      join.hidden = false; join.disabled = !online.authReady; join.textContent = '구글로 로그인';
+      join.hidden = false; join.disabled = !online.authReady; join.textContent = roomInvite ? '구글로 로그인하고 들어가기' : '구글로 로그인';
       return;
     }
     var inviting = room.inviteId && room.inviteId !== room.id;
-    var showChat = !inviting && !room.making && room.id && room.joined;
+    var joining = room.joining || !!roomInvite;              // 초대받은 방에 들어가는 중 (로그인 직후 포함)
+    var showChat = !joining && !inviting && !room.making && room.id && room.joined;
     gate.hidden = !!showChat; chat.hidden = !showChat;
     bar.hidden = !(room.id && room.joined);
     count.textContent = room.id && room.joined ? room.members.length + '명' : '';
-    if (inviting){
+    if (joining){
+      lead.textContent = '초대받은 단톡방에 들어가는 중…';
+    } else if (inviting){
       lead.textContent = '"' + room.inviteName + '" 방에 초대받았어요. 들어가면 방 사람들과 채팅하고 결투할 수 있어요.';
       join.hidden = false; join.disabled = false; join.textContent = '들어가기';
       back.hidden = !room.id;
@@ -4654,7 +4706,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     online.attend = null; online.attendLoaded = false; online.attendError = false;
     online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
     online.arenaSent = ''; online.arenaDenied = false; online.duelNews = '';
-    roomStop(); room.id = ''; room.name = ''; room.inviteId = ''; room.making = false;
+    roomStop(); room.id = ''; room.name = ''; room.inviteId = ''; room.making = false; room.joining = false;
     online.dirtyAt = 0;
     renderOnline(); render();
     if (!user) return;
@@ -4993,6 +5045,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('logoutBtn').hidden = !u;
     $('onlineWho').textContent = u ? currentName() + '님 · 구글 계정에 자동 저장 중'
                                : !online.authReady ? '로그인 상태를 확인하는 중…'
+                               : roomInvite ? '단톡방 초대를 받았어요! 구글로 로그인하면 바로 들어가요.'
                                : '로그인하면 기기를 바꿔도 이어지고, 출석 보상과 랭킹에 참여해요.';
     var note = $('onlineNote');
     note.textContent = '';
@@ -5038,6 +5091,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var CARRY_SENT = SAVE_KEY + ':carried';     // 이미 브라우저로 보낸 진행 — 같은 진행을 매번 다시 보내지 않도록
   var KAKAO_STAY = SAVE_KEY + ':stay';        // "카톡에서 계속하기"를 고른 폰은 자동으로 넘기지 않음
   var pendingCarry = '';
+  var kakaoSkip = false;                      // 초대 링크로 왔지만 "카톡에서 계속하기"를 고름
 
   function freshGame(){ return state.stats.tries === 0 && state.level === 0; }
   function browserUrl(force){
@@ -5052,16 +5106,20 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return url;
   }
   function kakaoStay(){ try { return localStorage.getItem(KAKAO_STAY) === '1'; } catch (e) { return false; } }
-  function openInBrowser(force){
+  function openInBrowser(force, keepStay){
     var go = (EMU && window.__navigate) || function(u){ location.href = u; };   // __navigate: 시험용
-    try { localStorage.removeItem(KAKAO_STAY); } catch (e) {}                    // 브라우저를 고르면 다음부터 다시 자동으로
+    if (!keepStay) try { localStorage.removeItem(KAKAO_STAY); } catch (e) {}    // 브라우저를 고르면 다음부터 다시 자동으로
     go('kakaotalk://web/openExternal?url=' + encodeURIComponent(browserUrl(force)));
   }
+  /* 단톡방 · 결투 초대 링크는 로그인해야 쓸 수 있어서, "카톡에서 계속하기"를 골랐던 폰도 이번만 브라우저로 넘깁니다 */
+  function kakaoInvited(){ return !kakaoSkip && !!(roomInvite || (duelTarget && !duelTargetRoom)); }
   function kakaoAutoOpen(){
-    if (!IN_KAKAO || !WEBSITE || kakaoStay()) return;
+    if (!IN_KAKAO || !WEBSITE) return;
+    var invited = kakaoInvited();
+    if (kakaoStay() && !invited) return;
     var key = SAVE_KEY + ':opened', done = false;
     try { done = sessionStorage.getItem(key) === '1'; sessionStorage.setItem(key, '1'); } catch (e) {}
-    if (!done) setTimeout(function(){ openInBrowser(false); }, 400);
+    if (!done || invited) setTimeout(function(){ openInBrowser(false, true); }, 400);
   }
   /* 브라우저 쪽: 주소에 실려 온 진행을 받습니다. 이 브라우저가 새 판이면 바로 받고, 아니면 물어봅니다. */
   function takeCarry(){
@@ -5101,15 +5159,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       b.addEventListener('click', fn);
       row.appendChild(b);
     }
-    if (IN_KAKAO && WEBSITE && kakaoStay()){
+    var invite = !kakaoInvited() ? '' : roomInvite ? '단톡방' : '결투';
+    if (IN_KAKAO && WEBSITE && kakaoStay() && !invite){
       line('카카오톡에서 하는 중 · 로그인, 출석 보상, 랭킹 참여는 크롬·사파리에서만 돼요. 진행은 이 폰의 카카오톡에만 저장돼요.');
       act('브라우저로 열기', 'btn-kakao', function(){ openInBrowser(true); renderKakao(); });
     } else if (IN_KAKAO && WEBSITE){
-      line('카카오톡 안에서는 구글 로그인이 막혀 있어요.', true);
-      line('크롬·사파리에서 열면 로그인, 출석 보상, 랭킹 참여를 모두 할 수 있어요. 카카오톡에서 한 진행도 같이 옮겨 가요.');
+      line(invite ? invite + ' 초대는 크롬·사파리에서 열려요.' : '카카오톡 안에서는 구글 로그인이 막혀 있어요.', true);
+      line(invite ? '카카오톡 안에서는 구글 로그인이 막혀 있어서, 크롬·사파리로 열고 로그인하면 바로 ' + (roomInvite ? '단톡방에 들어가요.' : '결투할 수 있어요.') +
+                    ' 카카오톡에서 한 진행도 같이 옮겨 가요.'
+                  : '크롬·사파리에서 열면 로그인, 출석 보상, 랭킹 참여를 모두 할 수 있어요. 카카오톡에서 한 진행도 같이 옮겨 가요.');
       act('브라우저로 열기', 'btn-kakao', function(){ openInBrowser(true); });
       act('카톡에서 계속하기', '', function(){
         try { localStorage.setItem(KAKAO_STAY, '1'); } catch (e) {}
+        kakaoSkip = true;
         renderKakao();
       });
     } else if (pendingCarry){
@@ -5176,7 +5238,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('roomMakeBtn').addEventListener('click', function(){ room.making = false; roomCreate($('roomName').value); });
   $('roomName').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('roomMakeBtn').click(); } });
   $('roomJoinBtn').addEventListener('click', function(){
-    if (!online.user){ onlineLogin(); return; }
+    if (!online.user){
+      if (inAppBrowser()){ if (IN_KAKAO && WEBSITE) openInBrowser(true); return; }
+      onlineLogin(); return;
+    }
+    if (room.joining) return;
     if (room.inviteId && room.inviteId !== room.id) roomJoin(room.inviteId, room.inviteName);
     else if (room.id && !room.joined) roomJoin(room.id, room.name);
   });

@@ -536,6 +536,16 @@ img{max-width:100%}
 .dex-cell.now{outline:2px solid var(--ember);outline-offset:1px}
 .dex-cell.na{border-style:dashed;border-color:var(--line);background:none;position:relative}
 .dex-cell.na::after{content:'—';position:absolute;inset:0;display:grid;place-items:center;color:var(--ash);font-size:12px;opacity:.6}
+.lvb{
+  position:absolute;right:2px;bottom:2px;pointer-events:none;
+  font-family:var(--font-mono);font-size:10px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;
+  padding:2px 3px;border-radius:4px;background:rgba(10,8,6,.78);color:var(--parch);
+}
+.lvb:empty{display:none}
+.lvb.b0{color:var(--ash);font-weight:500;opacity:.8}
+.lvb.b10{color:#FFC04A}
+.lvb.b15{color:#FF8FE0}
+.lvb.b20{color:#140A10;background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF)}
 .dex-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
 .dex-tab{
   font:inherit;font-size:12.5px;font-weight:600;color:var(--ash-2);cursor:pointer;
@@ -846,7 +856,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <span class="count" id="codexCount">0 / 50</span>
     </div>
     <div class="dex-tabs" id="dexTabs" role="tablist" aria-label="무기 종류"></div>
-    <p class="codex-lead">무기 종류마다 뽑은 적 있는 속성과 등급의 칸이 밝혀집니다. "—" 칸은 그 종류에 없는 전설·신화예요.</p>
+    <p class="codex-lead">무기 종류마다 뽑은 적 있는 속성과 등급의 칸이 밝혀집니다. 칸 오른쪽 아래 숫자는 그 무기를 가장 높이 올린 단계예요. "—" 칸은 그 종류에 없는 전설·신화예요.</p>
     <div class="dex-wrap" id="dexWrap"></div>
   </section>
 
@@ -1834,7 +1844,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     found[sw.el] |= 1 << sw.rar;
     foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
-      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [],
+      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(),
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -1857,6 +1867,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     catch (e) { return false; }
   }
 
+  /* 도감 칸(종류 × 속성 × 등급)마다 그 무기를 가장 높이 올린 단계 */
+  function blankBest(){
+    return KINDS.map(function(){ return ELEMENTS.map(function(){ return RARITIES.map(function(){ return 0; }); }); });
+  }
+  function noteBest(w, lv){
+    var k = swordKind(w), row = state.dexBest[k][w.el];
+    state.found[w.el] |= 1 << w.rar;
+    state.foundKind[k][w.el] |= 1 << w.rar;
+    if (lv > row[w.rar]) row[w.rar] = Math.min(SYNTH_MAX, lv);
+  }
   function giveSword(sw){
     state.sword = sw;
     state.found[sw.el] |= 1 << sw.rar;
@@ -1949,13 +1969,22 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }).slice(0, VAULT_MAX).map(function(w){
       return { seed:w.seed >>> 0, el:w.el | 0, rar:w.rar | 0, kind:swordKind({ el:w.el | 0, rar:w.rar | 0, kind:w.kind }), lv:w.lv | 0 };
     });
+    var db = Array.isArray(data.dexBest) ? data.dexBest : [];
+    var dexBest = KINDS.map(function(K, k){
+      return ELEMENTS.map(function(E, e){
+        return RARITIES.map(function(R, r){
+          var v = Array.isArray(db[k]) && Array.isArray(db[k][e]) ? Math.min(SYNTH_MAX, Math.max(0, db[k][e][r] | 0)) : 0;
+          return fk[k][e] & (1 << r) ? v : 0;
+        });
+      });
+    });
     var it = data.items || {}, at = data.attend || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
     state = {
       gold: num(data.gold, base.gold),
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
-      found: found, foundKind: fk, vault: vault,
+      found: found, foundKind: fk, vault: vault, dexBest: dexBest,
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -1985,6 +2014,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     };
     state.found[state.sword.el] |= 1 << state.sword.rar;
     state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
+    /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
+    noteBest(state.sword, state.level);
+    state.vault.forEach(function(w){ noteBest(w, w.lv); });
+    if (state.stats.bestSw) noteBest(state.stats.bestSw, state.stats.best);
   }
 
   /* ═════════ 저장 2 · 저장 코드 (기기 간 이동) ═════════ */
@@ -2020,6 +2053,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       y:st.bestSw ? (st.bestSw.kind ? [st.bestSw.seed, st.bestSw.el, st.bestSw.rar, st.bestSw.kind]
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
       v:state.vault.length ? state.vault.map(function(w){ return [w.seed, w.el, w.rar, w.kind, w.lv]; }) : undefined,
+      h:state.dexBest.map(function(m){ return m.map(function(row){ return row.map(function(v){ return B32.charAt(v); }).join(''); }).join(''); }).join('').replace(/0+$/, '') || undefined,
       i:[state.items.bless, state.items.protect, state.items.master],
       a:[state.attend.last, state.attend.day, state.attend.total]
     }));
@@ -2051,6 +2085,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.v)) out.vault = d.v.filter(Array.isArray).map(function(a){ return { seed:a[0], el:a[1], rar:a[2], kind:a[3] | 0, lv:a[4] }; });
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
+    if (typeof d.h === 'string'){
+      var i = 0;
+      out.dexBest = KINDS.map(function(){
+        return ELEMENTS.map(function(){
+          return RARITIES.map(function(){ return Math.max(0, B32.indexOf(d.h.charAt(i++) || '0')); });
+        });
+      });
+    }
     return out;
   }
 
@@ -2454,8 +2496,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           var cv = document.createElement('canvas');
           cv.width = cv.height = 128;
           cell.appendChild(cv);
+          var badge = document.createElement('span');
+          badge.className = 'lvb';
+          cell.appendChild(badge);
           row.appendChild(cell);
-          dexCells[e][r] = { cell:cell, cv:cv, drawn:null };
+          dexCells[e][r] = { cell:cell, cv:cv, badge:badge, drawn:null, best:null, tip:'' };
         }
         col.appendChild(row);
       }
@@ -2476,6 +2521,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           c.cell.classList.toggle('on', on);
           c.cell.classList.toggle('off', avail && !on);
           c.cell.classList.toggle('na', !avail);
+          c.tip = '';
           if (!avail){
             var cx = c.cv.getContext('2d');
             cx.setTransform(1, 0, 0, 1, 0, 0);                  // 밝혀진 그림을 그리면 확대 설정이 남아 있으므로 먼저 되돌림
@@ -2486,11 +2532,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
               if (c.drawn !== want) return;                     // 그새 다른 종류로 바뀌었으면 건너뜀
               var sw = canonical(e, r, k);
               renderStill(c.cv, sw, !on);
-              c.cell.title = on
+              c.tip = on
                 ? '[' + RARITIES[r].name + '] ' + sw.name
                 : RARITIES[r].name + ' ' + ELEMENTS[e].name + ' ' + KINDS[k].name + ' · 아직 못 뽑음';
+              c.cell.title = c.tip + (on ? ' · 최고 +' + c.best : '');
             });
           })(c, e, r, k, want, on);
+        }
+        var best = on ? state.dexBest[k][e][r] : -1;
+        if (c.best !== best){
+          c.best = best;
+          c.badge.textContent = on ? '+' + best : '';
+          c.badge.className = 'lvb' + (best >= MAX ? ' b20' : best >= 15 ? ' b15' : best >= 10 ? ' b10' : best === 0 ? ' b0' : '');
+          if (c.tip) c.cell.title = c.tip + (on ? ' · 최고 +' + best : '');
         }
         c.cell.classList.toggle('now', k === ck && cw.el === e && cw.rar === r);
       }
@@ -2621,6 +2675,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var was = feats(from, state.sword.rar);
       state.level = Math.min(MAX, from + 1);
       state.stats.wins += 1;
+      noteBest(state.sword, state.level);
       if (state.level > state.stats.best){
         state.stats.best = state.level;
         state.stats.bestSw = { seed:state.sword.seed, el:state.sword.el, rar:state.sword.rar, kind:swordKind(state.sword) };
@@ -2703,6 +2758,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.vault[vaultSel[0]] = made;
     state.vault.splice(vaultSel[1], 1);
     vaultSel = [];
+    noteBest(made, made.lv);
     if (made.lv > state.stats.best){
       state.stats.best = made.lv;
       state.stats.bestSw = { seed:made.seed, el:made.el, rar:made.rar, kind:made.kind };

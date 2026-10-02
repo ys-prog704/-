@@ -424,6 +424,71 @@ img{max-width:100%}
 .mcard.locked{opacity:.45}
 .mcard:hover{border-color:var(--ash)}
 .hunt-note{margin:10px 2px 0;font-size:11px;color:var(--ash);line-height:1.5}
+/* ── 단톡방 ── */
+.room{padding:16px 15px}
+.room-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.room-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;color:var(--ash)}
+.room-head .count{font-family:var(--font-mono);font-size:12.5px;font-weight:700;color:#FEE500}
+.room-bar{display:flex;gap:6px;align-items:center;margin:8px 0 0}
+.room-bar select{
+  flex:1 1 auto;min-width:0;font:inherit;font-size:14px;font-weight:700;color:var(--parch);
+  background:var(--iron-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:7px 8px;
+}
+.btn-share.small{padding:8px 11px;font-size:12.5px;white-space:nowrap}
+.room-gate{margin-top:10px}
+.room-lead{margin:0 0 10px;font-size:12.5px;color:var(--ash-2);line-height:1.5}
+.room-make{display:flex;gap:6px;flex-wrap:wrap}
+.room-make input{
+  flex:1 1 180px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:var(--r-md);
+  border:1px solid var(--line-2);background:var(--ink);color:var(--parch);
+}
+.room-make .btn{flex:0 0 auto;padding:10px 16px}
+.room-gate > .btn{width:100%}
+.room-gate > .btn-ghost{margin-top:8px}
+.room-chat{margin-top:10px}
+.room-msgs{
+  height:330px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding:12px 10px;border-radius:var(--r-md);
+  background:#17202A;box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;overscroll-behavior:contain;
+}
+.rm{display:flex;flex-direction:column;gap:3px;max-width:88%}
+.rm .who{font-size:11px;font-weight:600;color:#A9B4C0;padding-left:2px}
+.rm .line{display:flex;align-items:flex-end;gap:5px}
+.rm .bub{padding:7px 10px;border-radius:13px;font-size:14px;line-height:1.42;overflow-wrap:anywhere;white-space:pre-wrap}
+.rm .tm{flex:0 0 auto;font-size:10px;color:#7F8B97;white-space:nowrap}
+.rm.them{align-self:flex-start}
+.rm.them .bub{background:#2C3744;color:#F1F3F5;border-top-left-radius:4px}
+.rm.me{align-self:flex-end;align-items:flex-end}
+.rm.me .bub{background:#FEE500;color:#191600;border-top-right-radius:4px}
+.rm.bot{align-self:stretch;max-width:none}
+.rm.bot .who{color:var(--ember)}
+.rm.bot .bub{flex:1 1 auto;background:rgba(232,98,44,.13);border:1px solid rgba(232,98,44,.32);color:#FFDCC2;border-radius:10px}
+.rm.local{align-self:center;max-width:96%;font-size:12px;color:#B8C2CC;background:rgba(255,255,255,.07);border-radius:12px;padding:5px 11px;text-align:center;margin:0}
+.room-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.room-chips button{
+  font-family:var(--font-mono);font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line-2);background:var(--iron-2);color:var(--ash-2);
+}
+.room-chips button:hover{color:var(--parch);border-color:var(--ash)}
+.room-form{display:flex;gap:6px;margin-top:8px}
+.room-form input{
+  flex:1 1 auto;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:var(--r-md);
+  border:1px solid var(--line-2);background:var(--ink);color:var(--parch);
+}
+.room-form input:focus,.room-make input:focus{outline:2px solid #FEE500;outline-offset:-1px}
+.btn-send{flex:0 0 auto;font:inherit;font-size:14px;font-weight:800;padding:0 15px;border:none;border-radius:var(--r-md);background:#FEE500;color:#191600;cursor:pointer}
+.room-rank{margin-top:10px}
+.room-rank summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ash-2);padding:4px 2px}
+.room-rank summary span{font-weight:500;color:var(--ash)}
+.room-rank-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.room-rank-list li{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 8px;padding:7px 9px;
+  border-radius:var(--r-sm);background:var(--iron-2);font-size:12.5px;
+}
+.room-rank-list li.me{box-shadow:0 0 0 1px rgba(254,229,0,.35) inset}
+.room-rank-list li b{grid-column:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-rank-list li .ri{grid-column:1;font-size:11px;color:var(--ash);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-rank-list li button{grid-column:2;grid-row:1 / span 2}
+.room-foot{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
 .t-duel{background:rgba(111,208,127,.16);color:#7FDD8A}
 .t-duellose{background:rgba(201,74,64,.14);color:#E07A70}
 .duel.off .hunt-stage,.duel.off .hunt-sta,.duel.off .duel-foot,.duel.off .duel-list{display:none}
@@ -908,6 +973,47 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     </section>
 
     <div class="side">
+      <section class="panel room" id="room" aria-labelledby="roomTitle">
+        <div class="room-head">
+          <h2 id="roomTitle">대장간 단톡방</h2>
+          <span class="count" id="roomCount"></span>
+        </div>
+        <div class="room-bar" id="roomBar" hidden>
+          <select id="roomSel" aria-label="방 고르기"></select>
+          <button class="btn-share small" id="roomInviteBtn" type="button">카톡으로 초대</button>
+        </div>
+        <p class="share-note" id="roomShareNote" hidden></p>
+        <div class="room-gate" id="roomGate">
+          <p class="room-lead" id="roomLead"></p>
+          <div class="room-make" id="roomMake" hidden>
+            <input id="roomName" maxlength="20" autocomplete="off" placeholder="방 이름 (예: 우리반 대장간)">
+            <button class="btn btn-hunt" id="roomMakeBtn" type="button">방 만들기</button>
+          </div>
+          <button class="btn btn-hunt" id="roomJoinBtn" type="button" hidden>들어가기</button>
+          <button class="btn-ghost small" id="roomBackBtn" type="button" hidden>지금 방으로 돌아가기</button>
+        </div>
+        <div class="room-chat" id="roomChat" hidden>
+          <div class="room-msgs" id="roomMsgs" role="log" aria-live="polite" aria-label="단톡방 대화"></div>
+          <div class="room-chips" id="roomChips">
+            <button type="button" data-cmd="/강화">/강화</button><button type="button" data-cmd="/정보">/정보</button>
+            <button type="button" data-cmd="/랭킹">/랭킹</button><button type="button" data-cmd="/출석">/출석</button>
+            <button type="button" data-cmd="/도움">/도움</button>
+          </div>
+          <form class="room-form" id="roomForm" autocomplete="off">
+            <input id="roomText" maxlength="200" enterkeyhint="send" placeholder="메시지, 또는 /강화 · /결투 이름">
+            <button class="btn-send" id="roomSend" type="submit">보내기</button>
+          </form>
+          <details class="room-rank" id="roomRankBox">
+            <summary>방 랭킹 &middot; 결투 <span id="roomRankCount"></span></summary>
+            <ol class="room-rank-list" id="roomRank"></ol>
+          </details>
+          <div class="room-foot">
+            <button class="btn-ghost small" id="roomNewBtn" type="button">새 방 만들기</button>
+            <button class="btn-ghost small" id="roomLeaveBtn" type="button">방 나가기</button>
+          </div>
+        </div>
+      </section>
+
       <section class="panel hunt duel" id="duel" aria-labelledby="duelTitle">
         <div class="hunt-head">
           <h2 id="duelTitle">결투장 &middot; 다른 사람과 겨뤄 골드 벌기</h2>
@@ -2241,7 +2347,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
       gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
-      energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 },
+      energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 }, rooms: [], roomId: '',
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -2341,6 +2447,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     onlineQueueSave();
     queueRank();
     queueArena();
+    queueRoomMe();
     touchSaveState();
   }
   function loadLocal(){
@@ -2392,6 +2499,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
       found: found, foundKind: fk, vault: vault, dexBest: dexBest, awake: (num(data.awake, 0) | 0) & 0x7FFF,
       energy: { full: num(en.full, 0) },
+      rooms: (Array.isArray(data.rooms) ? data.rooms : []).filter(function(r){
+        return r && typeof r.id === 'string' && /^[A-Za-z0-9]{10,40}$/.test(r.id) && typeof r.name === 'string';
+      }).slice(0, ROOM_MAX).map(function(r){ return { id:r.id, name:r.name.slice(0, 20) }; }),
       duel: { n: num(du.n, 0) | 0, w: num(du.w, 0) | 0, dn: num(du.dn, 0) | 0, dw: num(du.dw, 0) | 0 },
       hunt: { n: num(hu.n, 0) | 0, w: num(hu.w, 0) | 0,
               sel: typeof hu.sel === 'number' && hu.sel >= -1 && hu.sel < MONSTERS.length ? hu.sel | 0 : -1 },
@@ -2424,6 +2534,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     };
     state.found[state.sword.el] |= 1 << state.sword.rar;
     state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
+    state.roomId = state.rooms.some(function(r){ return r.id === data.roomId; }) ? data.roomId : '';
     /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
     noteBest(state.sword, state.level);
     state.vault.forEach(function(w){ noteBest(w, w.lv); noteAwake(w); });
@@ -2464,6 +2575,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
       v:state.vault.length ? state.vault.map(function(w){ return [w.seed, w.el, w.rar, w.kind, w.lv]; }) : undefined,
       z:state.awake || undefined,
+      o:state.rooms.length ? [state.roomId].concat(state.rooms.map(function(r){ return [r.id, r.name]; })) : undefined,
       j:[Math.round(state.energy.full / 1000), state.duel.n, state.duel.w, state.duel.dn, state.duel.dw, state.hunt.n, state.hunt.w],
       h:state.dexBest.map(function(m){ return m.map(function(row){ return row.map(function(v){ return B32.charAt(v); }).join(''); }).join(''); }).join('').replace(/0+$/, '') || undefined,
       i:[state.items.bless, state.items.protect, state.items.master],
@@ -2498,6 +2610,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
     if (typeof d.z === 'number') out.awake = d.z;
+    if (Array.isArray(d.o) && d.o.length > 1){
+      out.roomId = String(d.o[0] || '');
+      out.rooms = d.o.slice(1).filter(Array.isArray).map(function(a){ return { id:String(a[0]), name:String(a[1] || '') }; });
+    }
     if (Array.isArray(d.j) && d.j.length === 7){
       out.energy = { full:d.j[0] * 1000 };
       out.duel = { n:d.j[1], w:d.j[2], dn:d.j[3], dw:d.j[4] };
@@ -2716,6 +2832,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (sw.rar === 4) quake();
     verdictSword('ok', lead + '새 ' + sw.K.name + ': ', sw);
     pushLog('r' + sw.rar, sw.R.name, '새 ' + sw.K.name + ' · ' + sw.name, null);
+    roomPull(sw);
   }
 
   /* ═════════ 화면 갱신 ═════════ */
@@ -2836,6 +2953,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     renderAttend();
     renderCodex();
     renderVault();
+    renderRoom();
     renderDuel();
     renderHunt();
     renderChart();
@@ -3165,11 +3283,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       }
       verdict('ok', '강화 성공! +' + state.level + (gain ? ' — ' + featText(gain, sw) + '!' : ''));
       pushLog('ok', '성공', '+' + from + ' → +' + state.level + (gain ? ' · ' + gain.short : ''), r);
+      roomForge('success', from, sw);
     } else if (kind === 'keep'){
       anvil.classList.add('fx-keep');
       burst(7); tone(180, .17, 'sine', .085);
       verdict('keep', '실패했지만 단계는 유지되었습니다.');
       pushLog('keep', '유지', '+' + from + ' 유지', r);
+      roomForge('keep', from, currentSword());
     } else {
       var lost = currentSword();
       state.level = 0;
@@ -3180,6 +3300,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       tone(90, .55, 'sawtooth', .11);
       verdictSword('boom', '+' + from + ' ', lost, ' — 산산조각 났습니다…');
       pushLog('boom', '파괴', '+' + from + ' ' + lost.name, r);
+      roomForge('boom', from, lost);
       wait = 820; replace = true;
     }
 
@@ -3243,6 +3364,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     } else reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
     verdictSword('ok', '합성 성공! +' + made.lv + ' ', sw, ' (재료: ' + nameB + ')');
     pushLog('synth', '합성', '+' + a.lv + ' ×2 → +' + made.lv + ' ' + sw.name, null);
+    if (sw.awake && roomActive()) roomBot(roomWho() + '의 ' + sw.was + ' → +' + made.lv + ' 각성! 「' + sw.name + '」');
     render(); save();
   }
   function sellFromVault(){
@@ -3440,6 +3562,389 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
                button:'나도 강화하러 가기', url:SITE_URL, sw:sw, note:'showShareNote' });
   }
 
+  /* ═════════ 대장간 단톡방 ═════════
+     방을 만들고 카톡으로 초대하면(?room=방아이디) 친구가 들어옵니다. 실시간 채팅과 함께 대장간봇이 방 사람의
+     큰 소식(ROOM_POST 기준 이상)을 자동으로 올리고, 채팅창에서 /강화 · /판매 · /정보 · /랭킹 · /결투 · /출석 을 쓸 수 있습니다.
+     Firestore: rooms/{id} 이름·방장 · rooms/{id}/members/{uid} 대표 무기·최고 단계 · rooms/{id}/msgs 채팅·봇 */
+  var ROOM_MAX = 5, ROOM_MSGS = 60;
+  var ROOM_POST = { success:10, boom:8, sell:10, pull:3 };   // 이 단계(등급) 이상이면 봇이 알림: 성공 +10 · 파괴 +8 · 판매 +10 · 뽑기 전설
+  var room = { id:'', name:'', joined:false, loaded:false, members:[], msgs:[], local:[], unsubM:null, unsubC:null, seen:{}, first:true,
+               inviteId:'', inviteName:'', lastSend:0, sellArm:0, cmd:'', meTimer:null, meSent:'' };
+  var roomInvite = (function(){
+    var m = /[?&]room=([A-Za-z0-9]{10,40})(&|$)/.exec(location.search);
+    if (!m) return '';
+    try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])room=[^&]*(&|$)/, '$1').replace(/[?&]$/, '') + location.hash); } catch (e) {}
+    return m[1];
+  })();
+  function memberOk(x){ return arenaOk(x) && typeof x.best === 'number' && x.best >= 0 && x.best <= SYNTH_MAX; }
+  function roomActive(){ return !!(online.user && room.id && room.joined); }
+  function roomWho(){ return currentName() + '님'; }
+  function roomStop(){
+    if (room.unsubM) room.unsubM();
+    if (room.unsubC) room.unsubC();
+    room.unsubM = room.unsubC = null;
+    room.members = []; room.msgs = []; room.local = []; room.seen = {}; room.first = true; room.joined = false; room.loaded = false;
+    room.meSent = '';
+  }
+  function roomListen(id, name){
+    roomStop();
+    room.id = id || ''; room.name = name || '';
+    renderRoom();
+    if (!online.user || !id) return;
+    var F = online.fb, db = online.db, uid = online.user.uid;
+    room.unsubM = F.onSnapshot(F.collection(db, 'rooms', id, 'members'), function(qs){
+      if (room.id !== id) return;
+      room.members = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; }).filter(memberOk);
+      var was = room.joined;
+      room.joined = room.members.some(function(m){ return m.uid === uid; });
+      room.loaded = true;
+      if (room.joined && !was) queueRoomMe(true);
+      renderRoom();
+    }, function(){
+      if (room.id !== id) return;
+      room.joined = false; room.loaded = true;               // 방 사람이 아니면(나갔거나 처음) 읽을 수 없음
+      renderRoom();
+    });
+    room.unsubC = F.onSnapshot(F.query(F.collection(db, 'rooms', id, 'msgs'), F.orderBy('at', 'desc'), F.limit(ROOM_MSGS)), function(qs){
+      if (room.id !== id) return;
+      var fresh = false;
+      room.msgs = qs.docs.map(function(d){
+        var x = d.data({ serverTimestamps:'estimate' });
+        x.id = d.id;
+        x.t = x.at && x.at.toMillis ? x.at.toMillis() : Date.now();
+        if (!room.seen[d.id]){ room.seen[d.id] = 1; if (!room.first && x.uid !== uid) fresh = true; }
+        return x;
+      }).filter(function(x){ return typeof x.text === 'string' && typeof x.name === 'string'; })
+        .sort(function(a, b){ return a.t - b.t; });
+      if (fresh) tone(1320, .05, 'sine', .03);
+      room.first = false;
+      renderRoomMsgs();
+    }, function(){ /* 방 사람이 아니면 못 읽음 — 들어가면 다시 연결 */ });
+  }
+  function roomMe(){
+    var p = arenaPayload();
+    p.best = Math.min(SYNTH_MAX, state.stats.best | 0);
+    return p;
+  }
+  function queueRoomMe(now){
+    if (!roomActive()) return;
+    clearTimeout(room.meTimer);
+    room.meTimer = setTimeout(sendRoomMe, now ? 300 : 3000);
+  }
+  function sendRoomMe(){
+    if (!roomActive()) return;
+    var p = roomMe(), key = room.id + JSON.stringify(p), F = online.fb, id = room.id;
+    if (key === room.meSent) return;
+    F.setDoc(F.doc(online.db, 'rooms', id, 'members', online.user.uid), Object.assign({}, p, { at:F.serverTimestamp() }))
+      .then(function(){ if (room.id === id) room.meSent = key; }, function(){});
+  }
+  function roomRemember(id, name){
+    state.rooms = state.rooms.filter(function(r){ return r.id !== id; });
+    state.rooms.unshift({ id:id, name:String(name || '대장간').slice(0, 20) });
+    if (state.rooms.length > ROOM_MAX) state.rooms.length = ROOM_MAX;
+    state.roomId = id;
+  }
+  function roomCreate(name){
+    if (!online.user) return;
+    name = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 20) || (currentName() + '의 대장간').slice(0, 20);
+    var F = online.fb, db = online.db, uid = online.user.uid, ref = F.doc(F.collection(db, 'rooms')), b = F.writeBatch(db);
+    b.set(ref, { name:name, owner:uid, at:F.serverTimestamp() });
+    b.set(F.doc(db, 'rooms', ref.id, 'members', uid), Object.assign(roomMe(), { at:F.serverTimestamp() }));
+    b.set(F.doc(F.collection(db, 'rooms', ref.id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:'bot', at:F.serverTimestamp(),
+      text:roomWho() + '이 "' + name + '" 방을 만들었어요. 카톡으로 친구들을 초대해 보세요!' });
+    $('roomMakeBtn').disabled = true;
+    b.commit().then(function(){
+      $('roomMakeBtn').disabled = false;
+      $('roomName').value = '';
+      room.inviteId = '';
+      roomRemember(ref.id, name);
+      roomListen(ref.id, name);
+      save(); render();
+    }, function(e){
+      $('roomMakeBtn').disabled = false;
+      roomNote(e && e.code === 'permission-denied' ? '방을 만들려면 관리자가 Firebase 규칙을 새로 게시해야 해요.' : '방을 만들지 못했어요. 잠시 뒤 다시 해 주세요.');
+    });
+  }
+  function roomJoin(id, name){
+    if (!online.user || !id) return;
+    var F = online.fb, db = online.db, uid = online.user.uid, b = F.writeBatch(db);
+    b.set(F.doc(db, 'rooms', id, 'members', uid), Object.assign(roomMe(), { at:F.serverTimestamp() }));
+    b.set(F.doc(F.collection(db, 'rooms', id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:'bot', at:F.serverTimestamp(),
+      text:roomWho() + '이 들어왔어요! 대표 무기 +' + roomMe().lv + ' · 최고 +' + roomMe().best });
+    $('roomJoinBtn').disabled = true;
+    b.commit().then(function(){
+      $('roomJoinBtn').disabled = false;
+      room.inviteId = '';
+      roomRemember(id, name);
+      roomListen(id, name);
+      save(); render();
+    }, function(){ $('roomJoinBtn').disabled = false; roomNote('방에 들어가지 못했어요. 링크를 다시 확인해 주세요.'); });
+  }
+  function roomLeave(){
+    if (!online.user || !room.id) return;
+    var F = online.fb, db = online.db, uid = online.user.uid, id = room.id;
+    var gone = function(){
+      F.deleteDoc(F.doc(db, 'rooms', id, 'members', uid)).catch(function(){});
+      state.rooms = state.rooms.filter(function(r){ return r.id !== id; });
+      var next = state.rooms[0];
+      state.roomId = next ? next.id : '';
+      roomListen(next ? next.id : '', next ? next.name : '');
+      save(); render();
+    };
+    if (room.joined) roomSay(roomWho() + '이 방을 나갔어요.', 'bot').then(gone, gone); else gone();
+  }
+  function roomSay(text, kind){
+    if (!roomActive()) return Promise.resolve();
+    var F = online.fb;
+    return F.addDoc(F.collection(online.db, 'rooms', room.id, 'msgs'), {
+      uid:online.user.uid, name:currentName().slice(0, 12), text:String(text).slice(0, 300), kind:kind || 'chat', at:F.serverTimestamp()
+    }).catch(function(){ roomLocal('메시지를 보내지 못했어요.'); });
+  }
+  function roomBot(text){ return roomSay(text, 'bot'); }
+  /* 나에게만 보이는 안내 줄 (서버에 남지 않음) */
+  function roomLocal(text){
+    room.local.push({ local:true, text:text, t:Date.now(), id:'l' + room.local.length });
+    if (room.local.length > 20) room.local.shift();
+    renderRoomMsgs(true);
+  }
+  function roomNote(text){ shareNote('roomShareNote', text); }
+  function roomRanked(){
+    return room.members.slice().sort(function(a, b){ return b.best - a.best || b.pw - a.pw || (a.name < b.name ? -1 : 1); });
+  }
+  function roomFind(arg){
+    var me = online.user && online.user.uid, others = room.members.filter(function(m){ return m.uid !== me; });
+    return others.filter(function(m){ return m.name === arg; })[0] || others.filter(function(m){ return m.name.indexOf(arg) === 0; })[0] || null;
+  }
+  /* ── 대장간봇: 게임 쪽에서 부르는 알림 ── */
+  function roomForge(kind, from, sw){
+    var cmd = room.cmd === 'forge';
+    room.cmd = '';
+    if (!roomActive()) return;
+    if (kind === 'success' && (cmd || from + 1 >= ROOM_POST.success))
+      roomBot(roomWho() + ' +' + from + ' → +' + (from + 1) + ' 강화 성공! (' + sw.name + ')' + (from + 1 >= MAX ? ' 드디어 +' + MAX + '!' : ''));
+    else if (kind === 'boom' && (cmd || from >= ROOM_POST.boom))
+      roomBot(roomWho() + '의 +' + from + ' ' + josa(sw.name, '이', '가') + ' 산산조각 났어요…');
+    else if (kind === 'keep' && cmd)
+      roomBot(roomWho() + ' +' + from + ' 강화 실패 (단계는 그대로)');
+  }
+  function roomPull(sw){
+    if (roomActive() && sw.rar >= ROOM_POST.pull) roomBot(roomWho() + '이 [' + sw.R.name + '] ' + josa(sw.name, '을', '를') + ' 뽑았어요!');
+  }
+  function roomSell(lv, name, price){
+    var cmd = room.cmd === 'sell';
+    room.cmd = '';
+    if (roomActive() && (cmd || lv >= ROOM_POST.sell)) roomBot(roomWho() + '이 +' + lv + ' ' + josa(name, '을', '를') + ' ' + gold(price) + '에 팔았어요');
+  }
+  function roomDuel(foe, win, got){
+    var cmd = room.cmd === 'duel';
+    room.cmd = '';
+    var inRoom = room.members.some(function(m){ return m.uid === foe.uid; });
+    if (roomActive() && (cmd || inRoom))
+      roomBot(roomWho() + '이 ' + foe.name + '님에게 결투로 ' + (win ? '이겼어요! (+' + gold(got) + ')' : '졌어요… (잃은 건 기력뿐)'));
+  }
+  function roomAttend(n, text){
+    var cmd = room.cmd === 'attend';
+    room.cmd = '';
+    if (roomActive() && cmd) roomBot(roomWho() + ' 출석 ' + n + '일째 · ' + text);
+  }
+  /* ── 명령어 ── */
+  var ROOM_HELP = '명령어: /강화 · /판매(두 번) · /정보 · /랭킹 · /결투 이름 · /출석 · /도움 — 결과는 대장간봇이 방에 알려 줘요';
+  function roomCommand(raw){
+    var parts = raw.trim().split(/\s+/), c = parts[0], arg = parts.slice(1).join(' ');
+    if (c === '/강화' || c === '/ㄱ' || c === '/강'){
+      if (rolling) return roomLocal('망치질 중이에요. 잠깐만요!');
+      var row = LEVELS[state.level];
+      if (row.cost === null) return roomLocal('+' + MAX + ' 이에요. 무기고에 넣거나 팔 수 있어요.');
+      if (state.gold < row.cost) return roomLocal('골드가 모자라요 (' + gold(row.cost) + ' 필요). /판매 하거나 결투로 벌어 보세요.');
+      roomSay(raw, 'chat');
+      room.cmd = 'forge';
+      attempt();
+      return;
+    }
+    if (c === '/판매' || c === '/팔기'){
+      var price = sellPrice();
+      if (price <= 0) return roomLocal('+0 무기는 팔 수 없어요.');
+      if (rolling) return roomLocal('망치질 중이에요. 잠깐만요!');
+      if (Date.now() - room.sellArm > 6000){
+        room.sellArm = Date.now();
+        return roomLocal('정말 팔려면 6초 안에 /판매 를 한 번 더 입력하세요 (+' + state.level + ' · ' + gold(price) + ')');
+      }
+      room.sellArm = 0;
+      roomSay(raw, 'chat');
+      room.cmd = 'sell';
+      doSell();
+      return;
+    }
+    if (c === '/정보' || c === '/내검' || c === '/검'){
+      var sw = currentSword(), ch = champion();
+      roomSay(raw, 'chat');
+      roomBot(roomWho() + ' · +' + state.level + ' ' + sw.name + ' [' + sw.R.name + ' · ' + sw.E.name + '] · ' + gold(state.gold) +
+              ' · 최고 +' + state.stats.best + ' · 결투 힘 ' + ch.p);
+      return;
+    }
+    if (c === '/랭킹' || c === '/순위'){
+      var list = roomRanked().slice(0, 5).map(function(m, i){ return (i + 1) + '. ' + m.name + ' 최고 +' + m.best + ' (대표 +' + m.lv + ')'; });
+      roomSay(raw, 'chat');
+      roomBot('방 랭킹 — ' + (list.join(' · ') || '아직 아무도 없어요'));
+      return;
+    }
+    if (c === '/결투' || c === '/배틀'){
+      if (!arg){
+        var o = room.members.filter(function(m){ return m.uid !== online.user.uid; }).map(function(m){ return m.name; });
+        return roomLocal(o.length ? '누구와 겨룰까요? 예: /결투 ' + o[0] + ' (방 사람: ' + o.join(', ') + ')' : '방에 다른 사람이 없어요. 카톡으로 초대해 보세요!');
+      }
+      var foe = roomFind(arg);
+      if (!foe) return roomLocal('방에 "' + arg + '" 님이 없어요.');
+      if (dueling || rolling) return roomLocal('지금은 바빠요. 잠깐 뒤에 다시!');
+      if (energyNow() < 1) return roomLocal('기력이 없어요 · ' + energyLeft() + ' 뒤 1 회복');
+      roomSay(raw, 'chat');
+      room.cmd = 'duel';
+      if (!duelFight(foe)){ room.cmd = ''; roomLocal('결투를 시작하지 못했어요.'); }
+      return;
+    }
+    if (c === '/출석'){
+      if (!canClaim()) return roomLocal('오늘은 이미 출석했어요. 내일 또 와요!');
+      roomSay(raw, 'chat');
+      room.cmd = 'attend';
+      claimAttend();
+      return;
+    }
+    if (c === '/도움' || c === '/명령어' || c === '/help') return roomLocal(ROOM_HELP);
+    roomLocal('모르는 명령어예요. ' + ROOM_HELP);
+  }
+  function roomSubmit(text){
+    text = String(text || '').trim();
+    if (!text || !roomActive()) return;
+    if (Date.now() - room.lastSend < 600) return;             // 너무 빠른 연속 입력은 무시
+    room.lastSend = Date.now();
+    if (text.charAt(0) === '/') roomCommand(text); else roomSay(text, 'chat');
+  }
+  /* 로그인했을 때: 초대 링크로 왔으면 그 방을, 아니면 마지막 방을 엽니다 */
+  function roomOnLogin(){
+    if (!online.user) return;
+    var F = online.fb, db = online.db, uid = online.user.uid;
+    if (roomInvite){
+      var id = roomInvite;
+      roomInvite = '';
+      F.getDoc(F.doc(db, 'rooms', id)).then(function(d){
+        if (!d.exists()){ roomNote('초대받은 방을 찾을 수 없어요.'); return; }
+        var name = String(d.data().name || '대장간');
+        if (state.rooms.some(function(r){ return r.id === id; })){ roomRemember(id, name); roomListen(id, name); save(); return; }
+        F.getDoc(F.doc(db, 'rooms', id, 'members', uid)).then(function(m){
+          if (m.exists()){ roomRemember(id, name); roomListen(id, name); save(); }
+          else { room.inviteId = id; room.inviteName = name; renderRoom(); }
+        }, function(){ room.inviteId = id; room.inviteName = name; renderRoom(); });
+      }, function(){ roomNote('초대받은 방을 열지 못했어요. 관리자가 Firebase 규칙을 새로 게시했는지 확인해 주세요.'); });
+    }
+    var cur = state.rooms.filter(function(r){ return r.id === state.roomId; })[0] || state.rooms[0];
+    if (cur && room.id !== cur.id){ state.roomId = cur.id; roomListen(cur.id, cur.name); }
+  }
+  function shareRoom(){
+    if (!room.id) return;
+    shareOut({ title:currentName() + '님이 "' + room.name + '" 대장간 단톡방에 초대했어요', desc:'같이 강화하고, 결투하고, 자랑해요! 지금 ' + room.members.length + '명',
+               button:'단톡방 들어가기', url:SITE_URL + '?room=' + room.id, note:'roomShareNote' });
+  }
+  /* ── 화면 ── */
+  function roomTime(t){
+    var d = new Date(t), h = d.getHours(), m = d.getMinutes();
+    return (h < 12 ? '오전 ' : '오후 ') + ((h + 11) % 12 + 1) + ':' + (m < 10 ? '0' : '') + m;
+  }
+  function renderRoomMsgs(stick){
+    var box = $('roomMsgs');
+    if (!box) return;
+    var near = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    var me = online.user && online.user.uid;
+    var items = room.msgs.concat(room.local).sort(function(a, b){ return a.t - b.t; });
+    box.textContent = '';
+    if (!items.length){
+      var e = document.createElement('p'); e.className = 'rm local'; e.textContent = '아직 대화가 없어요. 인사해 보세요! (' + ROOM_HELP + ')';
+      box.appendChild(e);
+    }
+    items.forEach(function(m){
+      var row = document.createElement('div');
+      if (m.local){ row.className = 'rm local'; row.textContent = m.text; box.appendChild(row); return; }
+      var bot = m.kind === 'bot', mine = !bot && m.uid === me;
+      row.className = 'rm ' + (bot ? 'bot' : mine ? 'me' : 'them');
+      if (!mine){ var who = document.createElement('span'); who.className = 'who'; who.textContent = bot ? '대장간봇' : m.name; row.appendChild(who); }
+      var line = document.createElement('div'); line.className = 'line';
+      var bub = document.createElement('span'); bub.className = 'bub'; bub.textContent = m.text;
+      var tm = document.createElement('span'); tm.className = 'tm'; tm.textContent = roomTime(m.t);
+      if (mine){ line.appendChild(tm); line.appendChild(bub); } else { line.appendChild(bub); line.appendChild(tm); }
+      row.appendChild(line);
+      box.appendChild(row);
+    });
+    if (near || stick || room.stick !== false) box.scrollTop = box.scrollHeight;
+    room.stick = false;
+  }
+  function renderRoom(){
+    var gate = $('roomGate'), chat = $('roomChat'), lead = $('roomLead'), make = $('roomMake'), join = $('roomJoinBtn'), back = $('roomBackBtn');
+    var bar = $('roomBar'), count = $('roomCount');
+    make.hidden = join.hidden = back.hidden = true;
+    if (!online.on){
+      gate.hidden = false; chat.hidden = true; bar.hidden = true; count.textContent = '';
+      lead.textContent = !ONLINE_POSSIBLE ? '단톡방은 웹사이트에서 구글로 로그인하면 열려요. 방을 만들어 카톡으로 친구들을 초대할 수 있어요.'
+                       : online.failed ? '온라인 기능을 불러오지 못해 단톡방을 열 수 없어요.' : '단톡방을 여는 중…';
+      return;
+    }
+    if (!online.user){
+      gate.hidden = false; chat.hidden = true; bar.hidden = true; count.textContent = '';
+      lead.textContent = roomInvite ? '단톡방 초대를 받았어요! 구글로 로그인하면 바로 들어갈 수 있어요.'
+                                    : '구글로 로그인하면 방을 만들고 카톡으로 친구들을 초대할 수 있어요. 방 사람들의 강화 소식을 대장간봇이 알려 줘요.';
+      join.hidden = false; join.disabled = !online.authReady; join.textContent = '구글로 로그인';
+      return;
+    }
+    var inviting = room.inviteId && room.inviteId !== room.id;
+    var showChat = !inviting && !room.making && room.id && room.joined;
+    gate.hidden = !!showChat; chat.hidden = !showChat;
+    bar.hidden = !(room.id && room.joined);
+    count.textContent = room.id && room.joined ? room.members.length + '명' : '';
+    if (inviting){
+      lead.textContent = '"' + room.inviteName + '" 방에 초대받았어요. 들어가면 방 사람들과 채팅하고 결투할 수 있어요.';
+      join.hidden = false; join.disabled = false; join.textContent = '들어가기';
+      back.hidden = !room.id;
+    } else if (!room.id || room.making){
+      lead.textContent = '방을 만들고 카톡으로 친구들을 초대해 보세요. 채팅창에서 /강화 로 강화하고, 대장간봇이 방 사람들의 큰 소식을 알려 줘요.';
+      make.hidden = false;
+      back.hidden = !room.id;
+    } else if (!room.joined){
+      lead.textContent = room.loaded ? '"' + room.name + '" 방에서 나간 상태예요. 다시 들어갈까요?' : '방을 여는 중…';
+      join.hidden = !room.loaded; join.disabled = false; join.textContent = '다시 들어가기';
+    }
+    /* 방 고르기 */
+    var sel = $('roomSel'), sig = JSON.stringify([state.rooms, room.id]);
+    if (sel.dataset.sig !== sig){
+      sel.dataset.sig = sig;
+      sel.textContent = '';
+      state.rooms.forEach(function(r){
+        var o = document.createElement('option'); o.value = r.id; o.textContent = r.name; o.selected = r.id === room.id; sel.appendChild(o);
+      });
+    }
+    /* 방 랭킹 */
+    var ol = $('roomRank'), ranked = roomRanked(), me = online.user.uid;
+    $('roomRankCount').textContent = ranked.length ? '(' + ranked.length + '명)' : '';
+    var rsig = JSON.stringify(ranked.map(function(m){ return [m.uid, m.name, m.best, m.lv, m.pw, m.seed]; })) + (dueling ? 1 : 0) + energyNow();
+    if (ol.dataset.sig !== rsig){
+      ol.dataset.sig = rsig;
+      ol.textContent = '';
+      ranked.forEach(function(m, i){
+        var li = document.createElement('li'), sw = arenaSword(m);
+        li.className = m.uid === me ? 'me' : '';
+        var nm = document.createElement('b'); nm.textContent = (i + 1) + '. ' + m.name + (m.uid === me ? ' (나)' : '');
+        var info = document.createElement('span'); info.className = 'ri';
+        info.textContent = '최고 +' + m.best + ' · 대표 +' + m.lv + ' ' + sw.name + ' · 힘 ' + m.pw;
+        li.appendChild(nm); li.appendChild(info);
+        if (m.uid !== me){
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'btn-ghost small'; b.textContent = '결투';
+          b.disabled = dueling || rolling || energyNow() < 1;
+          b.addEventListener('click', function(){ roomSubmit('/결투 ' + m.name); });
+          li.appendChild(b);
+        }
+        ol.appendChild(li);
+      });
+    }
+  }
+
   /* ═════════ 결투장 (사람끼리) ═════════ */
   var dueling = false, duelPick = '', duelWho = '';
   /* 카톡 도전장 링크(?duel=uid)로 들어오면 그 사람을 먼저 골라 둡니다 */
@@ -3448,7 +3953,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!m) return '';
     try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])duel=[^&]*(&|$)/, '$1').replace(/[?&]$/, '') + location.hash); } catch (e) {}
     return m[1];
-  })(), duelTargetDoc = null, duelTargetBusy = false;
+  })(), duelTargetDoc = null, duelTargetBusy = false, duelTargetRoom = false;
   function loadDuelTarget(){
     if (!duelTarget || duelTargetDoc || duelTargetBusy || !online.on) return;
     duelTargetBusy = true;
@@ -3570,7 +4075,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!online.on){
       $('duelShareBtn').hidden = true;
       box.classList.add('off');
-      lead.textContent = ONLINE_POSSIBLE ? '온라인 기능을 불러오지 못해 결투장을 열 수 없어요.' : '결투장은 웹사이트에서 구글로 로그인하면 열려요. (다른 사람과 겨루는 기능)';
+      lead.textContent = !ONLINE_POSSIBLE ? '결투장은 웹사이트에서 구글로 로그인하면 열려요. (다른 사람과 겨루는 기능)'
+                       : online.failed ? '온라인 기능을 불러오지 못해 결투장을 열 수 없어요.' : '결투장을 여는 중…';
       btn.hidden = true; list.textContent = ''; status.textContent = '';
       $('duelRefresh').hidden = true;
       return;
@@ -3581,7 +4087,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var foes = duelFoes();
     if (duelTargetDoc && !online.duelTargetPicked){ duelPick = duelTargetDoc.uid; online.duelTargetPicked = true; }
     if (!foes.some(function(x){ return x.uid === duelPick; })) duelPick = foes.length ? foes[0].uid : '';
-    if (duelTargetDoc && !online.duelNews && (!online.user || duelTargetDoc.uid !== online.user.uid)){
+    if (duelTargetDoc && !duelTargetRoom && !online.duelNews && (!online.user || duelTargetDoc.uid !== online.user.uid)){
       news.hidden = false;
       news.textContent = duelTargetDoc.name + '님이 보낸 결투 도전장이에요! ' + (online.user ? '아래에서 바로 도전하세요.' : '로그인하면 도전할 수 있어요.');
     }
@@ -3655,12 +4161,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (online.user && !dueling) prepCard(me);
     status.textContent = online.arenaBusy ? '불러오는 중…' : online.arena ? '결투장 ' + (online.arena.filter(function(x){ return !online.user || x.uid !== online.user.uid; }).length) + '명' : '';
   }
-  function duelFight(){
-    if (dueling || hunting || rolling || !online.user || online.arenaDenied) return;
-    var foe = duelFoes().filter(function(x){ return x.uid === duelPick; })[0];
-    if (!foe) return;
+  function duelFight(foeArg){
+    if (dueling || hunting || rolling || !online.user || online.arenaDenied) return false;
+    var foe = foeArg || duelFoes().filter(function(x){ return x.uid === duelPick; })[0];
+    if (!foe) return false;
+    if (foeArg){                                              // 단톡방에서 고른 상대를 무대에도 세움
+      duelTarget = foe.uid; duelTargetDoc = foe; duelTargetRoom = true; duelPick = foe.uid; online.duelTargetPicked = true;
+    }
     var c = champion(), p = duelChance(c.p, foe.pw);
-    if (!useEnergy()) return;
+    if (!useEnergy()) return false;
     var win = Math.random() < p, got = win ? duelGold(c.p, foe.pw) : 0;
     var def = win ? 0 : Math.round(duelGold(foe.pw, c.p) * DUEL_DEF);
     var me = makeSword(c.w.seed, c.lv, c.w.el, c.w.rar, c.w.kind), F = online.fb, uid = online.user.uid;
@@ -3678,6 +4187,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       aw:('+' + c.lv + ' ' + me.name).slice(0, 40), win:win, gold:got, def:def, c:false, at:F.serverTimestamp()
     }).catch(function(){ /* 기록을 못 남겨도 결과는 그대로 */ });
     var text = win ? '승리! ' + foe.name + '님을 이겼어요 +' + gold(got) : '패배… ' + foe.name + '님이 더 강했어요. 무기는 무사해요';
+    roomDuel(foe, win, got);
     dueling = true;
     var stage = $('duelStage'), res = $('duelResult');
     res.textContent = ''; res.className = 'hunt-result';
@@ -3695,7 +4205,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       else tone(196, .25, 'sawtooth', .04);
       render();
     }
-    if (reduced()){ finish(); return; }
+    if (reduced()){ finish(); return true; }
     var hpMe = 100, hpFoe = 100, k = 0, meEl = stage.querySelector('.fighter.me'), foeEl = stage.querySelector('.fighter.mob');
     function hit(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
     (function step(){
@@ -3714,6 +4224,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       k++;
       setTimeout(step, 380);
     })();
+    return true;
   }
 
   /* ═════════ 사냥터 (몬스터, 지금은 잠금) ═════════ */
@@ -3952,6 +4463,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.stats.earned += price;
     if (state.gold > state.stats.peak) state.stats.peak = state.gold;
     pushLog('sell', '판매', '+' + state.level + ' ' + old.name + ' → ' + gold(price), null);
+    roomSell(state.level, old.name, price);
     state.level = 0;
     state.buffs = { bless:false, protect:false, master:false };
     sellArmed = false;
@@ -4026,6 +4538,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     reveal('출석 ' + n + '일째!', text, last ? '일주일 개근 보상' : '', '#FFD27A', last);
     verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (R.item ? ' 상점에서 무료로 쓸 수 있어요.' : ''));
     pushLog('gift', '출석', n + '일째 · ' + text + (server ? ' · 서버 확인' : ''), null);
+    roomAttend(n, text);
     render(); save();
   }
   function renderAttend(){
@@ -4141,6 +4654,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     online.attend = null; online.attendLoaded = false; online.attendError = false;
     online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
     online.arenaSent = ''; online.arenaDenied = false; online.duelNews = '';
+    roomStop(); room.id = ''; room.name = ''; room.inviteId = ''; room.making = false;
     online.dirtyAt = 0;
     renderOnline(); render();
     if (!user) return;
@@ -4157,6 +4671,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       sendArena(true);
       claimDuels();
       loadArena();
+      roomOnLogin();
       renderOnline(); render();
     });
   }
@@ -4527,7 +5042,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function freshGame(){ return state.stats.tries === 0 && state.level === 0; }
   function browserUrl(force){
     var url = location.origin + location.pathname + location.search, code = encodeState(), sent = '';
-    if (duelTarget) url += (location.search ? '&' : '?') + 'duel=' + encodeURIComponent(duelTarget);   // 카톡 도전장
+    if (duelTarget && !duelTargetRoom) url += (location.search ? '&' : '?') + 'duel=' + encodeURIComponent(duelTarget);   // 카톡 도전장
+    if (roomInvite) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'room=' + encodeURIComponent(roomInvite);              // 단톡방 초대
     try { sent = localStorage.getItem(CARRY_SENT) || ''; } catch (e) {}
     if (!freshGame() && (force || code !== sent)){
       try { localStorage.setItem(CARRY_SENT, code); } catch (e) {}
@@ -4647,6 +5163,44 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('synthBtn').addEventListener('click', synthesize);
   $('huntBtn').addEventListener('click', huntFight);
   $('duelBtn').addEventListener('click', duelAction);
+  $('roomForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = $('roomText').value;
+    $('roomText').value = '';
+    roomSubmit(v);
+  });
+  $('roomChips').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-cmd]');
+    if (b) roomSubmit(b.dataset.cmd);
+  });
+  $('roomMakeBtn').addEventListener('click', function(){ room.making = false; roomCreate($('roomName').value); });
+  $('roomName').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('roomMakeBtn').click(); } });
+  $('roomJoinBtn').addEventListener('click', function(){
+    if (!online.user){ onlineLogin(); return; }
+    if (room.inviteId && room.inviteId !== room.id) roomJoin(room.inviteId, room.inviteName);
+    else if (room.id && !room.joined) roomJoin(room.id, room.name);
+  });
+  $('roomBackBtn').addEventListener('click', function(){ room.inviteId = ''; room.making = false; renderRoom(); });
+  $('roomNewBtn').addEventListener('click', function(){ room.making = true; renderRoom(); $('roomName').focus(); });
+  var roomLeaveArmed = 0;
+  $('roomLeaveBtn').addEventListener('click', function(){
+    var b = this;
+    if (Date.now() - roomLeaveArmed > 3000){
+      roomLeaveArmed = Date.now(); b.textContent = '정말 나갈까요?'; b.classList.add('armed');
+      setTimeout(function(){ b.textContent = '방 나가기'; b.classList.remove('armed'); }, 3000);
+      return;
+    }
+    roomLeaveArmed = 0; b.textContent = '방 나가기'; b.classList.remove('armed');
+    roomLeave();
+  });
+  $('roomSel').addEventListener('change', function(){
+    var r = state.rooms.filter(function(x){ return x.id === this.value; }, this)[0];
+    if (!r) return;
+    state.roomId = r.id;
+    roomListen(r.id, r.name);
+    save();
+  });
+  $('roomInviteBtn').addEventListener('click', shareRoom);
   $('duelShareBtn').addEventListener('click', shareDuel);
   $('showShareBtn').addEventListener('click', shareShow);
   $('inviteBtn').addEventListener('click', inviteFriends);
@@ -4799,7 +5353,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     if (e.key !== ' ' && e.key !== 'Enter') return;
     var el = document.activeElement, tag = el && el.tagName;
-    if (tag === 'BUTTON' || tag === 'SUMMARY' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+    if (tag === 'BUTTON' || tag === 'SUMMARY' || tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
     e.preventDefault();
     attempt();
   });

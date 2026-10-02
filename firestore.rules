@@ -9,6 +9,7 @@ rules_version = '2';
 //          기기 날짜를 바꿔도 소용없습니다.
 //  - 랭킹: 누구나 볼 수 있고, 자기 기록만 올릴 수 있으며, 범위를 벗어난 값은 거부합니다.
 //  - 결투장: 각자 대표 무기를 올려 두고(누구나 봄), 도전 기록은 도전한 사람만 만들고 두 사람만 봅니다.
+//  - 단톡방: 방 이름은 로그인한 사람이 볼 수 있고(초대 링크), 방 사람·메시지는 방 사람끼리만 봅니다.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -19,6 +20,16 @@ service cloud.firestore {
     }
     // 한국 시간(UTC+9) 기준 날짜
     function kstDay(t) { return (t + duration.value(9, 'h')).date(); }
+    // 대표 무기 정보 (결투장·단톡방 공통). 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
+    function validProfile(d) {
+      return d.name is string && d.name.size() >= 1 && d.name.size() <= 12
+        && d.lv is int && d.lv >= 0 && d.lv <= 21
+        && d.rar is int && d.rar >= 0 && d.rar <= 4
+        && d.el is int && d.el >= 0 && d.el <= 9
+        && d.kind is int && d.kind >= 0 && d.kind <= 4
+        && d.seed is int && d.seed >= 0 && d.seed <= 4294967295
+        && d.pw == d.lv + d.rar + (d.lv > 20 ? 2 : 0);
+    }
 
     match /saves/{uid} {
       allow read: if isOwner(uid);
@@ -67,14 +78,7 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if isOwner(uid)
         && onlyKeys(['name', 'lv', 'rar', 'el', 'kind', 'seed', 'pw', 'at'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
-        && request.resource.data.lv is int && request.resource.data.lv >= 0 && request.resource.data.lv <= 21
-        && request.resource.data.rar is int && request.resource.data.rar >= 0 && request.resource.data.rar <= 4
-        && request.resource.data.el is int && request.resource.data.el >= 0 && request.resource.data.el <= 9
-        && request.resource.data.kind is int && request.resource.data.kind >= 0 && request.resource.data.kind <= 4
-        && request.resource.data.seed is int && request.resource.data.seed >= 0 && request.resource.data.seed <= 4294967295
-        && request.resource.data.pw == request.resource.data.lv + request.resource.data.rar + (request.resource.data.lv > 20 ? 2 : 0)
+        && validProfile(request.resource.data)
         && request.resource.data.at == request.time;
       allow delete: if isOwner(uid);
     }
@@ -101,6 +105,54 @@ service cloud.firestore {
       allow update: if signedIn() && resource.data.d == request.auth.uid && resource.data.c == false
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['c'])
         && request.resource.data.c == true;
+    }
+
+    // 단톡방: 초대 링크(방 아이디)를 아는 로그인한 사람은 방 이름을 보고 들어올 수 있습니다.
+    // 방 사람 확인은 쓰기 묶음(방 만들기 + 내 자리) 뒤 상태로 봅니다(existsAfter).
+    function inRoom(roomId) {
+      return signedIn() && exists(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+    function inRoomAfter(roomId) {
+      return signedIn() && existsAfter(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+    match /rooms/{roomId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && onlyKeys(['name', 'owner', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 20
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.at == request.time;
+      allow update: if signedIn() && resource.data.owner == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 20;
+
+      // 방 사람: 자기 자리만 만들고·고치고·지웁니다(나가기). 방 사람끼리만 봅니다.
+      match /members/{uid} {
+        allow read: if inRoom(roomId);
+        allow create, update: if isOwner(uid)
+          && existsAfter(/databases/$(database)/documents/rooms/$(roomId))
+          && onlyKeys(['name', 'lv', 'rar', 'el', 'kind', 'seed', 'pw', 'best', 'at'])
+          && validProfile(request.resource.data)
+          && request.resource.data.best is int && request.resource.data.best >= 0 && request.resource.data.best <= 21
+          && request.resource.data.at == request.time;
+        allow delete: if isOwner(uid);
+      }
+
+      // 메시지: 방 사람만 쓰고 봅니다. 쓴 사람(uid)은 나여야 하고, 고치거나 지울 수 없습니다.
+      match /msgs/{id} {
+        allow read: if inRoom(roomId);
+        allow create: if inRoomAfter(roomId)
+          && onlyKeys(['uid', 'name', 'text', 'kind', 'at'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 300
+          && request.resource.data.kind in ['chat', 'bot']
+          && request.resource.data.at == request.time;
+      }
     }
   }
 }

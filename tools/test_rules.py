@@ -142,6 +142,61 @@ expect('방어한 사람이 다른 값까지 바꾸기 → 거부', update_c(t2,
 expect('방어한 사람이 보상 받음(c) 켜기 → 허용', update_c(t2, 'duels/d2'), True)
 expect('이미 받은 보상 다시 받기 → 거부', update_c(t2, 'duels/d2'), False)
 
+# ── 단톡방 ──
+def commit(token, writes):
+    st, d = call(FS + ':commit', {'writes': writes}, token)
+    return st
+
+def wr(path, fields, server_time=()):
+    w = {'update': {'name': 'projects/demo-sword-forge/databases/(default)/documents/' + path,
+                    'fields': {k: val(v) for k, v in fields.items()}}}
+    if server_time:
+        w['updateTransforms'] = [{'fieldPath': f, 'setToServerValue': 'REQUEST_TIME'} for f in server_time]
+    return w
+
+def delete(token, path):
+    return commit(token, [{'delete': 'projects/demo-sword-forge/databases/(default)/documents/' + path}])
+
+def room_query(token, room):
+    q = {'structuredQuery': {'from': [{'collectionId': 'msgs'}], 'orderBy': [{'field': {'fieldPath': 'at'}, 'direction': 'DESCENDING'}], 'limit': 50}}
+    st, d = call(FS + '/rooms/' + room + ':runQuery', q, token)
+    return st
+
+mem = lambda **kw: dict({'name': '성연', 'lv': 12, 'rar': 1, 'el': 2, 'kind': 1, 'seed': 21, 'pw': 13, 'best': 15}, **kw)
+msg = lambda uid, **kw: dict({'uid': uid, 'name': '성연', 'text': '안녕!', 'kind': 'chat'}, **kw)
+u4, t4 = user()
+expect('방 만들기 (만든 사람 = 나)', write(t1, 'rooms/r1', {'name': '우리 대장간', 'owner': u1}, ['at']), True)
+expect('남을 만든 사람으로 → 거부', write(t1, 'rooms/r2', {'name': '가짜', 'owner': u2}, ['at']), False)
+expect('방 이름 21자 → 거부', write(t1, 'rooms/r3', {'name': '가' * 21, 'owner': u1}, ['at']), False)
+expect('로그인한 사람은 방 이름 보기 (초대 링크)', read(t2, 'rooms/r1'), True)
+expect('로그인 안 하면 방 못 봄', read(None, 'rooms/r1'), False)
+expect('방 만들기 + 내 자리 + 첫 메시지를 한 번에 → 허용',
+       commit(t1, [wr('rooms/r9', {'name': '한 번에', 'owner': u1}, ['at']), wr('rooms/r9/members/' + u1, mem(), ['at']),
+                   wr('rooms/r9/msgs/m0', msg(u1, kind='bot', text='방을 만들었어요'), ['at'])]), True)
+expect('방장 자리 → 허용', write(t1, 'rooms/r1/members/' + u1, mem(), ['at']), True)
+expect('초대받은 사람 들어가기 → 허용', write(t2, 'rooms/r1/members/' + u2, mem(name='민수', pw=13), ['at']), True)
+expect('없는 방에 들어가기 → 거부', write(t2, 'rooms/nope/members/' + u2, mem(), ['at']), False)
+expect('남의 자리 만들기 → 거부', write(t2, 'rooms/r1/members/' + u3, mem(), ['at']), False)
+expect('힘 부풀린 자리 → 거부', write(t2, 'rooms/r1/members/' + u2, mem(pw=30), ['at']), False)
+expect('최고 단계 +22 → 거부', write(t2, 'rooms/r1/members/' + u2, mem(best=22), ['at']), False)
+expect('방 사람은 방 사람 목록 보기', read(t2, 'rooms/r1/members/' + u1), True)
+expect('방 밖 사람은 방 사람 못 봄', read(t4, 'rooms/r1/members/' + u1), False)
+expect('방 사람 메시지 쓰기 → 허용', write(t2, 'rooms/r1/msgs/a1', msg(u2, name='민수'), ['at']), True)
+expect('대장간봇 메시지(kind=bot) → 허용', write(t1, 'rooms/r1/msgs/a2', msg(u1, kind='bot', text='성연님 +13 강화 성공!'), ['at']), True)
+expect('방 밖 사람 메시지 → 거부', write(t4, 'rooms/r1/msgs/a3', msg(u4), ['at']), False)
+expect('남인 척 메시지 (uid ≠ 나) → 거부', write(t2, 'rooms/r1/msgs/a4', msg(u1), ['at']), False)
+expect('메시지 301자 → 거부', write(t2, 'rooms/r1/msgs/a5', msg(u2, text='가' * 301), ['at']), False)
+expect('모르는 종류(kind) → 거부', write(t2, 'rooms/r1/msgs/a6', msg(u2, kind='admin'), ['at']), False)
+expect('시간을 직접 지정 → 거부', write(t2, 'rooms/r1/msgs/a7', dict(msg(u2), at=utcnow)), False)
+expect('메시지 고치기 → 거부', write(t2, 'rooms/r1/msgs/a1', msg(u2, text='고침'), ['at']), False)
+expect('방 사람은 메시지 목록 보기', room_query(t2, 'r1'), True)
+expect('방 밖 사람은 메시지 목록 못 봄', room_query(t4, 'r1'), False)
+expect('방장은 방 이름 바꾸기', commit(t1, [dict(wr('rooms/r1', {'name': '새 이름'}), updateMask={'fieldPaths': ['name']})]), True)
+expect('방장이 아니면 이름 못 바꿈', commit(t2, [dict(wr('rooms/r1', {'name': '뺏기'}), updateMask={'fieldPaths': ['name']})]), False)
+expect('나가기 (내 자리 지우기) → 허용', delete(t2, 'rooms/r1/members/' + u2), True)
+expect('나간 뒤에는 메시지 못 씀', write(t2, 'rooms/r1/msgs/a8', msg(u2), ['at']), False)
+expect('남의 자리 지우기 → 거부', delete(t2, 'rooms/r1/members/' + u1), False)
+
 for r, n, s in results: print('%s  %s  (HTTP %d)' % (r, n, s))
 fails = [n for r, n, _ in results if r == 'FAIL']
 print('\n%d/%d 통과' % (len(results) - len(fails), len(results)) + ('' if not fails else '  실패: ' + ', '.join(fails)))

@@ -954,7 +954,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       </div>
 
       <div class="shop">
-        <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용 &middot; 출석 보상 아이템은 자동으로 써요</p>
+        <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용 &middot; 출석·사냥 보상 아이템은 자동으로 써요</p>
         <div class="shop-grid">
           <button class="item i-bless" id="buyBless" type="button">
             <span><span class="nm">축복의 주문서</span><br><span class="ds">성공 확률 +10%p</span></span>
@@ -1099,6 +1099,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <li><span class="sk">누적 판매 수익</span><span class="sv" id="stEarned">0 G</span></li>
             <li><span class="sk">최고 보유 골드</span><span class="sv" id="stPeak">0 G</span></li>
             <li><span class="sk">결투 이김 / 도전 · 방어</span><span class="sv" id="stDuel">0 / 0 · 0 / 0</span></li>
+            <li><span class="sk">사냥 이김 / 도전</span><span class="sv" id="stHunt">0 / 0</span></li>
           </ul>
         </section>
       </aside>
@@ -1248,14 +1249,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      승률 = 50% + (내 힘 − 상대 힘) × 15%p (5% ~ 95%).
      방어: 누가 나에게 도전했다가 지면 그 사람이 받았을 보상의 DUEL_DEF 만큼을 다음에 접속할 때 받습니다(duels).
 
-     사냥터(몬스터): 지금은 잠가 두었습니다. HUNT_OPEN 을 true 로 바꾸면 열립니다.
+     사냥터(몬스터): HUNT_OPEN 을 false 로 바꾸면 다시 잠급니다. 로그인 없이도 이 기기에서 바로 싸웁니다.
      pw 몬스터 힘 · gold 이기면 받는 골드 · weak 약점 속성(ELEMENTS 번호, 맞으면 내 힘 +3)
      승률 = 50% + 힘 차이 × 15%p, 최대 95% (0% 가 되는 몬스터는 도전할 수 없음) */
   var ENERGY_MAX = 10, ENERGY_REGEN = 6 * 60 * 1000;
   var DUEL_GOLD = [200, 350, 700, 1300, 2200, 3700, 6000, 9500, 15000, 22000, 34000, 50000, 74000, 110000,
                    160000, 240000, 350000, 530000, 780000, 1200000, 1800000, 2600000, 3900000, 5900000, 8900000, 13000000];
   var DUEL_DEF = .3, DUEL_SHOW = 8;
-  var HUNT_OPEN = false;
+  var HUNT_OPEN = true;
   var MONSTERS = [
     { key:'slime',     pw:0,  gold:200,     weak:0 },
     { key:'goblin',    pw:2,  gold:800,     weak:2 },
@@ -2435,7 +2436,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (buffs.protect || buffs.master){ k += x; x = 0; }
     return { s:s, k:k, x:x };
   }
-  /* 출석 보상(보관함) 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
+  /* 출석 · 사냥으로 받은 보상 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
      파괴 방지권은 파괴가 없는 +0~+3 에서는 기다렸다가 +4 첫 강화에, 축복서·장인은 성공 100% 인 +0 이 지나면 씁니다. */
   function itemUseful(key){
     var base = odds(state.level, { bless:false, protect:false, master:false });
@@ -2454,10 +2455,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         if (key === 'master') masterCovers();
       }
     });
-    if (used.length) pushLog('buy', '출석', used.join(' · ') + ' · 다음 강화에 자동 적용', null);
+    if (used.length) pushLog('buy', '보상', used.join(' · ') + ' · 다음 강화에 자동 적용', null);
     return used.length > 0;
   }
-  /* 아직 기다리는 출석 아이템이 언제 쓰이는지 (상점 버튼 · 출석 안내에 같이 씁니다) */
+  /* 아직 기다리는 보상 아이템이 언제 쓰이는지 (상점 버튼 · 출석 · 사냥 안내에 같이 씁니다) */
   function autoWhen(key){
     if (itemPrice(key) === null) return '다음 무기에';                   // +20 은 강화하지 않음
     if (state.buffs[key]) return '그다음 강화에';
@@ -2474,7 +2475,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.buffs.protect = state.auto.protect = false;
     state.items.protect = Math.min(999, state.items.protect + 1);
   }
-  /* 팔거나 무기고에 넣어 쓰지 못한 출석 아이템은 돌려받습니다 */
+  /* 방금 받은 key 아이템이 언제 쓰이는지: wasAuto 는 받기 전에 이미 같은 아이템이 붙어 있었는지 */
+  function autoSays(key, wasAuto){ return !wasAuto && state.auto[key] ? '다음 강화에' : autoWhen(key); }
+  /* 팔거나 무기고에 넣어 쓰지 못한 보상 아이템은 돌려받습니다 */
   function returnAuto(){
     ['bless', 'protect', 'master'].forEach(function(key){
       if (state.auto[key] && state.buffs[key]) state.items[key] = Math.min(999, state.items[key] + 1);
@@ -2971,7 +2974,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var ip = itemPrice(key), held = state.buffs[key], have = state.items[key];
       btn.classList.toggle('held', held);
       label.classList.toggle('stock', have > 0 && !held);
-      if (held){ label.textContent = (state.auto[key] ? '출석 보상 적용' : '적용됨') + (have ? ' · ' + have + '개 더' : ''); btn.disabled = true; }
+      if (held){ label.textContent = (state.auto[key] ? '보상 적용' : '적용됨') + (have ? ' · ' + have + '개 더' : ''); btn.disabled = true; }
       else if (have > 0){ label.textContent = autoWhen(key) + ' 자동 · ' + have + '개'; btn.disabled = true; }   // 때가 되면 저절로 씀
       else if (ip === null){ label.textContent = '—'; btn.disabled = true; }
       else {
@@ -2986,7 +2989,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (!state.buffs[key]) return;
       var chip = document.createElement('span');
       chip.className = 'chip i-' + key;
-      chip.textContent = ITEMS[key].label + (state.auto[key] ? ' · 출석' : '');
+      chip.textContent = ITEMS[key].label + (state.auto[key] ? ' · 보상' : '');
       buffWrap.appendChild(chip);
     });
 
@@ -2998,6 +3001,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('stEarned').textContent = gold(st.earned);
     $('stPeak').textContent = gold(st.peak);
     $('stDuel').textContent = fmt(state.duel.w) + ' / ' + fmt(state.duel.n) + ' · ' + fmt(state.duel.dw) + ' / ' + fmt(state.duel.dn);
+    $('stHunt').textContent = fmt(state.hunt.w) + ' / ' + fmt(state.hunt.n);
+    $('stHunt').parentNode.hidden = !HUNT_OPEN;
 
     renderLog();
     renderAttend();
@@ -3620,7 +3625,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      큰 소식(ROOM_POST 기준 이상)을 자동으로 올리고, 채팅창에서 /강화 · /판매 · /정보 · /랭킹 · /결투 · /출석 을 쓸 수 있습니다.
      Firestore: rooms/{id} 이름·방장 · rooms/{id}/members/{uid} 대표 무기·최고 단계 · rooms/{id}/msgs 채팅·봇 */
   var ROOM_MAX = 5, ROOM_MSGS = 60;
-  var ROOM_POST = { success:10, boom:8, sell:10, pull:3 };   // 이 단계(등급) 이상이면 봇이 알림: 성공 +10 · 파괴 +8 · 판매 +10 · 뽑기 전설
+  var ROOM_POST = { success:10, boom:8, sell:10, pull:3, hunt:16 };   // 이 단계(등급 · 몬스터 힘) 이상이면 봇이 알림: 성공 +10 · 파괴 +8 · 판매 +10 · 뽑기 전설 · 사냥 히드라
   var room = { id:'', name:'', joined:false, loaded:false, members:[], msgs:[], local:[], unsubM:null, unsubC:null, seen:{}, first:true,
                inviteId:'', inviteName:'', lastSend:0, sellArm:0, cmd:'', meTimer:null, meSent:'' };
   var ROOM_INVITE = SAVE_KEY + ':invite';     // 초대 링크로 왔으면 들어갈 때까지 이 탭에 기억 (로그인하다 새로고침돼도 잊지 않게)
@@ -3821,6 +3826,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var inRoom = room.members.some(function(m){ return m.uid === foe.uid; });
     if (roomActive() && (cmd || inRoom))
       roomBot(roomWho() + '이 ' + foe.name + '님에게 결투로 ' + (win ? '이겼어요! (+' + gold(got) + ')' : '졌어요… (잃은 건 기력뿐)'));
+  }
+  function roomHunt(name, M){
+    if (roomActive() && M.pw >= ROOM_POST.hunt) roomBot(roomWho() + '이 사냥터에서 ' + josa(name, '을', '를') + ' 처치했어요! (+' + gold(M.gold) + ')');
   }
   function roomAttend(n, text){
     var cmd = room.cmd === 'attend';
@@ -4332,7 +4340,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return true;
   }
 
-  /* ═════════ 사냥터 (몬스터, 지금은 잠금) ═════════ */
+  /* ═════════ 사냥터 (몬스터) ═════════ */
   var hunting = false, huntTimer = null, MSPR = {};
   function loadMonsters(done){
     var keys = Object.keys(MONSTER_DATA), left = keys.length;
@@ -4497,7 +4505,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var h = state.hunt, si = huntSel(), M = MONSTERS[si], ch = huntChampion(M), p = huntChance(ch.p, M);
     if (p <= 0 || !useEnergy()) return;
     h.n += 1;
-    var win = Math.random() < p, drop = null, D = MONSTER_DATA[M.key] || { ko:M.key };
+    var win = Math.random() < p, drop = null, wasAuto = false, D = MONSTER_DATA[M.key] || { ko:M.key };
     if (win){
       h.w += 1;
       state.gold += M.gold;
@@ -4505,11 +4513,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
       var u = Math.random(), acc = 0;
       HUNT_DROP.forEach(function(d){ if (!drop && u < (acc += d.p)) drop = d.item; });
-      if (drop){ state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1); autoItems(); }
+      if (drop){ wasAuto = state.auto[drop]; state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1); autoItems(); }
       pushLog('hunt', '사냥', D.ko + ' 처치 +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full : ''), null);
     } else pushLog('huntlose', '사냥', D.ko + '에게 졌습니다 (기력 -1)', null);
     save();                                                    // 결과는 바로 저장 (연출 도중에 닫아도 그대로)
-    var text = win ? '승리! +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full + ' 획득!' : '')
+    if (win) roomHunt(D.ko, M);
+    var text = win ? '승리! +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full + ' 획득! (' + autoSays(drop, wasAuto) + ' 자동 적용)' : '')
                    : '패배… ' + josa(D.ko, '이', '가') + ' 더 강했어요. 무기는 무사해요';
     hunting = true;
     var stage = $('huntStage'), res = $('huntResult');
@@ -4644,7 +4653,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     fanfare(last ? 4 : 2);
     reveal('출석 ' + n + '일째!', text, last ? '일주일 개근 보상' : '', '#FFD27A', last);
     verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (!R.item ? ''
-                 : ' ' + (!wasAuto && state.auto[R.item] ? '다음 강화에' : autoWhen(R.item)) + ' 자동으로 적용돼요.'));
+                 : ' ' + autoSays(R.item, wasAuto) + ' 자동으로 적용돼요.'));
     pushLog('gift', '출석', n + '일째 · ' + text + (server ? ' · 서버 확인' : ''), null);
     roomAttend(n, text);
     render(); save();
@@ -5242,7 +5251,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   function buy(key){
-    if (rolling || state.buffs[key] || state.items[key] > 0) return;     // 출석 아이템은 때가 되면 저절로 쓰입니다
+    if (rolling || state.buffs[key] || state.items[key] > 0) return;     // 보상 아이템은 때가 되면 저절로 쓰입니다
     var price = itemPrice(key);
     if (price === null || state.gold < price) return;
     state.gold -= price;

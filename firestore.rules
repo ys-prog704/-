@@ -51,7 +51,7 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
         && request.resource.data.best is int
-        && request.resource.data.best >= 0 && request.resource.data.best <= 20
+        && request.resource.data.best >= 0 && request.resource.data.best <= 21   // 강화 +20, 합성 +21
         && request.resource.data.peak is int
         && request.resource.data.peak >= 0 && request.resource.data.peak < 1000000000000
         && request.resource.data.score == request.resource.data.best * 1000000000000 + request.resource.data.peak

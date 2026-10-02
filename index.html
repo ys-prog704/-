@@ -117,7 +117,7 @@ img{max-width:100%}
 /* ── 모루 ── */
 .anvil{
   padding:16px 16px 20px;display:flex;flex-direction:column;
-  align-items:center;gap:13px;position:relative;overflow:hidden;
+  align-items:center;gap:13px;position:relative;overflow:hidden;overflow:clip;   /* clip: 폰에서 아래 강화 버튼이 따라오도록(sticky) */
 }
 .anvil::after{
   content:"";position:absolute;left:50%;bottom:-140px;
@@ -263,6 +263,7 @@ img{max-width:100%}
 .legend .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
 .dot-s{background:#5FA463}.dot-k{background:#8A8076}.dot-x{background:#C94A40}
 .legend .hit{color:var(--parch)}
+.odds-info{width:100%;max-width:440px}
 .gacha-odds{
   margin:10px 0 0;font-size:11.5px;line-height:1.6;color:var(--ash);
   display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;
@@ -275,6 +276,16 @@ img{max-width:100%}
 
 /* ── 행동 ── */
 .actions{display:flex;gap:9px;width:100%;max-width:440px;flex-wrap:wrap}
+/* 폰(한 줄 화면)에서는 강화·판매 버튼이 화면 아래에 붙어 따라와서, 위의 무기를 보면서 바로 누를 수 있습니다 */
+@media (max-width:819px){
+  .anvil .actions{
+    position:sticky;bottom:0;z-index:6;max-width:none;flex-wrap:nowrap;
+    width:calc(100% + 32px);margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,transparent,var(--iron) 18px);
+  }
+  .anvil .actions .btn{padding:12px 12px}
+  .anvil .actions .btn-sell{flex:0 1 128px}
+}
 .btn{
   font-family:var(--font-body);font-size:15px;font-weight:600;
   border:none;border-radius:var(--r-md);padding:13px 16px;cursor:pointer;
@@ -444,6 +455,8 @@ img{max-width:100%}
 .t-sell{background:rgba(217,164,65,.16);color:var(--gold)}
 .t-buy{background:rgba(111,168,184,.16);color:var(--quench)}
 .t-gift{background:rgba(217,164,65,.2);color:#F4C95E}
+.t-vault{background:color-mix(in srgb, var(--r2) 18%, transparent);color:var(--r2)}
+.t-synth{background:linear-gradient(90deg,#FF5FD0,#FFB02E,#5FE8FF);color:#140A10}
 .t-r0{background:rgba(168,162,154,.16);color:var(--r0)}
 .t-r1{background:color-mix(in srgb, var(--r1) 20%, transparent);color:var(--r1)}
 .t-r2{background:color-mix(in srgb, var(--r2) 20%, transparent);color:var(--r2)}
@@ -461,6 +474,42 @@ img{max-width:100%}
 .stats .sv{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:600}
 
 /* ── 도감: 속성 10 × 등급 5 ── */
+/* ── 보관함 · 합성 ── */
+.vault{margin-top:18px;padding:16px 15px 18px}
+.vault-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.vault-head h2{margin:0;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.vault-head .count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--gold)}
+.vault-lead{margin:0 0 12px;font-size:12px;color:var(--ash)}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.vault-grid:empty{display:none}
+.vcard{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;
+  font:inherit;color:var(--parch);text-align:center;cursor:pointer;
+  background:var(--iron-2);border:1px solid var(--line-2);border-radius:var(--r-md);padding:8px 6px 9px;
+}
+.vcard canvas{width:100%;max-width:120px;aspect-ratio:1;display:block}
+.vcard .lv{font-family:var(--font-display);font-size:20px;line-height:1;color:var(--ember)}
+.vcard .nm{font-size:11.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.vcard .rr{font-size:10.5px;font-weight:600}
+.vcard:hover{border-color:var(--ash)}
+.vcard.sel{outline:2px solid var(--gold);outline-offset:-1px;background:color-mix(in srgb, var(--gold) 9%, var(--iron-2))}
+.vcard .pick{
+  position:absolute;top:6px;left:6px;font-size:10.5px;font-weight:700;color:#1A0D06;
+  background:var(--gold);border-radius:999px;padding:1px 7px;
+}
+.vcard.top{border-color:transparent;background:
+  linear-gradient(var(--iron-2),var(--iron-2)) padding-box,
+  linear-gradient(135deg,#FF5FD0,#FFB02E,#5FE8FF,#B45FFF) border-box;border:2px solid transparent}
+.vcard.top .lv{background:linear-gradient(90deg,#FF5FD0,#FFB02E,#5FE8FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vault-acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;max-width:520px}
+.btn-synth{
+  flex:2 1 200px;color:#140A10;
+  background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF);
+  box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 6px 22px rgba(255,95,208,.25);
+}
+.btn-synth:hover:not(:disabled){filter:brightness(1.07)}
+.vault-acts .btn-sell{flex:1 1 128px}
+
 .codex{margin-top:18px;padding:16px 15px 18px}
 .codex-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
 .codex-head .count{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:600;color:var(--r2)}
@@ -674,8 +723,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           <div><span class="k"><i class="dot-k"></i>유지</span><span class="v" id="valK">0%</span></div>
           <div><span class="k"><i class="dot-x"></i>파괴</span><span class="v c-x" id="valX">0%</span></div>
         </div>
-        <p class="gacha-odds" id="gachaOdds"></p>
-        <p class="gacha-odds kind-odds" id="kindOdds"></p>
       </div>
 
       <div class="actions">
@@ -687,6 +734,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         골드가 부족합니다 &#8212;
         <button id="bellowsBtn" type="button">풀무질해서 300 G 벌기</button>
       </p>
+
+      <div class="odds-info">
+        <p class="gacha-odds" id="gachaOdds"></p>
+        <p class="gacha-odds kind-odds" id="kindOdds"></p>
+      </div>
 
       <div class="shop">
         <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용</p>
@@ -775,6 +827,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   </main>
 
+  <section class="panel vault" id="vault" aria-labelledby="vaultTitle">
+    <div class="vault-head">
+      <h2 id="vaultTitle">무기고 &middot; +20 무기</h2>
+      <span class="count" id="vaultCount">0 / 12</span>
+    </div>
+    <p class="vault-lead" id="vaultLead"></p>
+    <div class="vault-grid" id="vaultGrid"></div>
+    <div class="vault-acts">
+      <button class="btn btn-synth" id="synthBtn" type="button" disabled>합성하기<span class="cost" id="synthNote">두 자루를 골라 주세요</span></button>
+      <button class="btn btn-sell" id="vaultSellBtn" type="button" disabled>팔기<span class="cost" id="vaultSellNote">한 자루를 골라 주세요</span></button>
+    </div>
+  </section>
+
   <section class="panel codex">
     <div class="codex-head">
       <h2>도감 &middot; 속성 &times; 등급</h2>
@@ -837,6 +902,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     { s:null, x:null, cost:null,   price:16000000 }
   ];
   var MAX = LEVELS.length - 1;
+  /* +20 무기는 무기고에 모아 두고, 같은 단계 두 자루를 합성해 한 단계 위로 만듭니다 (강화로는 +20 까지) */
+  var SYNTH_MAX = 21;                        // 합성으로 만들 수 있는 가장 높은 단계 (랭킹 규칙의 best 상한과 같게)
+  var VAULT_MAX = 12;                        // 무기고 칸 수
+  function levelPrice(lv){ return lv <= MAX ? LEVELS[lv].price : Math.round(LEVELS[MAX].price * Math.pow(2.5, lv - MAX)); }
 
   /* ═════════ 뽑기 등급 ═════════  w = 1000분율 가중치, mult = 판매가 배수 */
   var RARITIES = [
@@ -1762,7 +1831,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     found[sw.el] |= 1 << sw.rar;
     foundKind[sw.kind][sw.el] |= 1 << sw.rar;
     return {
-      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind,
+      gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [],
       buffs: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -1871,13 +1940,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         return v;
       }));
     }
+    var vault = (Array.isArray(data.vault) ? data.vault : []).filter(function(w){
+      return w && typeof w.seed === 'number' && isFinite(w.seed) && w.el >= 0 && w.el < ELEMENTS.length &&
+             w.rar >= 0 && w.rar < RARITIES.length && (w.lv | 0) >= MAX && (w.lv | 0) <= SYNTH_MAX;
+    }).slice(0, VAULT_MAX).map(function(w){
+      return { seed:w.seed >>> 0, el:w.el | 0, rar:w.rar | 0, kind:swordKind({ el:w.el | 0, rar:w.rar | 0, kind:w.kind }), lv:w.lv | 0 };
+    });
     var it = data.items || {}, at = data.attend || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
     state = {
       gold: num(data.gold, base.gold),
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
-      found: found, foundKind: fk,
+      found: found, foundKind: fk, vault: vault,
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
         protect: !!(data.buffs && data.buffs.protect),
@@ -1898,7 +1973,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       stats: {
         tries:num(st.tries, 0), wins:num(st.wins, 0), booms:num(st.booms, 0),
         spent:num(st.spent, 0), earned:num(st.earned, 0), peak:num(st.peak, base.gold),
-        best:Math.min(MAX, num(st.best, 0)), pulls:num(st.pulls, 1), legends:num(st.legends, 0),
+        best:Math.min(SYNTH_MAX, num(st.best, 0)), pulls:num(st.pulls, 1), legends:num(st.legends, 0),
         bestSw: st.bestSw && typeof st.bestSw.seed === 'number' && st.bestSw.el >= 0 && st.bestSw.el < ELEMENTS.length &&
                 st.bestSw.rar >= 0 && st.bestSw.rar < RARITIES.length
                 ? { seed:st.bestSw.seed >>> 0, el:st.bestSw.el | 0, rar:st.bestSw.rar | 0,
@@ -1941,6 +2016,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       q:state.foundKind.map(function(m){ return m.map(function(v){ return B32.charAt(v & 31); }).join(''); }).join(''),
       y:st.bestSw ? (st.bestSw.kind ? [st.bestSw.seed, st.bestSw.el, st.bestSw.rar, st.bestSw.kind]
                                     : [st.bestSw.seed, st.bestSw.el, st.bestSw.rar]) : 0,
+      v:state.vault.length ? state.vault.map(function(w){ return [w.seed, w.el, w.rar, w.kind, w.lv]; }) : undefined,
       i:[state.items.bless, state.items.protect, state.items.master],
       a:[state.attend.last, state.attend.day, state.attend.total]
     }));
@@ -1969,6 +2045,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         out.foundKind.push(d.q.substr(k * ELEMENTS.length, ELEMENTS.length).split('').map(function(c){ return Math.max(0, B32.indexOf(c)); }));
     }
     if (Array.isArray(d.i) && d.i.length === 3) out.items = { bless:d.i[0], protect:d.i[1], master:d.i[2] };
+    if (Array.isArray(d.v)) out.vault = d.v.filter(Array.isArray).map(function(a){ return { seed:a[0], el:a[1], rar:a[2], kind:a[3] | 0, lv:a[4] }; });
     if (Array.isArray(d.a) && d.a.length === 3) out.attend = { last:d.a[0], day:d.a[1], total:d.a[2] };
     if (Array.isArray(d.y) && d.y.length >= 3) out.stats.bestSw = { seed:d.y[0], el:d.y[1], rar:d.y[2], kind:d.y[3] | 0 };
     return out;
@@ -2234,9 +2311,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     var fb = $('forgeBtn');
     if (maxed){
-      fb.firstChild.nodeValue = '최고 단계 달성';
-      $('forgeCost').textContent = '더는 강화할 수 없습니다';
-      fb.disabled = true;
+      var full = state.vault.length >= VAULT_MAX;
+      fb.firstChild.nodeValue = '무기고에 넣기';
+      $('forgeCost').textContent = full ? '무기고가 가득 찼어요' : '무기고 ' + state.vault.length + '/' + VAULT_MAX + '칸';
+      fb.disabled = rolling || full;
     } else {
       fb.firstChild.nodeValue = '강화하기';
       $('forgeCost').textContent = gold(row.cost);
@@ -2293,6 +2371,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     renderLog();
     renderAttend();
     renderCodex();
+    renderVault();
     renderChart();
   }
 
@@ -2551,7 +2630,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       tone(660, .13, 'triangle', .075);
       tone(990, .24, 'triangle', .062, .1);
       if (state.level === MAX){
-        reveal('+' + MAX + ' 달성!', sw.name, '더는 강화할 수 없는 경지입니다', sw.R.color, true);
+        reveal('+' + MAX + ' 달성!', sw.name, '무기고에 넣어 두었다가 두 자루를 합성하면 +' + (MAX + 1) + ' 이 됩니다', sw.R.color, true);
         fanfare(4); quake();
       } else if (gain){
         reveal(gain.short + '!', '+' + state.level + ' · ' + featText(gain, sw), '', sw.E.glow, gain.key === 'prism');
@@ -2589,6 +2668,129 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       rolling = false;
       render(); save();
     }, wait);
+  }
+
+  /* ═════════ 무기고 · 합성 ═════════
+     +20 무기를 무기고에 넣으면 새 무기를 뽑습니다(판매와 같지만 골드 대신 무기를 남김).
+     같은 단계 두 자루를 고르면 합성: 먼저 고른 무기의 모습으로 한 단계 위가 되고, 다른 한 자루는 사라집니다. */
+  var vaultSel = [], vaultSig = '', vaultSellArmed = false, vaultSellTimer = null;
+  function vaultSword(w){ return makeSword(w.seed, w.lv, w.el, w.rar, w.kind); }
+  function vaultPrice(w){ return Math.round(levelPrice(w.lv) * RARITIES[w.rar].mult); }
+  function storeWeapon(){
+    if (rolling || state.level !== MAX || state.vault.length >= VAULT_MAX) return;
+    var old = currentSword(), w = state.sword;
+    state.vault.push({ seed:w.seed, el:w.el, rar:w.rar, kind:swordKind(w), lv:MAX });
+    pushLog('vault', '무기고', '+' + MAX + ' ' + old.name + ' → 무기고', null);
+    state.level = 0;
+    state.buffs = { bless:false, protect:false, master:false };
+    giveSword(rollSword());
+    $('rollText').textContent = '—';
+    highlight(null);
+    tone(660, .12, 'triangle', .06);
+    tone(990, .2, 'triangle', .05, .1);
+    popIn($('anvil'));
+    newSwordMoment(currentSword(), '무기고에 넣었습니다. ');
+    render(); save();
+  }
+  function synthesize(){
+    if (rolling || vaultSel.length !== 2) return;
+    var a = state.vault[vaultSel[0]], b = state.vault[vaultSel[1]];
+    if (!a || !b || a.lv !== b.lv || a.lv >= SYNTH_MAX) return;
+    var made = { seed:a.seed, el:a.el, rar:a.rar, kind:a.kind, lv:a.lv + 1 }, nameB = vaultSword(b).name;
+    state.vault[vaultSel[0]] = made;
+    state.vault.splice(vaultSel[1], 1);
+    vaultSel = [];
+    if (made.lv > state.stats.best){
+      state.stats.best = made.lv;
+      state.stats.bestSw = { seed:made.seed, el:made.el, rar:made.rar, kind:made.kind };
+    }
+    var sw = vaultSword(made);
+    flash('ok', 'rgba(255,190,240,.9)');
+    burst(46, 'ok', '#FFB02E');
+    fanfare(4); quake();
+    reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
+    verdictSword('ok', '합성 성공! +' + made.lv + ' ', sw, ' (재료: ' + nameB + ')');
+    pushLog('synth', '합성', '+' + a.lv + ' ×2 → +' + made.lv + ' ' + sw.name, null);
+    render(); save();
+  }
+  function sellFromVault(){
+    if (rolling || vaultSel.length !== 1) return;
+    var i = vaultSel[0], w = state.vault[i];
+    if (!w) return;
+    var price = vaultPrice(w), sw = vaultSword(w);
+    state.gold += price;
+    state.stats.earned += price;
+    if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+    state.vault.splice(i, 1);
+    vaultSel = [];
+    vaultSellArmed = false;
+    tone(880, .1, 'triangle', .06);
+    tone(1320, .18, 'triangle', .05, .08);
+    verdictSword('ok', '무기고에서 ' + gold(price) + '에 팔았습니다: +' + w.lv + ' ', sw);
+    pushLog('sell', '판매', '무기고 +' + w.lv + ' ' + sw.name + ' → ' + gold(price), null);
+    render(); save();
+  }
+  function renderVault(){
+    var grid = $('vaultGrid'), V = state.vault;
+    vaultSel = vaultSel.filter(function(i){ return i < V.length; });
+    var sig = JSON.stringify(V) + '|' + vaultSel.join(',');
+    if (sig !== vaultSig){
+      vaultSig = sig;
+      grid.textContent = '';
+      V.forEach(function(w, i){
+        var sw = vaultSword(w), b = document.createElement('button'), at = vaultSel.indexOf(i);
+        b.type = 'button';
+        b.className = 'vcard' + (at >= 0 ? ' sel' : '') + (w.lv > MAX ? ' top' : '');
+        b.setAttribute('aria-pressed', String(at >= 0));
+        b.title = '+' + w.lv + ' [' + sw.R.name + '] ' + sw.name + ' · 판매가 ' + gold(vaultPrice(w));
+        if (at >= 0){
+          var pk = document.createElement('span');
+          pk.className = 'pick'; pk.textContent = at === 0 ? '① 모습' : '② 재료';
+          b.appendChild(pk);
+        }
+        var cv = document.createElement('canvas');
+        cv.width = cv.height = 128;
+        b.appendChild(cv);
+        var lv = document.createElement('span'); lv.className = 'lv'; lv.textContent = '+' + w.lv;
+        var rr = document.createElement('span'); rr.className = 'rr'; rr.style.color = sw.R.color; rr.textContent = sw.R.name + ' · ' + sw.E.name;
+        var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = sw.name;
+        b.appendChild(lv); b.appendChild(rr); b.appendChild(nm);
+        b.addEventListener('click', function(){ pickVault(i); });
+        grid.appendChild(b);
+        renderStill(cv, sw, false);
+      });
+    }
+    $('vaultCount').textContent = V.length + ' / ' + VAULT_MAX;
+    $('vaultLead').textContent = V.length
+      ? '두 자루를 고르면 합성할 수 있어요. 먼저 고른 무기의 모습으로 한 단계 올라가고, 두 번째 무기는 재료로 사라져요.'
+      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 +' + (MAX + 1) + ' 이 됩니다.';
+    var a = V[vaultSel[0]], c = V[vaultSel[1]], sb = $('synthBtn'), note = $('synthNote');
+    if (vaultSel.length === 2 && a && c){
+      var okSynth = a.lv === c.lv && a.lv < SYNTH_MAX;
+      sb.disabled = rolling || !okSynth;
+      note.textContent = okSynth ? '+' + a.lv + ' 두 자루 → +' + (a.lv + 1)
+                       : a.lv !== c.lv ? '같은 단계끼리만 합성할 수 있어요' : '+' + SYNTH_MAX + ' 이 지금 가장 높은 단계예요';
+    } else {
+      sb.disabled = true;
+      note.textContent = V.length < 2 ? '+' + MAX + ' 두 자루가 필요해요' : '두 자루를 골라 주세요';
+    }
+    var vb = $('vaultSellBtn'), vn = $('vaultSellNote');
+    if (vaultSel.length === 1 && a){
+      vb.disabled = rolling;
+      if (!vaultSellArmed){ vb.firstChild.nodeValue = '팔기'; vb.classList.remove('armed'); vn.textContent = gold(vaultPrice(a)); }
+    } else {
+      vaultSellArmed = false;
+      vb.disabled = true; vb.firstChild.nodeValue = '팔기'; vb.classList.remove('armed');
+      vn.textContent = '한 자루를 골라 주세요';
+    }
+  }
+  function pickVault(i){
+    var at = vaultSel.indexOf(i);
+    if (at >= 0) vaultSel.splice(at, 1);
+    else if (vaultSel.length < 2) vaultSel.push(i);
+    else vaultSel[1] = i;
+    vaultSellArmed = false;
+    renderVault();
   }
 
   function doSell(){
@@ -3033,7 +3235,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function currentName(){ return online.pendingName || (online.myRank && online.myRank.name) || defaultName(online.user); }
   function cleanName(v){ return String(v || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 12); }
   function rankPayload(){
-    var st = state.stats, b = st.bestSw || state.sword, best = Math.min(MAX, st.best | 0);
+    var st = state.stats, b = st.bestSw || state.sword, best = Math.min(SYNTH_MAX, st.best | 0);
     var peak = Math.min(999999999999, Math.max(0, Math.round(st.peak)));
     return { name:currentName(), best:best, peak:peak, score:best * 1e12 + peak,
              sword:makeSword(b.seed >>> 0, best, b.el, b.rar, b.kind).name.slice(0, 40), rar:b.rar | 0, el:b.el | 0 };
@@ -3266,7 +3468,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   /* ═════════ 이벤트 ═════════ */
-  $('forgeBtn').addEventListener('click', attempt);
+  $('forgeBtn').addEventListener('click', function(){ if (state.level === MAX) storeWeapon(); else attempt(); });
 
   $('sellBtn').addEventListener('click', function(){
     if (rolling) return;
@@ -3282,6 +3484,21 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       return;
     }
     doSell();
+  });
+
+  $('synthBtn').addEventListener('click', synthesize);
+  $('vaultSellBtn').addEventListener('click', function(){
+    if (rolling || vaultSel.length !== 1) return;
+    if (!vaultSellArmed){
+      vaultSellArmed = true;
+      this.firstChild.nodeValue = '정말 팔까요?';
+      this.classList.add('armed');
+      $('vaultSellNote').textContent = '한 번 더 누르기';
+      clearTimeout(vaultSellTimer);
+      vaultSellTimer = setTimeout(function(){ vaultSellArmed = false; renderVault(); }, 3200);
+      return;
+    }
+    sellFromVault();
   });
 
   $('bellowsBtn').addEventListener('click', function(){

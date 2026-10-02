@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>검 키우기 대장간</title>
+<meta name="description" content="한 자루를 끝까지 키우는 강화 게임. +21 각성 무기, 무기 도감, 친구와 결투까지.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="검 키우기 대장간">
+<meta property="og:title" content="검 키우기 대장간">
+<meta property="og:description" content="강화 +21 각성 · 무기 도감 · 친구와 결투. 같이 하자!">
+<meta property="og:image" content="https://ys-prog704.github.io/-/assets/share/card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://ys-prog704.github.io/-/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap">
@@ -623,7 +633,19 @@ img{max-width:100%}
 .show-card canvas{display:block;width:min(380px,100%);aspect-ratio:1;margin:2px auto 0}
 .show-name{margin:4px 0 0;font-size:18px;font-weight:800;color:#FFFFFF;text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .show-sub{margin:4px 0 12px;font-size:13px;color:var(--ash-2)}
-.show-close{width:100%;max-width:220px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
+.show-close{flex:1 1 140px;max-width:220px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
+.show-acts{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.btn-share{
+  font:inherit;font-size:14px;font-weight:700;cursor:pointer;border:none;border-radius:var(--r-md);padding:11px 14px;
+  color:#191600;background:#FEE500;box-shadow:0 4px 16px rgba(254,229,0,.18);
+}
+.btn-share:hover{filter:brightness(1.05)}
+.btn-share:disabled{opacity:.45;cursor:not-allowed}
+.duel .btn-share{width:100%;margin-top:7px}
+.show-acts .btn-share{flex:1 1 140px;max-width:220px}
+.share-note{margin:8px 2px 0;font-size:12px;color:var(--ash-2);text-align:center;overflow-wrap:anywhere}
+.btn-kakao{color:#191600;background:#FEE500;border-color:#FEE500}
+.btn-kakao:hover{color:#191600;background:#FFEC40;border-color:#FFEC40}
 
 .codex{margin-top:18px;padding:16px 15px 18px}
 .codex-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
@@ -769,6 +791,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <p class="tagline">한 자루를 끝까지 키우세요. 부서지면 새 무기가 뽑힙니다. 확률은 전부 공개됩니다.</p>
     </div>
     <div class="brand-tools">
+      <button class="btn-ghost btn-kakao" id="inviteBtn" type="button">카톡으로 친구 초대</button>
       <button class="btn-ghost" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
       <button class="btn-ghost" id="resetBtn" type="button">초기화</button>
     </div>
@@ -908,6 +931,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         </div>
         <p class="hunt-lead" id="duelLead"></p>
         <button class="btn btn-hunt" id="duelBtn" type="button">도전하기<span class="cost" id="duelCost">기력 1</span></button>
+        <button class="btn-share" id="duelShareBtn" type="button">카톡으로 도전장 보내기</button>
+        <p class="share-note" id="duelShareNote" hidden></p>
         <div class="duel-list" id="duelList" role="listbox" aria-label="상대 고르기"></div>
         <div class="duel-foot"><span id="duelStatus"></span><button class="btn-ghost small" id="duelRefresh" type="button">새로고침</button></div>
         <p class="hunt-note">대표 무기 = 지금 무기와 무기고 중 가장 센 무기. 힘 = 단계 + 등급(희귀 1 · 영웅 2 · 전설 3 · 신화 4) + 각성 2.
@@ -1065,7 +1090,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <canvas id="showCanvas" width="380" height="380"></canvas>
     <p class="show-name" id="showName"></p>
     <p class="show-sub" id="showSub"></p>
-    <button class="btn show-close" id="showClose" type="button">닫기</button>
+    <div class="show-acts">
+      <button class="btn-share" id="showShareBtn" type="button">카톡으로 자랑하기</button>
+      <button class="btn show-close" id="showClose" type="button">닫기</button>
+    </div>
+    <p class="share-note" id="showShareNote" hidden></p>
   </div>
 </div>
 
@@ -2122,6 +2151,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     show.bolts = sw.E.fx === 'storm' ? makeBolts(sw, Math.random) : null;
     show.boltAt = 0;
     c.setAttribute('aria-label', sw.R.name + ' 등급, ' + sw.name);
+    shareNote('showShareNote', '');
+    prepCard(sw);
     $('showClose').focus();
     if (reduced() || !SPR[sw.key]){ paintShow(1.7); return; }
     if (!show.raf){ show.last = performance.now(); show.raf = requestAnimationFrame(showLoop); }
@@ -3288,8 +3319,146 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       vn.textContent = '한 자루를 골라 주세요';
     }
   }
+  /* ═════════ 카카오톡 공유 ═════════
+     KAKAO_JS_KEY 가 있으면 카카오 공식 공유 카드(무기 그림 + 버튼)로 보냅니다. 없거나 실패하면 휴대폰 공유 창
+     (navigator.share — 목록에서 카카오톡을 고르면 됨), 그것도 없으면(PC) 링크를 복사합니다.
+     JavaScript 키는 공개용 키라 페이지에 들어가도 됩니다. 카카오 개발자 콘솔에서 이 사이트 도메인에서만 쓰이게 묶습니다.
+     카드 그림은 무기를 캔버스로 그려 카카오 서버에 올린 뒤(uploadImage) 씁니다. 못 올리면 공용 카드(SHARE_IMAGE)를 씁니다. */
+  var KAKAO_JS_KEY = '';
+  var KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
+  var SITE_URL = 'https://ys-prog704.github.io/-/';
+  var SHARE_IMAGE = SITE_URL + 'assets/share/card.png';
+  var kakaoSdk = null, cardUrls = {};
+  function kakaoKey(){
+    var test = /^(127\.0\.0\.1|localhost)$/.test(location.hostname) || location.protocol === 'file:';
+    return KAKAO_JS_KEY || (test && window.__KAKAO_KEY) || '';
+  }
+  function kakaoLoad(){
+    var key = kakaoKey();
+    if (!key || window.claude) return Promise.reject(new Error('no-key'));
+    if (window.Kakao && window.Kakao.isInitialized && window.Kakao.isInitialized()) return Promise.resolve(window.Kakao);
+    if (!kakaoSdk) kakaoSdk = new Promise(function(ok, no){
+      function init(){ try { if (!window.Kakao.isInitialized()) window.Kakao.init(key); ok(window.Kakao); } catch (e) { no(e); } }
+      if (window.Kakao && window.Kakao.init) return init();
+      var sc = document.createElement('script');
+      sc.src = KAKAO_SDK; sc.async = true; sc.crossOrigin = 'anonymous';
+      sc.onload = init;
+      sc.onerror = function(){ kakaoSdk = null; no(new Error('sdk')); };
+      document.head.appendChild(sc);
+    });
+    return kakaoSdk;
+  }
+  /* 공유 카드 그림 (800×420): 속성 빛 배경 + 무기 + 단계 */
+  function shareCanvas(sw){
+    var c = document.createElement('canvas'), x = c.getContext('2d');
+    c.width = 800; c.height = 420;
+    var g = x.createRadialGradient(400, 230, 30, 400, 230, 470);
+    g.addColorStop(0, hexA(sw.E.glow, .42)); g.addColorStop(.55, '#1A1411'); g.addColorStop(1, '#0B0907');
+    x.fillStyle = g; x.fillRect(0, 0, 800, 420);
+    var w = document.createElement('canvas');
+    w.width = w.height = 420;
+    renderStill(w, sw, false);
+    x.drawImage(w, 190, 0, 420, 420);
+    x.textBaseline = 'top';
+    x.font = '400 64px "Black Han Sans", "IBM Plex Sans KR", sans-serif';
+    x.fillStyle = sw.awake ? '#FF8FE0' : sw.R.color;
+    x.fillText('+' + sw.lv, 34, 28);
+    x.font = '700 22px "IBM Plex Sans KR", sans-serif';
+    x.fillStyle = 'rgba(233,220,203,.6)';
+    x.textAlign = 'right'; x.fillText('검 키우기 대장간', 770, 380);
+    return c;
+  }
+  function cardKey(sw){ return [sw.seed, sw.lv, sw.el, sw.rar, sw.kind].join('-'); }
+  /* 카카오 서버에 무기 카드를 미리 올려 둡니다 (누르는 순간 기다리지 않게) */
+  function prepCard(sw){
+    if (!kakaoKey() || !sw || !SPR[sw.key]) return null;
+    var k = cardKey(sw);
+    if (cardUrls[k]) return cardUrls[k];
+    cardUrls[k] = kakaoLoad().then(function(K){
+      return new Promise(function(ok){ shareCanvas(sw).toBlob(ok, 'image/png'); }).then(function(blob){
+        return K.Share.uploadImage({ file:[new File([blob], 'card.png', { type:'image/png' })] });
+      });
+    }).then(function(r){ return { url:r.infos.original.url, w:800, h:420 }; }, function(){ delete cardUrls[k]; return null; });
+    return cardUrls[k];
+  }
+  function shareNote(id, text){
+    var n = id && $(id);
+    if (!n){ if (text) verdict('ok', text); return; }
+    n.hidden = !text; n.textContent = text || '';
+  }
+  /* o: { title, desc, button, url, sw, note } */
+  function shareOut(o){
+    shareNote(o.note, '');
+    var key = kakaoKey();
+    if (key){
+      var card = o.sw ? prepCard(o.sw) : null;
+      kakaoLoad().then(function(K){
+        return Promise.resolve(card).then(function(img){
+          img = img || { url:SHARE_IMAGE, w:1200, h:630 };
+          K.Share.sendDefault({
+            objectType:'feed',
+            content:{ title:o.title, description:o.desc, imageUrl:img.url, imageWidth:img.w, imageHeight:img.h,
+                      link:{ mobileWebUrl:o.url, webUrl:o.url } },
+            buttons:[{ title:o.button, link:{ mobileWebUrl:o.url, webUrl:o.url } }]
+          });
+        });
+      }).catch(function(){ shareFallback(o); });
+      return;
+    }
+    shareFallback(o);
+  }
+  function shareFallback(o){
+    var text = o.title + '\n' + o.desc;
+    if (navigator.share){
+      navigator.share({ title:o.title, text:text, url:o.url }).catch(function(){});
+      return;
+    }
+    var all = text + '\n' + o.url;
+    function shown(){ shareNote(o.note, '링크를 복사했어요. 카톡 대화방에 붙여넣어 주세요.'); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(all).then(shown, function(){ shareNote(o.note, '이 주소를 카톡에 보내 주세요: ' + o.url); });
+    } else shareNote(o.note, '이 주소를 카톡에 보내 주세요: ' + o.url);
+  }
+  function inviteFriends(){
+    shareOut({ title:'검 키우기 대장간 같이 하자!', desc:'강화 +21 각성 · 무기 도감 · 친구와 결투. 누가 더 센 무기를 만드나 겨뤄 봐요.',
+               button:'게임하러 가기', url:SITE_URL, note:null });
+  }
+  function shareDuel(){
+    if (online.on && !online.user){ onlineLogin(); return; }
+    if (!online.user) return;
+    var c = champion(), sw = makeSword(c.w.seed, c.lv, c.w.el, c.w.rar, c.w.kind), name = currentName();
+    shareOut({ title:name + '님의 결투 신청!', desc:'+' + c.lv + ' ' + sw.name + ' · 힘 ' + c.p + ' — 이기면 골드를 받아요. 덤벼 보세요!',
+               button:'결투하러 가기', url:SITE_URL + '?duel=' + encodeURIComponent(online.user.uid), sw:sw, note:'duelShareNote' });
+  }
+  function shareShow(){
+    var sw = show.sw;
+    if (!sw) return;
+    var who = online.user ? currentName() + '님의 ' : '';
+    shareOut({ title:$('showTop').textContent + ' ' + sw.name, desc:who + sw.R.name + ' · ' + sw.E.name + ' 속성' + (sw.awake ? ' · 각성 전: ' + sw.was : ''),
+               button:'나도 강화하러 가기', url:SITE_URL, sw:sw, note:'showShareNote' });
+  }
+
   /* ═════════ 결투장 (사람끼리) ═════════ */
   var dueling = false, duelPick = '', duelWho = '';
+  /* 카톡 도전장 링크(?duel=uid)로 들어오면 그 사람을 먼저 골라 둡니다 */
+  var duelTarget = (function(){
+    var m = /[?&]duel=([A-Za-z0-9_-]{6,128})(&|$)/.exec(location.search);
+    if (!m) return '';
+    try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])duel=[^&]*(&|$)/, '$1').replace(/[?&]$/, '') + location.hash); } catch (e) {}
+    return m[1];
+  })(), duelTargetDoc = null, duelTargetBusy = false;
+  function loadDuelTarget(){
+    if (!duelTarget || duelTargetDoc || duelTargetBusy || !online.on) return;
+    duelTargetBusy = true;
+    var F = online.fb;
+    F.getDoc(F.doc(online.db, 'arena', duelTarget)).then(function(d){
+      duelTargetBusy = false;
+      var x = d.exists() ? d.data() : null;
+      if (x){ x.uid = d.id; if (arenaOk(x)) duelTargetDoc = x; }
+      if (!duelTargetDoc) duelTarget = '';
+      renderDuel();
+    }, function(){ duelTargetBusy = false; });
+  }
   function duelChance(mine, theirs){ return Math.max(.05, Math.min(.95, .5 + .15 * (mine - theirs))); }
   function duelGold(mine, theirs){ return DUEL_GOLD[Math.max(0, Math.min(DUEL_GOLD.length - 1, Math.min(theirs, mine + 2)))]; }
   function arenaOk(x){
@@ -3343,9 +3512,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* 나와 힘이 비슷한 사람부터 보여 줍니다 */
   function duelFoes(){
     var me = online.user && online.user.uid, mine = champion().p;
-    return (online.arena || []).filter(function(x){ return x.uid !== me; }).sort(function(a, b){
+    var list = (online.arena || []).filter(function(x){ return x.uid !== me && x.uid !== duelTarget; }).sort(function(a, b){
       return Math.abs(a.pw - mine) - Math.abs(b.pw - mine) || b.pw - a.pw;
     }).slice(0, DUEL_SHOW);
+    if (duelTargetDoc && duelTargetDoc.uid !== me){
+      var fresh = (online.arena || []).filter(function(x){ return x.uid === duelTarget; })[0];
+      list.unshift(fresh || duelTargetDoc);
+    }
+    return list;
   }
   /* 내가 없는 동안 들어온 도전: 막아 낸 만큼 방어 보상을 받고, 받았다고 표시합니다 */
   function claimDuels(){
@@ -3392,6 +3566,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     news.hidden = !online.duelNews; news.textContent = online.duelNews || '';
     var c = champion(), me = makeSword(c.w.seed, c.lv, c.w.el, c.w.rar, c.w.kind);
     if (!online.on){
+      $('duelShareBtn').hidden = true;
       box.classList.add('off');
       lead.textContent = ONLINE_POSSIBLE ? '온라인 기능을 불러오지 못해 결투장을 열 수 없어요.' : '결투장은 웹사이트에서 구글로 로그인하면 열려요. (다른 사람과 겨루는 기능)';
       btn.hidden = true; list.textContent = ''; status.textContent = '';
@@ -3400,8 +3575,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     box.classList.remove('off');
     btn.hidden = false; $('duelRefresh').hidden = false;
+    loadDuelTarget();
     var foes = duelFoes();
+    if (duelTargetDoc && !online.duelTargetPicked){ duelPick = duelTargetDoc.uid; online.duelTargetPicked = true; }
     if (!foes.some(function(x){ return x.uid === duelPick; })) duelPick = foes.length ? foes[0].uid : '';
+    if (duelTargetDoc && !online.duelNews && (!online.user || duelTargetDoc.uid !== online.user.uid)){
+      news.hidden = false;
+      news.textContent = duelTargetDoc.name + '님이 보낸 결투 도전장이에요! ' + (online.user ? '아래에서 바로 도전하세요.' : '로그인하면 도전할 수 있어요.');
+    }
     var foe = foes.filter(function(x){ return x.uid === duelPick; })[0] || null;
     /* 상대 목록 */
     var sig = JSON.stringify([foes.map(function(x){ return [x.uid, x.pw, x.lv, x.seed, x.name]; }), duelPick, c.p, Object.keys(SPR).length]);
@@ -3466,6 +3647,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       cost.textContent = energyNow() < 1 ? '기력이 없어요 · ' + energyLeft() + ' 뒤 1 회복'
                        : foe ? '기력 1 · 승률 ' + Math.round(p * 100) + '%' : '상대 없음';
     }
+    var sb = $('duelShareBtn');
+    sb.hidden = false;
+    sb.textContent = online.user ? '카톡으로 도전장 보내기' : '카톡으로 도전장 보내기 (로그인)';
+    if (online.user && !dueling) prepCard(me);
     status.textContent = online.arenaBusy ? '불러오는 중…' : online.arena ? '결투장 ' + (online.arena.filter(function(x){ return !online.user || x.uid !== online.user.uid; }).length) + '명' : '';
   }
   function duelFight(){
@@ -4340,6 +4525,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function freshGame(){ return state.stats.tries === 0 && state.level === 0; }
   function browserUrl(force){
     var url = location.origin + location.pathname + location.search, code = encodeState(), sent = '';
+    if (duelTarget) url += (location.search ? '&' : '?') + 'duel=' + encodeURIComponent(duelTarget);   // 카톡 도전장
     try { sent = localStorage.getItem(CARRY_SENT) || ''; } catch (e) {}
     if (!freshGame() && (force || code !== sent)){
       try { localStorage.setItem(CARRY_SENT, code); } catch (e) {}
@@ -4459,6 +4645,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('synthBtn').addEventListener('click', synthesize);
   $('huntBtn').addEventListener('click', huntFight);
   $('duelBtn').addEventListener('click', duelAction);
+  $('duelShareBtn').addEventListener('click', shareDuel);
+  $('showShareBtn').addEventListener('click', shareShow);
+  $('inviteBtn').addEventListener('click', inviteFriends);
   $('duelRefresh').addEventListener('click', function(){ loadArena(true); });
   setInterval(function(){
     if (energyTick()){ renderDuel(); renderHunt(); }
@@ -4600,7 +4789,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   document.addEventListener('keydown', function(e){
     if (!$('show').hidden){
       if (e.key === 'Escape'){ e.preventDefault(); closeShow(); }
-      else if (e.key === 'Tab'){ e.preventDefault(); $('showClose').focus(); }     // 창이 열려 있으면 닫기 버튼에 머묾
+      else if (e.key === 'Tab'){                                                    // 창이 열려 있으면 창 안의 두 버튼 사이만
+        e.preventDefault();
+        (document.activeElement === $('showClose') ? $('showShareBtn') : $('showClose')).focus();
+      }
       return;
     }
     if (e.key !== ' ' && e.key !== 'Enter') return;

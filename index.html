@@ -3324,18 +3324,20 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      (navigator.share — 목록에서 카카오톡을 고르면 됨), 그것도 없으면(PC) 링크를 복사합니다.
      JavaScript 키는 공개용 키라 페이지에 들어가도 됩니다. 카카오 개발자 콘솔에서 이 사이트 도메인에서만 쓰이게 묶습니다.
      카드 그림은 무기를 캔버스로 그려 카카오 서버에 올린 뒤(uploadImage) 씁니다. 못 올리면 공용 카드(SHARE_IMAGE)를 씁니다. */
-  var KAKAO_JS_KEY = '';
+  var KAKAO_JS_KEY = '1bc1977b6ffd0a17247e815aeec2475b';        // 카카오 개발자 앱 '검 키우기 대장간'의 JavaScript 키 (공개용)
   var KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
   var SITE_URL = 'https://ys-prog704.github.io/-/';
   var SHARE_IMAGE = SITE_URL + 'assets/share/card.png';
-  var kakaoSdk = null, cardUrls = {};
+  var kakaoSdk = null, kakaoFail = 0, cardUrls = {};
   function kakaoKey(){
     var test = /^(127\.0\.0\.1|localhost)$/.test(location.hostname) || location.protocol === 'file:';
     return KAKAO_JS_KEY || (test && window.__KAKAO_KEY) || '';
   }
-  function kakaoLoad(){
+  /* force: 공유 버튼을 눌렀을 때만 true — 자동으로 부를 때는 한 번 실패하면 1분 동안 다시 시도하지 않음 */
+  function kakaoLoad(force){
     var key = kakaoKey();
     if (!key || window.claude) return Promise.reject(new Error('no-key'));
+    if (!force && Date.now() - kakaoFail < 60000) return Promise.reject(new Error('backoff'));
     if (window.Kakao && window.Kakao.isInitialized && window.Kakao.isInitialized()) return Promise.resolve(window.Kakao);
     if (!kakaoSdk) kakaoSdk = new Promise(function(ok, no){
       function init(){ try { if (!window.Kakao.isInitialized()) window.Kakao.init(key); ok(window.Kakao); } catch (e) { no(e); } }
@@ -3343,7 +3345,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var sc = document.createElement('script');
       sc.src = KAKAO_SDK; sc.async = true; sc.crossOrigin = 'anonymous';
       sc.onload = init;
-      sc.onerror = function(){ kakaoSdk = null; no(new Error('sdk')); };
+      sc.onerror = function(){ kakaoSdk = null; kakaoFail = Date.now(); sc.remove(); no(new Error('sdk')); };
       document.head.appendChild(sc);
     });
     return kakaoSdk;
@@ -3370,11 +3372,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function cardKey(sw){ return [sw.seed, sw.lv, sw.el, sw.rar, sw.kind].join('-'); }
   /* 카카오 서버에 무기 카드를 미리 올려 둡니다 (누르는 순간 기다리지 않게) */
-  function prepCard(sw){
-    if (!kakaoKey() || !sw || !SPR[sw.key]) return null;
+  function prepCard(sw, force){
+    if (!kakaoKey() || !sw || !SPR[sw.key] || (!force && Date.now() - kakaoFail < 60000)) return null;
     var k = cardKey(sw);
     if (cardUrls[k]) return cardUrls[k];
-    cardUrls[k] = kakaoLoad().then(function(K){
+    cardUrls[k] = kakaoLoad(force).then(function(K){
       return new Promise(function(ok){ shareCanvas(sw).toBlob(ok, 'image/png'); }).then(function(blob){
         return K.Share.uploadImage({ file:[new File([blob], 'card.png', { type:'image/png' })] });
       });
@@ -3391,8 +3393,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     shareNote(o.note, '');
     var key = kakaoKey();
     if (key){
-      var card = o.sw ? prepCard(o.sw) : null;
-      kakaoLoad().then(function(K){
+      var card = o.sw ? prepCard(o.sw, true) : null;
+      kakaoLoad(true).then(function(K){
         return Promise.resolve(card).then(function(img){
           img = img || { url:SHARE_IMAGE, w:1200, h:630 };
           K.Share.sendDefault({

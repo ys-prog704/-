@@ -954,7 +954,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       </div>
 
       <div class="shop">
-        <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용</p>
+        <p class="shop-label">대장간 상점 &middot; 다음 1회에만 적용 &middot; 출석 보상 아이템은 자동으로 써요</p>
         <div class="shop-grid">
           <button class="item i-bless" id="buyBless" type="button">
             <span><span class="nm">축복의 주문서</span><br><span class="ds">성공 확률 +10%p</span></span>
@@ -2349,6 +2349,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
       energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 }, rooms: [], roomId: '',
       buffs: { bless:false, protect:false, master:false },
+      auto: { bless:false, protect:false, master:false },
       items: { bless:0, protect:0, master:0 },
       attend: { last:'', day:0, total:0 },
       sound: true, log: [], owner: null, synced: '',
@@ -2434,6 +2435,53 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (buffs.protect || buffs.master){ k += x; x = 0; }
     return { s:s, k:k, x:x };
   }
+  /* 출석 보상(보관함) 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
+     파괴 방지권은 파괴가 없는 +0~+3 에서는 기다렸다가 +4 첫 강화에, 축복서·장인은 성공 100% 인 +0 이 지나면 씁니다. */
+  function itemUseful(key){
+    var base = odds(state.level, { bless:false, protect:false, master:false });
+    if (!base) return false;                                            // +20 은 강화하지 않음
+    if (key === 'protect') return base.x > 0 && !state.buffs.master;
+    return base.s < 1;
+  }
+  function autoItems(){
+    if (rolling) return false;                                          // 굴리는 동안 받은 것은 결과가 나온 뒤에
+    var used = [];
+    ['master', 'bless', 'protect'].forEach(function(key){
+      if (state.items[key] > 0 && !state.buffs[key] && itemUseful(key)){
+        state.items[key] -= 1;
+        state.buffs[key] = state.auto[key] = true;
+        used.push(ITEMS[key].full);
+        if (key === 'master') masterCovers();
+      }
+    });
+    if (used.length) pushLog('buy', '출석', used.join(' · ') + ' · 다음 강화에 자동 적용', null);
+    return used.length > 0;
+  }
+  /* 아직 기다리는 출석 아이템이 언제 쓰이는지 (상점 버튼 · 출석 안내에 같이 씁니다) */
+  function autoWhen(key){
+    if (itemPrice(key) === null) return '다음 무기에';                   // +20 은 강화하지 않음
+    if (state.buffs[key]) return '그다음 강화에';
+    if (itemUseful(key)) return '다음 강화에';
+    if (key === 'protect'){                                             // 파괴가 있는데도 기다리면 장인의 손길 때문
+      var base = odds(state.level, { bless:false, protect:false, master:false });
+      return base && base.x > 0 ? '장인 다음에' : '+4부터';
+    }
+    return '+1부터';
+  }
+  /* 장인의 손길이 파괴를 막으니, 자동으로 붙은 방지권은 보관함으로 돌려놓았다가 다음 강화에 씁니다 */
+  function masterCovers(){
+    if (!state.auto.protect) return;
+    state.buffs.protect = state.auto.protect = false;
+    state.items.protect = Math.min(999, state.items.protect + 1);
+  }
+  /* 팔거나 무기고에 넣어 쓰지 못한 출석 아이템은 돌려받습니다 */
+  function returnAuto(){
+    ['bless', 'protect', 'master'].forEach(function(key){
+      if (state.auto[key] && state.buffs[key]) state.items[key] = Math.min(999, state.items[key] + 1);
+    });
+    state.buffs = { bless:false, protect:false, master:false };
+    state.auto = { bless:false, protect:false, master:false };
+  }
   function itemPrice(key){
     var row = LEVELS[state.level];
     if (row.cost === null) return null;
@@ -2511,6 +2559,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         master:  !!(data.buffs && data.buffs.master)
       },
       items: { bless:cnt(it.bless), protect:cnt(it.protect), master:cnt(it.master) },
+      auto: { bless:false, protect:false, master:false },
       attend: {
         last: typeof at.last === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(at.last) ? at.last : '',
         day: Math.min(ATTEND.length - 1, num(at.day, 0) | 0),
@@ -2535,6 +2584,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.found[state.sword.el] |= 1 << state.sword.rar;
     state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
     state.roomId = state.rooms.some(function(r){ return r.id === data.roomId; }) ? data.roomId : '';
+    ['bless', 'protect', 'master'].forEach(function(k){ state.auto[k] = !!(data.auto && data.auto[k]) && state.buffs[k]; });
+    autoItems();
     /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
     noteBest(state.sword, state.level);
     state.vault.forEach(function(w){ noteBest(w, w.lv); noteAwake(w); });
@@ -2564,7 +2615,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var st = state.stats, w = state.sword;
     var body = b64enc(JSON.stringify({
       g:Math.round(state.gold), l:state.level,
-      b:(state.buffs.bless ? 1 : 0) | (state.buffs.protect ? 2 : 0) | (state.buffs.master ? 4 : 0),
+      b:(state.buffs.bless ? 1 : 0) | (state.buffs.protect ? 2 : 0) | (state.buffs.master ? 4 : 0) |
+        (state.auto.bless ? 8 : 0) | (state.auto.protect ? 16 : 0) | (state.auto.master ? 32 : 0),
       t:st.tries, w:st.wins, k:st.booms, e:st.best,
       s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak),
       n:st.pulls, m:st.legends,
@@ -2595,6 +2647,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var out = {
       gold:d.g, level:d.l, sound:state.sound, owner:state.owner, synced:state.synced, log:[],
       buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },
+      auto:{ bless:!!(d.b & 8), protect:!!(d.b & 16), master:!!(d.b & 32) },
       stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p, pulls:d.n, legends:d.m }
     };
     if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2], kind:d.x[3] | 0 };
@@ -2918,12 +2971,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var ip = itemPrice(key), held = state.buffs[key], have = state.items[key];
       btn.classList.toggle('held', held);
       label.classList.toggle('stock', have > 0 && !held);
-      if (held){ label.textContent = '적용됨'; btn.disabled = true; }
+      if (held){ label.textContent = (state.auto[key] ? '출석 보상 적용' : '적용됨') + (have ? ' · ' + have + '개 더' : ''); btn.disabled = true; }
+      else if (have > 0){ label.textContent = autoWhen(key) + ' 자동 · ' + have + '개'; btn.disabled = true; }   // 때가 되면 저절로 씀
       else if (ip === null){ label.textContent = '—'; btn.disabled = true; }
-      else if (have > 0){
-        label.textContent = '보유 ' + have + '개 · 무료';
-        btn.disabled = rolling || (key === 'protect' && o && o.x === 0);
-      }
       else {
         label.textContent = gold(ip);
         btn.disabled = rolling || state.gold < ip || (key === 'protect' && o && o.x === 0);
@@ -2936,7 +2986,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (!state.buffs[key]) return;
       var chip = document.createElement('span');
       chip.className = 'chip i-' + key;
-      chip.textContent = ITEMS[key].label;
+      chip.textContent = ITEMS[key].label + (state.auto[key] ? ' · 출석' : '');
       buffWrap.appendChild(chip);
     });
 
@@ -3227,6 +3277,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (rolling) return;
     var row = LEVELS[state.level];
     if (row.cost === null || state.gold < row.cost) return;
+    autoItems();
     var o = odds(state.level, state.buffs), r = Math.random(), kind;
     if (r < o.s) kind = 'success';
     else if (r < o.s + o.k) kind = 'keep';
@@ -3237,6 +3288,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.stats.spent += row.cost;
     state.stats.tries += 1;
     state.buffs = { bless:false, protect:false, master:false };
+    state.auto = { bless:false, protect:false, master:false };
 
     var anvil = $('anvil');
     anvil.classList.add('is-rolling');
@@ -3314,6 +3366,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         newSwordMoment(currentSword(), '부서진 자리에 ');
       }
       rolling = false;
+      autoItems();
       render(); save();
     }, wait);
   }
@@ -3330,7 +3383,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.vault.push({ seed:w.seed, el:w.el, rar:w.rar, kind:swordKind(w), lv:MAX });
     pushLog('vault', '무기고', '+' + MAX + ' ' + old.name + ' → 무기고', null);
     state.level = 0;
-    state.buffs = { bless:false, protect:false, master:false };
+    returnAuto();
     giveSword(rollSword());
     $('rollText').textContent = '—';
     highlight(null);
@@ -4452,7 +4505,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
       var u = Math.random(), acc = 0;
       HUNT_DROP.forEach(function(d){ if (!drop && u < (acc += d.p)) drop = d.item; });
-      if (drop) state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1);
+      if (drop){ state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1); autoItems(); }
       pushLog('hunt', '사냥', D.ko + ' 처치 +' + gold(M.gold) + (drop ? ' · ' + ITEMS[drop].full : ''), null);
     } else pushLog('huntlose', '사냥', D.ko + '에게 졌습니다 (기력 -1)', null);
     save();                                                    // 결과는 바로 저장 (연출 도중에 닫아도 그대로)
@@ -4517,7 +4570,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     pushLog('sell', '판매', '+' + state.level + ' ' + old.name + ' → ' + gold(price), null);
     roomSell(state.level, old.name, price);
     state.level = 0;
-    state.buffs = { bless:false, protect:false, master:false };
+    returnAuto();
     sellArmed = false;
     giveSword(rollSword());
     $('rollText').textContent = '—';
@@ -4578,17 +4631,20 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* idx 칸의 보상을 주고 기록을 남깁니다 (서버 모드에서는 서버가 기록을 받아 준 뒤에만 부릅니다) */
   function grantAttend(idx, total, server){
     var R = ATTEND[idx], n = idx + 1, last = n === ATTEND.length, text = rewardParts(R, true).join(' + ');
+    var wasAuto = !!(R.item && state.auto[R.item]);
     if (R.gold){
       state.gold += R.gold;
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
     }
     if (R.item) state.items[R.item] = Math.min(999, state.items[R.item] + 1);
     state.attend = { last:dayKey(0), day:(idx + 1) % ATTEND.length, total:total };
+    autoItems();
     flash('ok', 'rgba(255,214,120,.8)');
     burst(last ? 40 : 24, 'ok', '#FFD27A');
     fanfare(last ? 4 : 2);
     reveal('출석 ' + n + '일째!', text, last ? '일주일 개근 보상' : '', '#FFD27A', last);
-    verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (R.item ? ' 상점에서 무료로 쓸 수 있어요.' : ''));
+    verdict('ok', '출석 보상: ' + text + ' 받았습니다!' + (!R.item ? ''
+                 : ' ' + (!wasAuto && state.auto[R.item] ? '다음 강화에' : autoWhen(R.item)) + ' 자동으로 적용돼요.'));
     pushLog('gift', '출석', n + '일째 · ' + text + (server ? ' · 서버 확인' : ''), null);
     roomAttend(n, text);
     render(); save();
@@ -5186,19 +5242,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   function buy(key){
-    if (rolling || state.buffs[key]) return;
+    if (rolling || state.buffs[key] || state.items[key] > 0) return;     // 출석 아이템은 때가 되면 저절로 쓰입니다
     var price = itemPrice(key);
-    if (price === null) return;
-    if (state.items[key] > 0){
-      state.items[key] -= 1;
-      state.buffs[key] = true;
-      pushLog('buy', '사용', ITEMS[key].full + ' · 보관함에서', null);
-    } else {
-      if (state.gold < price) return;
-      state.gold -= price;
-      state.buffs[key] = true;
-      pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
-    }
+    if (price === null || state.gold < price) return;
+    state.gold -= price;
+    state.buffs[key] = true;
+    if (key === 'master') masterCovers();
+    pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
     tone(520, .09, 'triangle', .05);
     render(); save();
   }

@@ -192,7 +192,9 @@ python3 tools/build_swords.py /tmp/crawl-tiles
 저장소를 그대로 올리면 됩니다. 빌드는 없고, 실제로 필요한 파일은 `index.html` 하나입니다.
 
 - **GitHub Pages** — 저장소가 공개여야 합니다(무료 요금제 기준). 저장소 Settings → Pages →
-  Branch 를 고르고 Save. 주소는 `https://<계정>.github.io/<저장소>/` 입니다.
+  Source "Deploy from a branch" → Branch 를 고르고 폴더는 `/ (root)` → Save. 주소는
+  `https://<계정>.github.io/<저장소>/` 이고, 그 브랜치에 올릴 때마다 1~2분 뒤 저절로 바뀝니다.
+  저장소의 빈 파일 `.nojekyll` 은 GitHub Pages 가 파일을 가공하지 않고 그대로 내보내게 합니다.
 - **Vercel · Netlify** — 비공개 저장소도 됩니다. GitHub 계정으로 가입 → 이 저장소를 Import →
   Framework 는 "Other", 빌드 명령은 비워 두고 Deploy.
 

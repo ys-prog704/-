@@ -568,7 +568,6 @@ img{max-width:100%}
 .btn-gift:hover:not(:disabled){filter:brightness(1.07)}
 .attend.done .attend-days,.attend.done .attend-foot{display:none}
 .i-bless{--rail:#5FA463}
-.i-protect{--rail:#C94A40}
 .i-master{--rail:#8A8076}
 .buffs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .buffs:empty{display:none}
@@ -655,6 +654,7 @@ img{max-width:100%}
   box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 6px 22px rgba(255,95,208,.25);
 }
 .btn-synth:hover:not(:disabled){filter:brightness(1.07)}
+.btn-synth.armed{background:var(--boom);color:#fff}
 .vault-acts .btn-sell{flex:1 1 128px}
 .btn-look{flex:1 1 110px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
 .vcard .aw{
@@ -960,12 +960,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <span><span class="nm">축복의 주문서</span><br><span class="ds">성공 확률 +10%p</span></span>
             <span class="pr" id="prBless">0 G</span>
           </button>
-          <button class="item i-protect" id="buyProtect" type="button">
-            <span><span class="nm">파괴 방지권</span><br><span class="ds">파괴 결과를 유지로 대체</span></span>
-            <span class="pr" id="prProtect">0 G</span>
-          </button>
           <button class="item i-master" id="buyMaster" type="button">
-            <span><span class="nm">장인의 손길</span><br><span class="ds">성공 확률 +15%p, 파괴는 유지로</span></span>
+            <span><span class="nm">장인의 손길</span><br><span class="ds">성공 확률 +15%p</span></span>
             <span class="pr" id="prMaster">0 G</span>
           </button>
         </div>
@@ -1183,7 +1179,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <tbody id="chartBody"></tbody>
       </table>
     </div>
-    <p class="mult-note" id="profitNote">+7 이상에서 팔면 평균적으로 남아요. +16 까지는 그냥 강화해도 되고, +17 부터는 파괴 방지권을 쓰는 게 이득이에요.</p>
+    <p class="mult-note" id="profitNote">+7 이상에서 팔면 평균적으로 남아요. +16 까지는 그냥 강화해도 평균적으로 남지만, 그 위는 파괴될 위험이 커서 평균적으로는 손해인 도박이에요. 파괴를 막는 아이템은 없어요(축복서·장인의 손길로 성공 확률만 올릴 수 있어요).</p>
     <p class="mult-note" id="multNote"></p>
   </details>
 
@@ -1213,7 +1209,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      s 성공 / x 파괴 (유지는 1-s-x), cost 시도 비용, price 일반 등급 판매가.
      하락은 없습니다. +0~+3 은 실패해도 유지뿐이고, +4 부터 파괴될 수 있습니다.
      판매가는 +7 부터 "한 단계 더 해서 파는 게 지금 파는 것보다 평균적으로 남도록" 정했습니다
-     (+6~+15 는 아이템 없이도, +16~+19 는 파괴 방지권을 쓰면 남음). */
+     (+6~+15 는 아이템 없이도 남음). +16~+19 는 파괴 위험이 커서 평균적으로 손해인 도박 구간이고,
+     파괴를 막는 아이템은 없습니다(축복서 + 장인을 같이 쓰면 +19 → +20 만 겨우 남음). */
   var LEVELS = [
     { s:1.00, x:0.00, cost:100,    price:0 },
     { s:0.95, x:0.00, cost:220,    price:180 },
@@ -1272,8 +1269,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     { key:'demonlord', pw:23, gold:4500000, weak:4 }
   ];
   var RAR_POWER = [0, 1, 2, 3, 4];
-  var HUNT_DROP = [{ item:'protect', p:.03 }, { item:'bless', p:.06 }];   // 이겼을 때 가끔 아이템
+  var HUNT_DROP = [{ item:'bless', p:.06 }];   // 이겼을 때 가끔 아이템
   var SYNTH_MAX = 21;                        // 합성으로 만들 수 있는 가장 높은 단계 (랭킹 규칙의 best 상한과 같게)
+  var SYNTH_RATE = .5;                       // 합성 성공 확률 — 실패하면 ② 재료만 사라지고 ① 은 그대로
   var VAULT_MAX = 12;                        // 무기고 칸 수
   function levelPrice(lv){ return lv <= MAX ? LEVELS[lv].price : Math.round(LEVELS[MAX].price * Math.pow(2.5, lv - MAX)); }
 
@@ -2303,7 +2301,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 게임 상태 ═════════ */
   var ITEMS = {
     bless:   { label:'축복',       full:'축복의 주문서', short:'축복서', mult:3 },
-    protect: { label:'파괴 방지',  full:'파괴 방지권',   short:'방지권', mult:4 },
     master:  { label:'장인의 손길', full:'장인의 손길',   short:'장인',   mult:7 }
   };
   var START_GOLD = 1000000;
@@ -2316,7 +2313,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      ATTEND_RESET_ON_MISS 가 false 면 하루 빠져도 다음 칸으로 이어지고, true 면 빠진 날 1일차로 돌아갑니다. */
   var ATTEND = [
     { gold:100000 }, { gold:200000 }, { item:'bless' }, { gold:400000 },
-    { item:'protect' }, { gold:600000 }, { item:'master', gold:1000000 }
+    { gold:500000 }, { gold:600000 }, { item:'master', gold:1000000 }
   ];
   var ATTEND_RESET_ON_MISS = false;
   var B32 = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
@@ -2349,9 +2346,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return {
       gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
       energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 }, rooms: [], roomId: '',
-      buffs: { bless:false, protect:false, master:false },
-      auto: { bless:false, protect:false, master:false },
-      items: { bless:0, protect:0, master:0 },
+      buffs: { bless:false, master:false },
+      auto: { bless:false, master:false },
+      items: { bless:0, master:0 },
       attend: { last:'', day:0, total:0 },
       sound: true, log: [], owner: null, synced: '',
       stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:START_GOLD,
@@ -2421,7 +2418,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function sellPrice(){ return Math.round(LEVELS[state.level].price * RARITIES[state.sword.rar].mult); }
 
   /* 아이템은 확률을 재분배할 뿐, 세 구간(성공·유지·파괴)의 합은 항상 1입니다.
-     축복 +10%p, 장인 +15%p 는 유지·파괴에서 비율대로 덜어 오고, 방지권·장인은 남은 파괴를 유지로 바꿉니다. */
+     축복 +10%p, 장인 +15%p 는 유지·파괴에서 비율대로 덜어 옵니다. 파괴를 아예 막는 아이템은 없습니다
+     (방지권이 있으면 돈만 있으면 +20 · +21 이 너무 쉬워져서 없앴습니다). */
   function odds(level, buffs){
     var row = LEVELS[level];
     if (row.s === null) return null;
@@ -2433,26 +2431,22 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     if (buffs.bless) boost(0.10);
     if (buffs.master) boost(0.15);
-    if (buffs.protect || buffs.master){ k += x; x = 0; }
     return { s:s, k:k, x:x };
   }
   /* 출석 · 사냥으로 받은 보상 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
-     파괴 방지권은 파괴가 없는 +0~+3 에서는 기다렸다가 +4 첫 강화에, 축복서·장인은 성공 100% 인 +0 이 지나면 씁니다. */
+     축복서 · 장인은 성공 100% 인 +0 만 건너뛰고 +1 강화부터 씁니다. */
   function itemUseful(key){
-    var base = odds(state.level, { bless:false, protect:false, master:false });
-    if (!base) return false;                                            // +20 은 강화하지 않음
-    if (key === 'protect') return base.x > 0 && !state.buffs.master;
-    return base.s < 1;
+    var base = odds(state.level, { bless:false, master:false });
+    return !!base && base.s < 1;                                        // +20 은 강화하지 않음
   }
   function autoItems(){
     if (rolling) return false;                                          // 굴리는 동안 받은 것은 결과가 나온 뒤에
     var used = [];
-    ['master', 'bless', 'protect'].forEach(function(key){
+    ['master', 'bless'].forEach(function(key){
       if (state.items[key] > 0 && !state.buffs[key] && itemUseful(key)){
         state.items[key] -= 1;
         state.buffs[key] = state.auto[key] = true;
         used.push(ITEMS[key].full);
-        if (key === 'master') masterCovers();
       }
     });
     if (used.length) pushLog('buy', '보상', used.join(' · ') + ' · 다음 강화에 자동 적용', null);
@@ -2463,27 +2457,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (itemPrice(key) === null) return '다음 무기에';                   // +20 은 강화하지 않음
     if (state.buffs[key]) return '그다음 강화에';
     if (itemUseful(key)) return '다음 강화에';
-    if (key === 'protect'){                                             // 파괴가 있는데도 기다리면 장인의 손길 때문
-      var base = odds(state.level, { bless:false, protect:false, master:false });
-      return base && base.x > 0 ? '장인 다음에' : '+4부터';
-    }
     return '+1부터';
-  }
-  /* 장인의 손길이 파괴를 막으니, 자동으로 붙은 방지권은 보관함으로 돌려놓았다가 다음 강화에 씁니다 */
-  function masterCovers(){
-    if (!state.auto.protect) return;
-    state.buffs.protect = state.auto.protect = false;
-    state.items.protect = Math.min(999, state.items.protect + 1);
   }
   /* 방금 받은 key 아이템이 언제 쓰이는지: wasAuto 는 받기 전에 이미 같은 아이템이 붙어 있었는지 */
   function autoSays(key, wasAuto){ return !wasAuto && state.auto[key] ? '다음 강화에' : autoWhen(key); }
   /* 팔거나 무기고에 넣어 쓰지 못한 보상 아이템은 돌려받습니다 */
   function returnAuto(){
-    ['bless', 'protect', 'master'].forEach(function(key){
+    ['bless', 'master'].forEach(function(key){
       if (state.auto[key] && state.buffs[key]) state.items[key] = Math.min(999, state.items[key] + 1);
     });
-    state.buffs = { bless:false, protect:false, master:false };
-    state.auto = { bless:false, protect:false, master:false };
+    state.buffs = { bless:false, master:false };
+    state.auto = { bless:false, master:false };
   }
   function itemPrice(key){
     var row = LEVELS[state.level];
@@ -2544,8 +2528,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     });
     var it = data.items || {}, at = data.attend || {}, hu = data.hunt || {}, en = data.energy || {}, du = data.duel || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
+    /* 파괴 방지권은 없어졌습니다. 예전 진행에 남아 있던 것은 — 받아 두었거나 보상으로 붙어 있던 것은 축복의 주문서로
+       바꾸고, 골드로 사서 붙여 둔 것은 산 값(그 단계 강화 비용 × 4)을 돌려줍니다. */
+    var hadProt = !!(data.buffs && data.buffs.protect), protAuto = hadProt && !!(data.auto && data.auto.protect);
+    var protBless = cnt(it.protect) + (protAuto ? 1 : 0);
+    var protRefund = hadProt && !protAuto && LEVELS[level].cost !== null ? LEVELS[level].cost * 4 : 0;
     state = {
-      gold: num(data.gold, base.gold),
+      gold: num(data.gold, base.gold) + protRefund,
       level: level,
       sword: swOk ? { seed:sw.seed >>> 0, el:sw.el | 0, rar:sw.rar | 0, kind:swordKind({ el:sw.el | 0, rar:sw.rar | 0, kind:sw.kind }) } : base.sword,
       found: found, foundKind: fk, vault: vault, dexBest: dexBest, awake: (num(data.awake, 0) | 0) & 0x7FFF,
@@ -2558,11 +2547,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
               sel: typeof hu.sel === 'number' && hu.sel >= -1 && hu.sel < MONSTERS.length ? hu.sel | 0 : -1 },
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
-        protect: !!(data.buffs && data.buffs.protect),
         master:  !!(data.buffs && data.buffs.master)
       },
-      items: { bless:cnt(it.bless), protect:cnt(it.protect), master:cnt(it.master) },
-      auto: { bless:false, protect:false, master:false },
+      items: { bless:Math.min(999, cnt(it.bless) + protBless), master:cnt(it.master) },
+      auto: { bless:false, master:false },
       attend: {
         last: typeof at.last === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(at.last) ? at.last : '',
         day: Math.min(ATTEND.length - 1, num(at.day, 0) | 0),
@@ -2587,7 +2575,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.found[state.sword.el] |= 1 << state.sword.rar;
     state.foundKind[swordKind(state.sword)][state.sword.el] |= 1 << state.sword.rar;
     state.roomId = state.rooms.some(function(r){ return r.id === data.roomId; }) ? data.roomId : '';
-    ['bless', 'protect', 'master'].forEach(function(k){ state.auto[k] = !!(data.auto && data.auto[k]) && state.buffs[k]; });
+    ['bless', 'master'].forEach(function(k){ state.auto[k] = !!(data.auto && data.auto[k]) && state.buffs[k]; });
+    if (protBless || protRefund){
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      pushLog('gift', '안내', '파괴 방지권이 없어져서 ' + [protBless ? '축복의 주문서 ' + protBless + '개로 바꿨어요' : '',
+              protRefund ? '산 값 ' + gold(protRefund) + '를 돌려받았어요' : ''].filter(Boolean).join(' · '), null);
+    }
     autoItems();
     /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
     noteBest(state.sword, state.level);
@@ -2618,8 +2611,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var st = state.stats, w = state.sword;
     var body = b64enc(JSON.stringify({
       g:Math.round(state.gold), l:state.level,
-      b:(state.buffs.bless ? 1 : 0) | (state.buffs.protect ? 2 : 0) | (state.buffs.master ? 4 : 0) |
-        (state.auto.bless ? 8 : 0) | (state.auto.protect ? 16 : 0) | (state.auto.master ? 32 : 0),
+      b:(state.buffs.bless ? 1 : 0) | (state.buffs.master ? 4 : 0) | (state.auto.bless ? 8 : 0) | (state.auto.master ? 32 : 0),
       t:st.tries, w:st.wins, k:st.booms, e:st.best,
       s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak),
       n:st.pulls, m:st.legends,
@@ -2633,7 +2625,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       o:state.rooms.length ? [state.roomId].concat(state.rooms.map(function(r){ return [r.id, r.name]; })) : undefined,
       j:[Math.round(state.energy.full / 1000), state.duel.n, state.duel.w, state.duel.dn, state.duel.dw, state.hunt.n, state.hunt.w],
       h:state.dexBest.map(function(m){ return m.map(function(row){ return row.map(function(v){ return B32.charAt(v); }).join(''); }).join(''); }).join('').replace(/0+$/, '') || undefined,
-      i:[state.items.bless, state.items.protect, state.items.master],
+      i:[state.items.bless, 0, state.items.master],                    // 가운데는 예전 파괴 방지권 자리
       a:[state.attend.last, state.attend.day, state.attend.total]
     }));
     return CODE_TAG + '-' + body + '-' + checksum(body);
@@ -2649,7 +2641,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var d = JSON.parse(b64dec(parts[1]));
     var out = {
       gold:d.g, level:d.l, sound:state.sound, owner:state.owner, synced:state.synced, log:[],
-      buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },
+      buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },      // protect: 예전 코드의 파괴 방지권 (adopt 가 옮김)
       auto:{ bless:!!(d.b & 8), protect:!!(d.b & 16), master:!!(d.b & 32) },
       stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p, pulls:d.n, legends:d.m }
     };
@@ -2968,7 +2960,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     $('bellows').hidden = !(!maxed && state.gold < row.cost && price <= 0);
 
-    ['bless','protect','master'].forEach(function(key){
+    ['bless','master'].forEach(function(key){
       var cap = key.charAt(0).toUpperCase() + key.slice(1);
       var btn = $('buy' + cap), label = $('pr' + cap);
       var ip = itemPrice(key), held = state.buffs[key], have = state.items[key];
@@ -2979,13 +2971,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       else if (ip === null){ label.textContent = '—'; btn.disabled = true; }
       else {
         label.textContent = gold(ip);
-        btn.disabled = rolling || state.gold < ip || (key === 'protect' && o && o.x === 0);
+        btn.disabled = rolling || state.gold < ip;
       }
     });
 
     var buffWrap = $('buffs');
     buffWrap.textContent = '';
-    ['bless','protect','master'].forEach(function(key){
+    ['bless','master'].forEach(function(key){
       if (!state.buffs[key]) return;
       var chip = document.createElement('span');
       chip.className = 'chip i-' + key;
@@ -3210,7 +3202,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (!chartBuilt){
       body.textContent = '';
       LEVELS.forEach(function(row, i){
-        var o = odds(i, { bless:false, protect:false, master:false });
+        var o = odds(i, { bless:false, master:false });
         var tr = document.createElement('tr');
         tr.dataset.lv = String(i);
         [{ t:'+' + i },
@@ -3292,8 +3284,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.gold -= row.cost;
     state.stats.spent += row.cost;
     state.stats.tries += 1;
-    state.buffs = { bless:false, protect:false, master:false };
-    state.auto = { bless:false, protect:false, master:false };
+    state.buffs = { bless:false, master:false };
+    state.auto = { bless:false, master:false };
 
     var anvil = $('anvil');
     anvil.classList.add('is-rolling');
@@ -3332,7 +3324,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       tone(660, .13, 'triangle', .075);
       tone(990, .24, 'triangle', .062, .1);
       if (state.level === MAX){
-        reveal('+' + MAX + ' 달성!', sw.name, '무기고에 넣어 두었다가 두 자루를 합성하면 +' + (MAX + 1) + ' 이 됩니다', sw.R.color, true);
+        reveal('+' + MAX + ' 달성!', sw.name, '무기고에 넣어 두었다가 두 자루를 합성하면 ' + Math.round(SYNTH_RATE * 100) + '% 확률로 +' + (MAX + 1) + ' 이 됩니다', sw.R.color, true);
         fanfare(4); quake();
       } else if (gain){
         reveal(gain.short + '!', '+' + state.level + ' · ' + featText(gain, sw), '', sw.E.glow, gain.key === 'prism');
@@ -3378,8 +3370,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 무기고 · 합성 ═════════
      +20 무기를 무기고에 넣으면 새 무기를 뽑습니다(판매와 같지만 골드 대신 무기를 남김).
-     같은 단계 두 자루를 고르면 합성: 먼저 고른 무기의 모습으로 한 단계 위가 되고, 다른 한 자루는 사라집니다. */
-  var vaultSel = [], vaultSig = '', vaultSellArmed = false, vaultSellTimer = null;
+     같은 단계 두 자루를 고르면 합성(SYNTH_RATE 확률로 성공): 성공하면 먼저 고른 무기의 모습으로 한 단계 위가 되고
+     다른 한 자루는 사라집니다. 실패하면 두 번째(재료)만 사라지고 먼저 고른 무기는 그대로입니다. */
+  var vaultSel = [], vaultSig = '', vaultSellArmed = false, vaultSellTimer = null, synthArmed = false, synthTimer = null;
   function vaultSword(w){ return makeSword(w.seed, w.lv, w.el, w.rar, w.kind); }
   function vaultPrice(w){ return Math.round(levelPrice(w.lv) * RARITIES[w.rar].mult); }
   function storeWeapon(){
@@ -3402,7 +3395,30 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (rolling || vaultSel.length !== 2) return;
     var a = state.vault[vaultSel[0]], b = state.vault[vaultSel[1]];
     if (!a || !b || a.lv !== b.lv || a.lv >= SYNTH_MAX) return;
-    var made = { seed:a.seed, el:a.el, rar:a.rar, kind:a.kind, lv:a.lv + 1 }, nameB = vaultSword(b).name;
+    if (!synthArmed){                                          // 실패하면 한 자루를 잃으니 한 번 더 눌러 확인
+      synthArmed = true;
+      clearTimeout(synthTimer);
+      synthTimer = setTimeout(function(){ synthArmed = false; renderVault(); }, 4000);
+      renderVault();
+      return;
+    }
+    synthArmed = false;
+    clearTimeout(synthTimer);
+    var swB = vaultSword(b), nameB = swB.name;
+    if (Math.random() >= SYNTH_RATE){
+      state.vault.splice(vaultSel[1], 1);
+      vaultSel = [];
+      flash('boom'); quake(); burst(30, 'boom');
+      noise(.5, .13, 1200);
+      tone(90, .55, 'sawtooth', .11);
+      reveal('합성 실패…', nameB, '재료 +' + b.lv + ' 무기가 사라졌어요', '#E8304A', false);
+      verdictSword('boom', '합성 실패… 재료 +' + b.lv + ' ', swB, josa(nameB, '이', '가').slice(nameB.length) + ' 사라졌어요. 먼저 고른 무기는 +' + a.lv + ' 그대로예요.');
+      pushLog('boom', '합성 실패', '+' + a.lv + ' ' + vaultSword(a).name + ' 그대로 · 재료 ' + nameB + ' 사라짐', null);
+      if (roomActive()) roomBot(roomWho() + '의 +' + (a.lv + 1) + ' 합성이 실패했어요… 재료 +' + b.lv + ' ' + josa(nameB, '이', '가') + ' 사라졌어요');
+      render(); save();
+      return;
+    }
+    var made = { seed:a.seed, el:a.el, rar:a.rar, kind:a.kind, lv:a.lv + 1 };
     state.vault[vaultSel[0]] = made;
     state.vault.splice(vaultSel[1], 1);
     vaultSel = [];
@@ -3476,15 +3492,22 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     $('vaultCount').textContent = V.length + ' / ' + VAULT_MAX;
     $('vaultLead').textContent = V.length
-      ? '두 자루를 고르면 합성할 수 있어요. 먼저 고른 무기가 +' + (MAX + 1) + ' 로 각성해 새 모습이 되고, 두 번째 무기는 재료로 사라져요.'
-      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 +' + (MAX + 1) + ' 로 각성합니다.';
+      ? '두 자루를 고르면 합성할 수 있어요(성공 ' + Math.round(SYNTH_RATE * 100) + '%). 성공하면 먼저 고른 무기가 +' + (MAX + 1) +
+        ' 로 각성해 새 모습이 되고 두 번째 무기는 재료로 사라져요. 실패하면 두 번째 무기(재료)만 사라지고 먼저 고른 무기는 그대로예요.'
+      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 ' + Math.round(SYNTH_RATE * 100) + '% 확률로 +' + (MAX + 1) + ' 로 각성합니다.';
     var a = V[vaultSel[0]], c = V[vaultSel[1]], sb = $('synthBtn'), note = $('synthNote');
     if (vaultSel.length === 2 && a && c){
       var okSynth = a.lv === c.lv && a.lv < SYNTH_MAX;
       sb.disabled = rolling || !okSynth;
-      note.textContent = okSynth ? '+' + a.lv + ' 두 자루 → +' + (a.lv + 1)
-                       : a.lv !== c.lv ? '같은 단계끼리만 합성할 수 있어요' : '+' + SYNTH_MAX + ' 이 지금 가장 높은 단계예요';
+      if (!okSynth) synthArmed = false;
+      sb.firstChild.nodeValue = synthArmed ? '정말 합성할까요?' : '합성하기';
+      sb.classList.toggle('armed', synthArmed);
+      note.textContent = !okSynth ? (a.lv !== c.lv ? '같은 단계끼리만 합성할 수 있어요' : '+' + SYNTH_MAX + ' 이 지금 가장 높은 단계예요')
+                       : synthArmed ? '한 번 더 누르기 · 실패하면 ② 재료가 사라져요'
+                       : '+' + a.lv + ' 두 자루 → +' + (a.lv + 1) + ' · 성공 ' + Math.round(SYNTH_RATE * 100) + '%';
     } else {
+      synthArmed = false;
+      sb.firstChild.nodeValue = '합성하기'; sb.classList.remove('armed');
       sb.disabled = true;
       note.textContent = V.length < 2 ? '+' + MAX + ' 두 자루가 필요해요' : '두 자루를 골라 주세요';
     }
@@ -4491,7 +4514,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         }
         $('huntMePow').textContent = '힘 ' + ch.p + (ch.w.el === M.weak ? ' (약점 +3)' : '');
         $('huntMobPow').textContent = '힘 ' + M.pw;
-        $('huntLead').textContent = D.ko + ' · 약점 ' + ELEMENTS[M.weak].name + ' 속성 · 이기면 ' + gold(M.gold) + ' (가끔 축복서·방지권)' +
+        $('huntLead').textContent = D.ko + ' · 약점 ' + ELEMENTS[M.weak].name + ' 속성 · 이기면 ' + gold(M.gold) + ' (가끔 축복서)' +
           (ch.vault >= 0 ? ' · 무기고에서 가장 센 무기가 나가요' : '');
       }
     }
@@ -4566,6 +4589,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     else if (vaultSel.length < 2) vaultSel.push(i);
     else vaultSel[1] = i;
     vaultSellArmed = false;
+    synthArmed = false;                                        // 고른 무기가 바뀌면 합성 확인도 처음부터
     renderVault();
   }
 
@@ -5256,7 +5280,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (price === null || state.gold < price) return;
     state.gold -= price;
     state.buffs[key] = true;
-    if (key === 'master') masterCovers();
     pushLog('buy', '구매', ITEMS[key].label + ' · -' + gold(price), null);
     tone(520, .09, 'triangle', .05);
     render(); save();
@@ -5359,7 +5382,6 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('buyBless').addEventListener('click', function(){ buy('bless'); });
-  $('buyProtect').addEventListener('click', function(){ buy('protect'); });
   $('buyMaster').addEventListener('click', function(){ buy('master'); });
   $('attendBtn').addEventListener('click', claimAttend);
   $('loginBtn').addEventListener('click', onlineLogin);

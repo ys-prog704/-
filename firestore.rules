@@ -10,6 +10,8 @@ rules_version = '2';
 //  - 랭킹: 누구나 볼 수 있고, 자기 기록만 올릴 수 있으며, 범위를 벗어난 값은 거부합니다.
 //  - 결투장: 각자 대표 무기를 올려 두고(누구나 봄), 도전 기록은 도전한 사람만 만들고 두 사람만 봅니다.
 //  - 단톡방: 방 이름은 로그인한 사람이 볼 수 있고(초대 링크), 방 사람·메시지는 방 사람끼리만 봅니다.
+//  - 운영자: Firebase 콘솔에서 admins/{운영자 uid} 문서를 만들면 그 계정이 운영자가 됩니다(게임에서는 못 만듦).
+//            운영자는 공지 · 선물을 보내고, 사람을 막거나(bans) 랭킹 · 결투장 · 단톡방 글을 지울 수 있습니다.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -20,6 +22,10 @@ service cloud.firestore {
     }
     // 한국 시간(UTC+9) 기준 날짜
     function kstDay(t) { return (t + duration.value(9, 'h')).date(); }
+    // 운영자: 콘솔에서 만든 admins/{uid} 문서가 있는 계정
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    // 운영자가 막은 계정: 랭킹 · 결투장 · 단톡방 · 선물에 쓸 수 없습니다
+    function banned() { return signedIn() && exists(/databases/$(database)/documents/bans/$(request.auth.uid)); }
     // 대표 무기 정보 (결투장·단톡방 공통). 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
     function validProfile(d) {
       return d.name is string && d.name.size() >= 1 && d.name.size() <= 12
@@ -54,11 +60,18 @@ service cloud.firestore {
         && kstDay(request.time) > kstDay(resource.data.last)
         && request.resource.data.day == (resource.data.day + 1) % 7
         && request.resource.data.total == resource.data.total + 1;
+      // 운영자는 시험하려고 자기 출석 기록을 되돌릴 수 있습니다
+      allow create, update: if isOwner(uid) && isAdmin()
+        && onlyKeys(['last', 'day', 'total'])
+        && request.resource.data.last is timestamp
+        && request.resource.data.day is int && request.resource.data.day >= 0 && request.resource.data.day <= 6
+        && request.resource.data.total is int && request.resource.data.total >= 0;
     }
 
     match /ranking/{uid} {
       allow read: if true;
-      allow create, update: if isOwner(uid)
+      allow delete: if isAdmin();
+      allow create, update: if isOwner(uid) && !banned()
         && onlyKeys(['name', 'best', 'peak', 'score', 'sword', 'rar', 'el', 'at'])
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
@@ -76,18 +89,18 @@ service cloud.firestore {
     // 결투장 대표 무기: 누구나 볼 수 있고 자기 것만 올립니다. 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
     match /arena/{uid} {
       allow read: if true;
-      allow create, update: if isOwner(uid)
+      allow create, update: if isOwner(uid) && !banned()
         && onlyKeys(['name', 'lv', 'rar', 'el', 'kind', 'seed', 'pw', 'at'])
         && validProfile(request.resource.data)
         && request.resource.data.at == request.time;
-      allow delete: if isOwner(uid);
+      allow delete: if isOwner(uid) || isAdmin();
     }
 
     // 결투 기록: 도전한 사람(a)이 만들고, 두 사람만 봅니다. 상대(d)는 결투장에 있는 사람이어야 합니다.
     // 방어한 사람은 "보상 받음(c)"만 켤 수 있습니다(한 번만).
     match /duels/{id} {
       allow read: if signedIn() && (resource.data.a == request.auth.uid || resource.data.d == request.auth.uid);
-      allow create: if signedIn()
+      allow create: if signedIn() && !banned()
         && onlyKeys(['a', 'd', 'an', 'dn', 'ap', 'dp', 'aw', 'win', 'gold', 'def', 'c', 'at'])
         && request.resource.data.a == request.auth.uid
         && request.resource.data.d is string && request.resource.data.d != request.auth.uid
@@ -128,30 +141,87 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 20;
 
-      // 방 사람: 자기 자리만 만들고·고치고·지웁니다(나가기). 방 사람끼리만 봅니다.
+      // 방 사람: 자기 자리만 만들고·고치고·지웁니다(나가기). 방 사람끼리만 봅니다. 운영자는 보고 내보낼 수 있습니다.
       match /members/{uid} {
-        allow read: if inRoom(roomId);
-        allow create, update: if isOwner(uid)
+        allow read: if inRoom(roomId) || isAdmin();
+        allow create, update: if isOwner(uid) && !banned()
           && existsAfter(/databases/$(database)/documents/rooms/$(roomId))
           && onlyKeys(['name', 'lv', 'rar', 'el', 'kind', 'seed', 'pw', 'best', 'at'])
           && validProfile(request.resource.data)
           && request.resource.data.best is int && request.resource.data.best >= 0 && request.resource.data.best <= 21
           && request.resource.data.at == request.time;
-        allow delete: if isOwner(uid);
+        allow delete: if isOwner(uid) || isAdmin();
       }
 
-      // 메시지: 방 사람만 쓰고 봅니다. 쓴 사람(uid)은 나여야 하고, 고치거나 지울 수 없습니다.
+      // 메시지: 방 사람만 쓰고 봅니다. 쓴 사람(uid)은 나여야 하고, 고칠 수 없습니다.
+      // 운영자는 어느 방이든 보고, "운영자" 메시지(kind=admin)를 쓰고, 메시지를 지울 수 있습니다.
       match /msgs/{id} {
-        allow read: if inRoom(roomId);
-        allow create: if inRoomAfter(roomId)
-          && onlyKeys(['uid', 'name', 'text', 'kind', 'at'])
+        allow read: if inRoom(roomId) || isAdmin();
+        allow delete: if isAdmin();
+        allow create: if onlyKeys(['uid', 'name', 'text', 'kind', 'at'])
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.name is string
           && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
           && request.resource.data.text is string
           && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 300
-          && request.resource.data.kind in ['chat', 'bot']
-          && request.resource.data.at == request.time;
+          && request.resource.data.at == request.time
+          && ((inRoomAfter(roomId) && !banned() && request.resource.data.kind in ['chat', 'bot'])
+              || (isAdmin() && request.resource.data.kind == 'admin'));
+      }
+    }
+
+    // ── 운영자 ──
+    // 내가 운영자인지 확인만 합니다. 만들고 지우는 건 Firebase 콘솔에서만 합니다.
+    match /admins/{uid} {
+      allow get: if isOwner(uid);
+    }
+
+    // 막은 계정: 운영자만 만들고 풀고, 막힌 사람은 자기가 막힌 것만 봅니다.
+    match /bans/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin()
+        && onlyKeys(['name', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 12
+        && request.resource.data.at == request.time;
+      allow delete: if isAdmin();
+    }
+
+    // 공지: 누구나(로그인 안 해도) 보고, 운영자만 올리고 내립니다. 공지는 notice/main 하나입니다.
+    match /notice/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() && id == 'main'
+        && onlyKeys(['text', 'at'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 200
+        && request.resource.data.at == request.time;
+      allow delete: if isAdmin();
+    }
+
+    // 선물: 운영자가 보내고(to = 받는 사람 uid, 또는 모두 'all'), 받는 사람만 봅니다.
+    // 받을 때 got/{내 uid} 를 만드는데, 한 번만 만들 수 있고 고치거나 지울 수 없어서 두 번 받을 수 없습니다.
+    match /gifts/{g} {
+      allow read: if isAdmin() || (signedIn() && (resource.data.to == request.auth.uid || resource.data.to == 'all'));
+      allow create: if isAdmin()
+        && onlyKeys(['to', 'toName', 'gold', 'item', 'n', 'msg', 'at'])
+        && request.resource.data.to is string
+        && request.resource.data.to.size() >= 1 && request.resource.data.to.size() <= 128
+        && request.resource.data.toName is string && request.resource.data.toName.size() <= 12
+        && request.resource.data.gold is int
+        && request.resource.data.gold >= 0 && request.resource.data.gold <= 100000000000
+        && request.resource.data.item in ['', 'bless', 'master']
+        && request.resource.data.n is int && request.resource.data.n >= 0 && request.resource.data.n <= 99
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 60
+        && request.resource.data.at == request.time;
+      allow delete: if isAdmin();
+
+      match /got/{uid} {
+        allow get: if isOwner(uid) || isAdmin();
+        allow list: if isAdmin();
+        allow create: if isOwner(uid) && !banned()
+          && onlyKeys(['at'])
+          && request.resource.data.at == request.time
+          && get(/databases/$(database)/documents/gifts/$(g)).data.to in [request.auth.uid, 'all'];
       }
     }
   }

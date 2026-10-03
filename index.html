@@ -357,6 +357,36 @@ img{max-width:100%}
 
 /* ── 온라인 (로그인 · 랭킹) ── */
 .online{margin-top:18px;padding:10px 15px}
+.notice{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-top:14px;padding:10px 14px;border-radius:var(--r-lg);
+  background:color-mix(in srgb, var(--gold) 13%, var(--iron));border:1px solid color-mix(in srgb, var(--gold) 55%, transparent)}
+.notice-tag{font-size:12px;color:var(--gold);white-space:nowrap;letter-spacing:.04em}
+.notice-text{flex:1 1 220px;font-size:14px;line-height:1.5;color:var(--parch);white-space:pre-wrap;word-break:break-word}
+.gift-box{display:flex;flex-direction:column;gap:6px;margin-top:9px}
+.gift-row{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;
+  background:rgba(217,164,65,.12);border:1px solid rgba(217,164,65,.45)}
+.gift-text{flex:1 1 200px;font-size:13px;color:#F4D9A0;word-break:break-word}
+.admin{margin-top:14px;padding:10px 15px;border-color:color-mix(in srgb, var(--quench) 55%, transparent)}
+.admin summary{cursor:pointer;display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;color:var(--quench)}
+.admin-sum{font-size:12px;color:var(--ash)}
+.admin-grid{display:grid;gap:12px;margin-top:10px}
+@media (min-width:820px){.admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.admin-sec{background:var(--iron-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.admin-sec h3{margin:0 0 8px;font-size:14px;color:var(--parch);display:flex;align-items:center;gap:8px;justify-content:space-between}
+.admin-row{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-bottom:7px;font-size:13px;color:var(--ash-2)}
+.admin-row label{display:flex;align-items:center;gap:6px}
+.admin-row input,.admin-row select,.admin-sec textarea{background:var(--ink);color:var(--parch);border:1px solid var(--line-2);border-radius:8px;
+  padding:6px 8px;font:inherit;font-size:13px;min-width:0}
+.admin-row input[type=number]{width:120px}
+#admGiftMsg{flex:1 1 220px}
+.admin-sec textarea{width:100%;min-height:62px;resize:vertical;margin-bottom:7px;box-sizing:border-box}
+.admin-now,.admin-sub{margin:4px 0 6px;font-size:12px;color:var(--ash)}
+.admin-list{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px}
+.admin-list li{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-size:12.5px;color:var(--ash-2);
+  background:var(--iron-3);border-radius:8px;padding:5px 8px}
+.admin-list li .al{flex:1 1 160px;min-width:0;word-break:break-word}
+.admin-list li.empty{background:none;color:var(--ash);padding:2px 0}
+.admin-note{margin:10px 0 2px;font-size:13px;color:var(--quench)}
+.rank-ban{margin:4px 0 8px;font-size:13px;color:var(--boom)}
 .online-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
 .online-who{flex:1 1 220px;font-size:12.5px;color:var(--ash-2)}
 .btn-login{color:var(--parch);border-color:var(--ash)}
@@ -462,6 +492,11 @@ img{max-width:100%}
 .rm.bot{align-self:stretch;max-width:none}
 .rm.bot .who{color:var(--ember)}
 .rm.bot .bub{flex:1 1 auto;background:rgba(232,98,44,.13);border:1px solid rgba(232,98,44,.32);color:#FFDCC2;border-radius:10px}
+.rm.admin{align-self:stretch;max-width:none}
+.rm.admin .who{color:var(--quench);font-weight:700}
+.rm.admin .bub{flex:1 1 auto;background:rgba(111,168,184,.14);border:1px solid rgba(111,168,184,.5);color:#DDF2F7;border-radius:10px}
+.rm .rm-del{font-size:10.5px;padding:1px 6px;margin-left:4px;border-radius:6px;border:1px solid var(--line-2);background:none;color:var(--ash);cursor:pointer}
+.rm .rm-del:hover{color:var(--boom);border-color:var(--boom)}
 .rm.local{align-self:center;max-width:96%;font-size:12px;color:#B8C2CC;background:rgba(255,255,255,.07);border-radius:12px;padding:5px 11px;text-align:center;margin:0}
 .room-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .room-chips button{
@@ -862,6 +897,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     </div>
   </header>
 
+  <div class="notice" id="notice" role="status" hidden>
+    <b class="notice-tag">운영자 공지</b>
+    <span class="notice-text" id="noticeText"></span>
+    <button class="btn-ghost small" id="noticeClose" type="button">닫기</button>
+  </div>
+
   <dl class="hud">
     <div><dt>보유 골드</dt><dd class="v-gold" id="hudGold">0</dd></div>
     <div><dt>최고 강화</dt><dd id="hudBest">+0</dd></div>
@@ -879,6 +920,67 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <button class="btn-ghost" id="logoutBtn" type="button" hidden>로그아웃</button>
     </div>
     <div class="online-note" id="onlineNote" hidden></div>
+    <div class="gift-box" id="giftBox" hidden></div>
+  </section>
+
+  <section class="panel admin" id="admin" hidden>
+    <details id="adminBox">
+      <summary><b>운영자 도구</b><span class="admin-sum">이 계정은 랭킹 · 결투장에서 빠져요 · 눌러서 열기</span></summary>
+      <div class="admin-grid">
+        <section class="admin-sec">
+          <h3>시험해 보기</h3>
+          <div class="admin-row">
+            <button class="btn-ghost small" type="button" data-adm="gold1">+1억 G</button>
+            <button class="btn-ghost small" type="button" data-adm="gold10">+10억 G</button>
+            <button class="btn-ghost small" type="button" data-adm="gold0">골드 0</button>
+          </div>
+          <div class="admin-row">
+            <label>강화 단계 <input id="admLv" type="number" min="0" max="20" value="19" inputmode="numeric"></label>
+            <button class="btn-ghost small" type="button" data-adm="setlv">바꾸기</button>
+          </div>
+          <div class="admin-row">
+            <button class="btn-ghost small" type="button" data-adm="vaultNow">지금 무기를 +20 으로 무기고에</button>
+            <button class="btn-ghost small" type="button" data-adm="vaultRand">아무 무기 +20 무기고에</button>
+          </div>
+          <div class="admin-row">
+            <button class="btn-ghost small" type="button" data-adm="energy">기력 가득</button>
+            <button class="btn-ghost small" type="button" data-adm="attend">출석 하루 되돌리기</button>
+          </div>
+        </section>
+        <section class="admin-sec">
+          <h3>공지</h3>
+          <p class="admin-now" id="admNoticeNow"></p>
+          <textarea id="admNotice" maxlength="200" placeholder="모든 사람 화면 맨 위에 뜨는 공지 (200자까지)"></textarea>
+          <div class="admin-row">
+            <button class="btn-ghost small" type="button" data-adm="noticeSet">공지 올리기</button>
+            <button class="btn-ghost small" type="button" data-adm="noticeOff">공지 내리기</button>
+          </div>
+        </section>
+        <section class="admin-sec">
+          <h3>선물 보내기</h3>
+          <div class="admin-row"><label>받는 사람 <select id="admGiftTo"></select></label></div>
+          <div class="admin-row"><label>골드 <input id="admGiftGold" type="number" min="0" step="100000" value="1000000" inputmode="numeric"></label></div>
+          <div class="admin-row">
+            <label>아이템 <select id="admGiftItem"><option value="">없음</option><option value="bless">축복의 주문서</option><option value="master">장인의 손길</option></select></label>
+            <label>개수 <input id="admGiftN" type="number" min="1" max="99" value="1" inputmode="numeric"></label>
+          </div>
+          <div class="admin-row"><input id="admGiftMsg" maxlength="60" placeholder="한마디 (예: 추석 선물이에요!)"></div>
+          <div class="admin-row"><button class="btn-ghost small" type="button" data-adm="giftSend" id="admGiftBtn">선물 보내기</button></div>
+          <p class="admin-sub">보낸 선물 (모두에게 보낸 선물은 거두기 전까지 새로 온 사람도 받아요)</p>
+          <ol class="admin-list" id="admGifts"></ol>
+        </section>
+        <section class="admin-sec">
+          <h3>관리 <button class="btn-ghost small" type="button" data-adm="refresh">새로고침</button></h3>
+          <p class="admin-sub">랭킹 — 지우기는 그 사람이 다음에 접속하면 다시 올라오고, 막기는 랭킹 · 결투장 · 단톡방 · 선물을 막아요</p>
+          <ol class="admin-list" id="admRank"></ol>
+          <p class="admin-sub">막은 사람</p>
+          <ol class="admin-list" id="admBans"></ol>
+          <p class="admin-sub">단톡방 — 보기를 누르면 아래 단톡방 칸에 열려요(메시지 지우기 · 내보내기)</p>
+          <ol class="admin-list" id="admRooms"></ol>
+        </section>
+      </div>
+      <p class="admin-note" id="admNote" hidden></p>
+    </details>
   </section>
 
   <section class="panel attend" id="attend" aria-labelledby="attendTitle">
@@ -1072,6 +1174,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           <h2>랭킹 &middot; 최고 강화</h2>
           <button class="btn-ghost small" id="rankRefresh" type="button">새로고침</button>
         </div>
+        <p class="rank-ban" id="rankBan" hidden>운영자가 이 계정의 랭킹 · 결투장 · 단톡방 참여를 막았어요.</p>
         <ol class="rank-list" id="rankList"></ol>
         <div class="rank-me" id="rankMe" hidden>
           <label for="rankName">랭킹 이름</label>
@@ -3414,7 +3517,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       reveal('합성 실패…', nameB, '재료 +' + b.lv + ' 무기가 사라졌어요', '#E8304A', false);
       verdictSword('boom', '합성 실패… 재료 +' + b.lv + ' ', swB, josa(nameB, '이', '가').slice(nameB.length) + ' 사라졌어요. 먼저 고른 무기는 +' + a.lv + ' 그대로예요.');
       pushLog('boom', '합성 실패', '+' + a.lv + ' ' + vaultSword(a).name + ' 그대로 · 재료 ' + nameB + ' 사라짐', null);
-      if (roomActive()) roomBot(roomWho() + '의 +' + (a.lv + 1) + ' 합성이 실패했어요… 재료 +' + b.lv + ' ' + josa(nameB, '이', '가') + ' 사라졌어요');
+      if (roomNews()) roomBot(roomWho() + '의 +' + (a.lv + 1) + ' 합성이 실패했어요… 재료 +' + b.lv + ' ' + josa(nameB, '이', '가') + ' 사라졌어요');
       render(); save();
       return;
     }
@@ -3438,7 +3541,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     } else reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
     verdictSword('ok', '합성 성공! +' + made.lv + ' ', sw, ' (재료: ' + nameB + ')');
     pushLog('synth', '합성', '+' + a.lv + ' ×2 → +' + made.lv + ' ' + sw.name, null);
-    if (sw.awake && roomActive()) roomBot(roomWho() + '의 ' + sw.was + ' → +' + made.lv + ' 각성! 「' + sw.name + '」');
+    if (sw.awake && roomNews()) roomBot(roomWho() + '의 ' + sw.was + ' → +' + made.lv + ' 각성! 「' + sw.name + '」');
     render(); save();
   }
   function sellFromVault(){
@@ -3670,6 +3773,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function memberOk(x){ return arenaOk(x) && typeof x.best === 'number' && x.best >= 0 && x.best <= SYNTH_MAX; }
   function roomActive(){ return !!(online.user && room.id && room.joined); }
+  /* 운영자는 방 사람이 아니어도 어느 방이든 보고 "운영자" 메시지를 씁니다 */
+  function roomCanSay(){ return !!(online.user && room.id && (room.joined || online.admin)); }
+  /* 대장간봇이 내 게임 소식을 알려도 되는지 — 운영자는 시험 도구로 바꾼 진행이라 알리지 않음 */
+  function roomNews(){ return roomActive() && !online.admin; }
   function roomWho(){ return currentName() + '님'; }
   function roomStop(){
     if (room.unsubM) room.unsubM();
@@ -3719,12 +3826,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return p;
   }
   function queueRoomMe(now){
-    if (!roomActive()) return;
+    if (!roomActive() || online.admin) return;
     clearTimeout(room.meTimer);
     room.meTimer = setTimeout(sendRoomMe, now ? 300 : 3000);
   }
   function sendRoomMe(){
-    if (!roomActive()) return;
+    if (!roomActive() || online.admin) return;
     var p = roomMe(), key = room.id + JSON.stringify(p), F = online.fb, id = room.id;
     if (key === room.meSent) return;
     F.setDoc(F.doc(online.db, 'rooms', id, 'members', online.user.uid), Object.assign({}, p, { at:F.serverTimestamp() }))
@@ -3741,9 +3848,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     name = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 20) || (currentName() + '의 대장간').slice(0, 20);
     var F = online.fb, db = online.db, uid = online.user.uid, ref = F.doc(F.collection(db, 'rooms')), b = F.writeBatch(db);
     b.set(ref, { name:name, owner:uid, at:F.serverTimestamp() });
-    b.set(F.doc(db, 'rooms', ref.id, 'members', uid), Object.assign(roomMe(), { at:F.serverTimestamp() }));
-    b.set(F.doc(F.collection(db, 'rooms', ref.id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:'bot', at:F.serverTimestamp(),
-      text:roomWho() + '이 "' + name + '" 방을 만들었어요. 카톡으로 친구들을 초대해 보세요!' });
+    if (!online.admin) b.set(F.doc(db, 'rooms', ref.id, 'members', uid), Object.assign(roomMe(), { at:F.serverTimestamp() }));
+    b.set(F.doc(F.collection(db, 'rooms', ref.id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:online.admin ? 'admin' : 'bot', at:F.serverTimestamp(),
+      text:(online.admin ? '운영자가' : roomWho() + '이') + ' "' + name + '" 방을 만들었어요. 카톡으로 친구들을 초대해 보세요!' });
     $('roomMakeBtn').disabled = true;
     b.commit().then(function(){
       $('roomMakeBtn').disabled = false;
@@ -3759,6 +3866,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function roomJoin(id, name, invited){
     if (!online.user || !id) return;
+    if (online.admin){                                         // 운영자는 방 사람 자리를 만들지 않고 봅니다
+      room.joining = false; room.inviteId = '';
+      roomRemember(id, name); roomListen(id, name); save(); render();
+      if (invited) roomShow();
+      return;
+    }
     var F = online.fb, db = online.db, uid = online.user.uid, b = F.writeBatch(db), me = roomMe();
     b.set(F.doc(db, 'rooms', id, 'members', uid), Object.assign({}, me, { at:F.serverTimestamp() }));
     b.set(F.doc(F.collection(db, 'rooms', id, 'msgs')), { uid:uid, name:currentName().slice(0, 12), kind:'bot', at:F.serverTimestamp(),
@@ -3773,12 +3886,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       roomListen(id, name);
       save(); render();
       if (invited) roomShow();
-    }, function(){
+    }, function(e){
       if (!isUser(uid)) return;
       room.joining = false;
       room.inviteId = id; room.inviteName = name;                       // 초대 화면을 남겨 두어 다시 누를 수 있게
       renderRoom();
-      roomNote('방에 들어가지 못했어요. 잠시 뒤 "들어가기"를 다시 눌러 주세요.');
+      checkBan(e).then(function(){
+        roomNote(online.banned ? '운영자가 막은 계정이라 단톡방에 들어갈 수 없어요.' : '방에 들어가지 못했어요. 잠시 뒤 "들어가기"를 다시 눌러 주세요.');
+      });
       if (invited) roomShow();
     });
   }
@@ -3802,11 +3917,35 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (room.joined) roomSay(roomWho() + '이 방을 나갔어요.', 'bot').then(gone, gone); else gone();
   }
   function roomSay(text, kind){
-    if (!roomActive()) return Promise.resolve();
+    if (!roomCanSay()) return Promise.resolve();
     var F = online.fb;
     return F.addDoc(F.collection(online.db, 'rooms', room.id, 'msgs'), {
-      uid:online.user.uid, name:currentName().slice(0, 12), text:String(text).slice(0, 300), kind:kind || 'chat', at:F.serverTimestamp()
-    }).catch(function(){ roomLocal('메시지를 보내지 못했어요.'); });
+      uid:online.user.uid, name:currentName().slice(0, 12), text:String(text).slice(0, 300),
+      kind:online.admin ? 'admin' : (kind || 'chat'), at:F.serverTimestamp()
+    }).catch(function(e){
+      checkBan(e).then(function(){ roomLocal(online.banned ? '운영자가 막은 계정이라 글을 쓸 수 없어요.' : '메시지를 보내지 못했어요.'); });
+    });
+  }
+  /* 쓰기가 규칙에 막혔을 때, 그사이 운영자가 막았는지 다시 확인합니다 */
+  function checkBan(e){
+    if (!online.user || online.banned || !(e && e.code === 'permission-denied')) return Promise.resolve();
+    var F = online.fb, uid = online.user.uid;
+    return F.getDoc(F.doc(online.db, 'bans', uid)).then(function(snap){
+      if (isUser(uid) && snap.exists()){ online.banned = true; renderOnline(); render(); }
+    }, function(){});
+  }
+  /* 운영자: 메시지 지우기 · 방 사람 내보내기 */
+  function roomDelMsg(id){
+    if (!online.admin || !room.id) return;
+    var F = online.fb;
+    F.deleteDoc(F.doc(online.db, 'rooms', room.id, 'msgs', id)).catch(function(){ roomLocal('메시지를 지우지 못했어요.'); });
+  }
+  function roomKick(m){
+    if (!online.admin || !room.id) return;
+    var F = online.fb;
+    F.deleteDoc(F.doc(online.db, 'rooms', room.id, 'members', m.uid)).then(function(){
+      roomSay('운영자가 ' + m.name + '님을 방에서 내보냈어요.');
+    }, function(){ roomLocal('내보내지 못했어요.'); });
   }
   function roomBot(text){ return roomSay(text, 'bot'); }
   /* 나에게만 보이는 안내 줄 (서버에 남지 않음) */
@@ -3827,7 +3966,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function roomForge(kind, from, sw){
     var cmd = room.cmd === 'forge';
     room.cmd = '';
-    if (!roomActive()) return;
+    if (!roomNews()) return;
     if (kind === 'success' && (cmd || from + 1 >= ROOM_POST.success))
       roomBot(roomWho() + ' +' + from + ' → +' + (from + 1) + ' 강화 성공! (' + sw.name + ')' + (from + 1 >= MAX ? ' 드디어 +' + MAX + '!' : ''));
     else if (kind === 'boom' && (cmd || from >= ROOM_POST.boom))
@@ -3836,27 +3975,27 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       roomBot(roomWho() + ' +' + from + ' 강화 실패 (단계는 그대로)');
   }
   function roomPull(sw){
-    if (roomActive() && sw.rar >= ROOM_POST.pull) roomBot(roomWho() + '이 [' + sw.R.name + '] ' + josa(sw.name, '을', '를') + ' 뽑았어요!');
+    if (roomNews() && sw.rar >= ROOM_POST.pull) roomBot(roomWho() + '이 [' + sw.R.name + '] ' + josa(sw.name, '을', '를') + ' 뽑았어요!');
   }
   function roomSell(lv, name, price){
     var cmd = room.cmd === 'sell';
     room.cmd = '';
-    if (roomActive() && (cmd || lv >= ROOM_POST.sell)) roomBot(roomWho() + '이 +' + lv + ' ' + josa(name, '을', '를') + ' ' + gold(price) + '에 팔았어요');
+    if (roomNews() && (cmd || lv >= ROOM_POST.sell)) roomBot(roomWho() + '이 +' + lv + ' ' + josa(name, '을', '를') + ' ' + gold(price) + '에 팔았어요');
   }
   function roomDuel(foe, win, got){
     var cmd = room.cmd === 'duel';
     room.cmd = '';
     var inRoom = room.members.some(function(m){ return m.uid === foe.uid; });
-    if (roomActive() && (cmd || inRoom))
+    if (roomNews() && (cmd || inRoom))
       roomBot(roomWho() + '이 ' + foe.name + '님에게 결투로 ' + (win ? '이겼어요! (+' + gold(got) + ')' : '졌어요… (잃은 건 기력뿐)'));
   }
   function roomHunt(name, M){
-    if (roomActive() && M.pw >= ROOM_POST.hunt) roomBot(roomWho() + '이 사냥터에서 ' + josa(name, '을', '를') + ' 처치했어요! (+' + gold(M.gold) + ')');
+    if (roomNews() && M.pw >= ROOM_POST.hunt) roomBot(roomWho() + '이 사냥터에서 ' + josa(name, '을', '를') + ' 처치했어요! (+' + gold(M.gold) + ')');
   }
   function roomAttend(n, text){
     var cmd = room.cmd === 'attend';
     room.cmd = '';
-    if (roomActive() && cmd) roomBot(roomWho() + ' 출석 ' + n + '일째 · ' + text);
+    if (roomNews() && cmd) roomBot(roomWho() + ' 출석 ' + n + '일째 · ' + text);
   }
   /* ── 명령어 ── */
   var ROOM_HELP = '명령어: /강화 · /판매(두 번) · /정보 · /랭킹 · /결투 이름 · /출석 · /도움 — 결과는 대장간봇이 방에 알려 줘요';
@@ -3925,7 +4064,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function roomSubmit(text){
     text = String(text || '').trim();
-    if (!text || !roomActive()) return;
+    if (!text || !roomCanSay()) return;
     if (Date.now() - room.lastSend < 600) return;             // 너무 빠른 연속 입력은 무시
     room.lastSend = Date.now();
     if (text.charAt(0) === '/') roomCommand(text); else roomSay(text, 'chat');
@@ -3989,13 +4128,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     items.forEach(function(m){
       var row = document.createElement('div');
       if (m.local){ row.className = 'rm local'; row.textContent = m.text; box.appendChild(row); return; }
-      var bot = m.kind === 'bot', mine = !bot && m.uid === me;
-      row.className = 'rm ' + (bot ? 'bot' : mine ? 'me' : 'them');
-      if (!mine){ var who = document.createElement('span'); who.className = 'who'; who.textContent = bot ? '대장간봇' : m.name; row.appendChild(who); }
+      var bot = m.kind === 'bot', adm = m.kind === 'admin', mine = !bot && !adm && m.uid === me;
+      row.className = 'rm ' + (adm ? 'admin' : bot ? 'bot' : mine ? 'me' : 'them');
+      if (!mine){ var who = document.createElement('span'); who.className = 'who'; who.textContent = adm ? '운영자' : bot ? '대장간봇' : m.name; row.appendChild(who); }
       var line = document.createElement('div'); line.className = 'line';
       var bub = document.createElement('span'); bub.className = 'bub'; bub.textContent = m.text;
       var tm = document.createElement('span'); tm.className = 'tm'; tm.textContent = roomTime(m.t);
       if (mine){ line.appendChild(tm); line.appendChild(bub); } else { line.appendChild(bub); line.appendChild(tm); }
+      if (online.admin){                                        // 운영자: 메시지 지우기
+        var del = document.createElement('button');
+        del.type = 'button'; del.className = 'rm-del'; del.textContent = '지우기';
+        del.addEventListener('click', function(){ roomDelMsg(m.id); });
+        line.appendChild(del);
+      }
       row.appendChild(line);
       box.appendChild(row);
     });
@@ -4028,10 +4173,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     var inviting = room.inviteId && room.inviteId !== room.id;
     var joining = room.joining || !!roomInvite;              // 초대받은 방에 들어가는 중 (로그인 직후 포함)
-    var showChat = !joining && !inviting && !room.making && room.id && room.joined;
+    var seen = room.joined || online.admin;                   // 운영자는 방 사람이 아니어도 봄
+    var showChat = !joining && !inviting && !room.making && room.id && seen;
     gate.hidden = !!showChat; chat.hidden = !showChat;
-    bar.hidden = !(room.id && room.joined);
-    count.textContent = room.id && room.joined ? room.members.length + '명' : '';
+    bar.hidden = !(room.id && seen);
+    count.textContent = room.id && seen ? room.members.length + '명' + (online.admin && !room.joined ? ' · 운영자로 보는 중' : '') : '';
     if (joining){
       lead.textContent = '초대받은 단톡방에 들어가는 중…';
     } else if (inviting){
@@ -4058,7 +4204,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     /* 방 랭킹 */
     var ol = $('roomRank'), ranked = roomRanked(), me = online.user.uid;
     $('roomRankCount').textContent = ranked.length ? '(' + ranked.length + '명)' : '';
-    var rsig = JSON.stringify(ranked.map(function(m){ return [m.uid, m.name, m.best, m.lv, m.pw, m.seed]; })) + (dueling ? 1 : 0) + energyNow();
+    var rsig = JSON.stringify(ranked.map(function(m){ return [m.uid, m.name, m.best, m.lv, m.pw, m.seed]; })) + (dueling ? 1 : 0) + energyNow() + (online.admin ? 'a' : '');
     if (ol.dataset.sig !== rsig){
       ol.dataset.sig = rsig;
       ol.textContent = '';
@@ -4075,6 +4221,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           b.disabled = dueling || rolling || energyNow() < 1;
           b.addEventListener('click', function(){ roomSubmit('/결투 ' + m.name); });
           li.appendChild(b);
+          if (online.admin){                                    // 운영자: 내보내기
+            var k = document.createElement('button');
+            k.type = 'button'; k.className = 'btn-ghost small'; k.textContent = '내보내기';
+            k.addEventListener('click', function(){ roomKick(m); });
+            li.appendChild(k);
+          }
         }
         ol.appendChild(li);
       });
@@ -4117,12 +4269,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return { name:currentName(), lv:c.lv, rar:c.w.rar | 0, el:c.w.el | 0, kind:swordKind(c.w), seed:c.w.seed >>> 0, pw:c.p };
   }
   function queueArena(now){
-    if (!online.user || online.conflict) return;
+    if (!online.user || online.conflict || boardsOff()) return;
     clearTimeout(online.arenaTimer);
     online.arenaTimer = setTimeout(sendArena, now ? 300 : 3000);
   }
   function sendArena(force){
-    if (!online.user || online.conflict) return;
+    if (!online.user || online.conflict || boardsOff()) return;
     var p = arenaPayload(), key = JSON.stringify(p);
     if (key === online.arenaSent && !force) return;
     var F = online.fb, uid = online.user.uid;
@@ -4299,6 +4451,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function duelFight(foeArg){
     if (dueling || hunting || rolling || !online.user || online.arenaDenied) return false;
+    if (online.banned){ verdict('keep', '운영자가 막은 계정이라 결투할 수 없어요.'); return false; }
     var foe = foeArg || duelFoes().filter(function(x){ return x.uid === duelPick; })[0];
     if (!foe) return false;
     if (foeArg){                                              // 단톡방에서 고른 상대를 무대에도 세움
@@ -4753,7 +4906,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     attend:null, attendLoaded:false, attendError:false, claiming:false,
     saveTimer:null, saveBusy:false, saveFail:false, lastCode:'', conflict:'', dirtyAt:0,
     myRank:null, pendingName:'', rankTimer:null, ranking:null, rankAt:0, rankError:false, note:'',
-    arena:null, arenaAt:0, arenaBusy:false, arenaTimer:null, arenaSent:'', arenaDenied:false, arenaReadDenied:false, duelNews:''
+    arena:null, arenaAt:0, arenaBusy:false, arenaTimer:null, arenaSent:'', arenaDenied:false, arenaReadDenied:false, duelNews:'',
+    admin:false, banned:false, notice:null, gifts:[], giftBusy:'', adm:{ gifts:null, bans:null, rooms:null }
   };
 
   function onlineInit(){
@@ -4780,6 +4934,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         }
         online.on = true;
         F.onAuthStateChanged(online.auth, onAuth);
+        noticeListen();
         loadRanking();
         loadArena();
         setInterval(function(){ if (!document.hidden){ loadRanking(); loadArena(); } }, 180000);
@@ -4795,12 +4950,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     online.attend = null; online.attendLoaded = false; online.attendError = false;
     online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
     online.arenaSent = ''; online.arenaDenied = false; online.duelNews = '';
+    online.admin = false; online.banned = false; online.gifts = []; online.giftBusy = ''; online.adm = { gifts:null, bans:null, rooms:null };
     roomStop(); room.id = ''; room.name = ''; room.inviteId = ''; room.making = false; room.joining = false;
     online.dirtyAt = 0;
     renderOnline(); render();
     if (!user) return;
     var F = online.fb, uid = user.uid;
     Promise.all([
+      F.getDoc(F.doc(online.db, 'admins', uid)).then(function(s){ if (isUser(uid)) online.admin = s.exists(); }, function(){}),
+      F.getDoc(F.doc(online.db, 'bans', uid)).then(function(s){ if (isUser(uid)) online.banned = s.exists(); }, function(){}),
       refreshAttend(),
       F.getDoc(F.doc(online.db, 'ranking', uid)).then(function(s){
         if (isUser(uid)) online.myRank = s.exists() ? s.data() : null;
@@ -4808,11 +4966,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       loadCloudSave()
     ]).then(function(){
       if (!isUser(uid)) return;
+      if (online.admin) adminStart();
       queueRank(true);
       sendArena(true);
       claimDuels();
       loadArena();
       roomOnLogin();
+      loadGifts();
       renderOnline(); render();
     });
   }
@@ -5053,13 +5213,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return { name:currentName(), best:best, peak:peak, score:best * 1e12 + peak,
              sword:makeSword(b.seed >>> 0, best, b.el, b.rar, b.kind).name.slice(0, 40), rar:b.rar | 0, el:b.el | 0 };
   }
+  function boardsOff(){ return online.admin || online.banned; }        // 운영자 · 막힌 계정은 랭킹 · 결투장에 올리지 않음
   function queueRank(now){
-    if (!online.user || online.conflict) return;
+    if (!online.user || online.conflict || boardsOff()) return;
     clearTimeout(online.rankTimer);
     online.rankTimer = setTimeout(sendRank, now ? 300 : 3000);
   }
   function sendRank(){
-    if (!online.user || online.conflict) return;
+    if (!online.user || online.conflict || boardsOff()) return;
     var mine = online.myRank, p = rankPayload();
     if (mine && p.score <= mine.score){
       if (p.name === mine.name) return;
@@ -5132,7 +5293,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('gisBox').hidden = !!u || (gis.state !== 'ready' && gis.state !== 'probing');
     $('gisBox').classList.toggle('probing', gis.state === 'probing');
     $('logoutBtn').hidden = !u;
-    $('onlineWho').textContent = u ? currentName() + '님 · 구글 계정에 자동 저장 중'
+    $('onlineWho').textContent = u ? (online.admin ? '운영자 · ' : '') + currentName() + '님 · 구글 계정에 자동 저장 중'
                                : !online.authReady ? '로그인 상태를 확인하는 중…'
                                : roomInvite ? '단톡방 초대를 받았어요! 구글로 로그인하면 바로 들어가요.'
                                : '로그인하면 기기를 바꿔도 이어지고, 출석 보상과 랭킹에 참여해요.';
@@ -5165,10 +5326,326 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       line(online.note);
       note.hidden = false;
     }
-    $('rankMe').hidden = !u;
+    $('rankMe').hidden = !u || online.admin || online.banned;
+    $('rankBan').hidden = !(u && online.banned);
+    renderGifts();
+    renderAdmin();
     if (u && document.activeElement !== $('rankName')) $('rankName').value = currentName();
     renderRank();
     gisStart();
+  }
+
+  /* ═════════ 공지 · 선물 (운영자가 보냄) ═════════
+     공지: notice/main 하나를 누구나(로그인 안 해도) 실시간으로 받습니다. 닫으면 같은 공지는 이 기기에서 다시 안 뜸.
+     선물: gifts 에서 나에게 · 모두에게 온 것 중 아직 안 받은 것을 보여 주고, "받기"를 누르면 gifts/{id}/got/{내 uid} 를
+     만듭니다. 이 기록은 한 번만 만들 수 있어서(규칙) 다른 기기나 초기화로 두 번 받을 수 없습니다. */
+  var NOTICE_SEEN = SAVE_KEY + ':notice';
+  function noticeListen(){
+    var F = online.fb;
+    F.onSnapshot(F.doc(online.db, 'notice', 'main'), function(snap){
+      var d = snap.exists() ? snap.data() : null;
+      online.notice = d && typeof d.text === 'string' && d.text
+        ? { text:d.text.slice(0, 200), key:d.text.length + ':' + (d.at && d.at.toMillis ? d.at.toMillis() : 0) } : null;
+      renderNotice();
+      renderAdmin();
+    }, function(){ online.notice = null; renderNotice(); });
+  }
+  function renderNotice(){
+    var n = online.notice, seen = '';
+    try { seen = localStorage.getItem(NOTICE_SEEN) || ''; } catch (e) {}
+    $('notice').hidden = !n || seen === n.key;
+    $('noticeText').textContent = n ? n.text : '';
+  }
+  function giftOk(x){
+    return x && typeof x.to === 'string' && typeof x.gold === 'number' && x.gold >= 0 && typeof x.msg === 'string' &&
+           (x.item === '' || x.item === 'bless' || x.item === 'master') && typeof x.n === 'number' && x.n >= 0;
+  }
+  function giftText(g){
+    var p = [];
+    if (g.gold > 0) p.push(gold(g.gold));
+    if (g.item && g.n > 0) p.push(ITEMS[g.item].full + (g.n > 1 ? ' ' + g.n + '개' : ''));
+    return p.join(' + ') || '선물';
+  }
+  function giftAt(g){ return g.at && g.at.toMillis ? g.at.toMillis() : 0; }
+  function loadGifts(){
+    if (!online.user || online.banned) return;
+    var F = online.fb, db = online.db, uid = online.user.uid;
+    var q = function(to){ return F.getDocs(F.query(F.collection(db, 'gifts'), F.where('to', '==', to), F.limit(20))); };
+    Promise.all([q(uid), q('all')]).then(function(r){
+      var list = [];
+      r.forEach(function(qs){ qs.docs.forEach(function(d){ var x = d.data(); if (giftOk(x)){ x.id = d.id; list.push(x); } }); });
+      return Promise.all(list.map(function(g){
+        return F.getDoc(F.doc(db, 'gifts', g.id, 'got', uid)).then(function(got){ return got.exists() ? null : g; }, function(){ return null; });
+      }));
+    }).then(function(list){
+      if (!isUser(uid)) return;
+      online.gifts = list.filter(Boolean).sort(function(a, b){ return giftAt(a) - giftAt(b); });
+      renderGifts();
+    }, function(){ /* 규칙을 아직 새로 게시하지 않았으면 조용히 넘어갑니다 */ });
+  }
+  function renderGifts(){
+    var box = $('giftBox');
+    box.textContent = '';
+    box.hidden = !online.user || !online.gifts.length;
+    online.gifts.forEach(function(g){
+      var row = document.createElement('div'); row.className = 'gift-row';
+      var t = document.createElement('span'); t.className = 'gift-text';
+      t.textContent = '운영자 선물 · ' + giftText(g) + (g.msg ? ' · "' + g.msg + '"' : '');
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-ghost small';
+      b.textContent = online.giftBusy === g.id ? '받는 중…' : '받기';
+      b.disabled = !!online.giftBusy;
+      b.addEventListener('click', function(){ claimGift(g.id); });
+      row.appendChild(t); row.appendChild(b);
+      box.appendChild(row);
+    });
+  }
+  function claimGift(id){
+    var g = online.gifts.filter(function(x){ return x.id === id; })[0];
+    if (!g || !online.user || online.giftBusy) return;
+    var F = online.fb, uid = online.user.uid;
+    online.giftBusy = id;
+    renderGifts();
+    F.setDoc(F.doc(online.db, 'gifts', id, 'got', uid), { at:F.serverTimestamp() }).then(function(){
+      if (isUser(uid)) grantGift(g);
+    }, function(e){
+      if (!isUser(uid)) return;
+      var gone = e && e.code === 'permission-denied';                   // 이미 받았거나(다른 기기) 운영자가 거둠
+      if (gone) online.gifts = online.gifts.filter(function(x){ return x.id !== id; });
+      verdict('keep', gone ? '이미 받았거나 운영자가 거둔 선물이에요.' : '선물을 받지 못했어요. 잠시 뒤 다시 눌러 주세요.');
+    }).then(function(){ online.giftBusy = ''; renderGifts(); });
+  }
+  function grantGift(g){
+    online.gifts = online.gifts.filter(function(x){ return x.id !== g.id; });
+    if (g.gold > 0){
+      state.gold += g.gold;
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+    }
+    if (g.item && g.n > 0) state.items[g.item] = Math.min(999, (state.items[g.item] | 0) + g.n);
+    autoItems();
+    var text = giftText(g);
+    flash('ok', 'rgba(255,214,120,.8)');
+    burst(24, 'ok', '#FFD27A');
+    fanfare(2);
+    reveal('운영자 선물!', text, g.msg || '', '#FFD27A', false);
+    verdict('ok', '운영자 선물을 받았어요: ' + text + (g.msg ? ' — "' + g.msg + '"' : '') + (g.item && g.n > 0 ? ' (아이템은 다음 강화에 자동으로 적용돼요)' : ''));
+    pushLog('gift', '선물', '운영자 · ' + text + (g.msg ? ' · ' + g.msg : ''), null);
+    render(); save();
+  }
+
+  /* ═════════ 운영자 도구 ═════════
+     Firebase 콘솔에서 admins/{uid} 문서를 만든 계정이 로그인하면 열립니다(README "운영자 계정").
+     시험 도구는 운영자 자기 게임만 바꾸고, 그래서 운영자는 랭킹 · 결투장에서 빠지며 단톡방 봇도 운영자 강화 소식은 알리지 않습니다.
+     공지 · 선물 · 막기 · 지우기는 규칙(isAdmin)이 운영자에게만 허락합니다. */
+  var admArm = { key:'', at:0 };
+  function adminStart(){
+    var F = online.fb, uid = online.user.uid;
+    F.deleteDoc(F.doc(online.db, 'ranking', uid)).catch(function(){});
+    F.deleteDoc(F.doc(online.db, 'arena', uid)).catch(function(){});
+    if (online.ranking) online.ranking = online.ranking.filter(function(r){ return r.uid !== uid; });
+    if (online.arena) online.arena = online.arena.filter(function(r){ return r.uid !== uid; });
+    renderRank();
+    adminRefresh();
+  }
+  function admNote(text){ var n = $('admNote'); n.textContent = text || ''; n.hidden = !text; }
+  function adminRefresh(){
+    if (!online.admin) return;
+    var F = online.fb, db = online.db;
+    F.getDocs(F.query(F.collection(db, 'gifts'), F.orderBy('at', 'desc'), F.limit(10))).then(function(qs){
+      online.adm.gifts = qs.docs.map(function(d){ var x = d.data({ serverTimestamps:'estimate' }); x.id = d.id; x.got = null; return x; }).filter(giftOk);
+      renderAdmin();
+      online.adm.gifts.forEach(function(g){
+        countGot(g.id).then(function(n){ g.got = n; renderAdmin(); });
+      });
+    }, function(){ online.adm.gifts = []; renderAdmin(); });
+    F.getDocs(F.query(F.collection(db, 'bans'), F.limit(100))).then(function(qs){
+      online.adm.bans = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; });
+      renderAdmin();
+    }, function(){ online.adm.bans = []; renderAdmin(); });
+    F.getDocs(F.query(F.collection(db, 'rooms'), F.orderBy('at', 'desc'), F.limit(20))).then(function(qs){
+      online.adm.rooms = qs.docs.map(function(d){ var x = d.data(); x.id = d.id; return x; }).filter(function(r){ return typeof r.name === 'string'; });
+      renderAdmin();
+    }, function(){ online.adm.rooms = []; renderAdmin(); });
+  }
+  function countGot(id){
+    var F = online.fb, c = F.collection(online.db, 'gifts', id, 'got');
+    if (F.getCountFromServer) return F.getCountFromServer(c).then(function(r){ return r.data().count; }, function(){ return null; });
+    return F.getDocs(c).then(function(qs){ return qs.size; }, function(){ return null; });
+  }
+  /* 선물을 받을 사람: 랭킹 · 결투장에 있는 사람 (나는 빼고) */
+  function adminPeople(){
+    var seen = {}, out = [], me = online.user && online.user.uid;
+    (online.ranking || []).forEach(function(r){
+      if (r.uid !== me && !seen[r.uid]){ seen[r.uid] = 1; out.push({ uid:r.uid, name:String(r.name || '이름 없음'), lv:r.best | 0 }); }
+    });
+    (online.arena || []).forEach(function(r){
+      if (r.uid !== me && !seen[r.uid]){ seen[r.uid] = 1; out.push({ uid:r.uid, name:String(r.name || '이름 없음'), lv:r.lv | 0 }); }
+    });
+    return out;
+  }
+  function admItem(list, text, acts){
+    var li = document.createElement('li'), t = document.createElement('span');
+    t.className = 'al'; t.textContent = text;
+    li.appendChild(t);
+    (acts || []).forEach(function(a){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-ghost small' + (admArm.key === a.key && Date.now() - admArm.at < 4000 ? ' armed' : '');
+      b.textContent = admArm.key === a.key && Date.now() - admArm.at < 4000 ? '정말?' : a.label;
+      b.dataset.adm = a.act;
+      Object.keys(a.data || {}).forEach(function(k){ b.dataset[k] = a.data[k]; });
+      b.dataset.key = a.key;
+      li.appendChild(b);
+    });
+    list.appendChild(li);
+  }
+  function admEmpty(list, text){ var li = document.createElement('li'); li.className = 'empty'; li.textContent = text; list.appendChild(li); }
+  function renderAdmin(){
+    var box = $('admin');
+    box.hidden = !online.admin;
+    if (!online.admin) return;
+    $('admNoticeNow').textContent = online.notice ? '지금 공지: ' + online.notice.text : '지금은 공지가 없어요.';
+    var sel = $('admGiftTo'), people = adminPeople(), sig = JSON.stringify(people);
+    if (sel.dataset.sig !== sig){
+      var keep = sel.value;
+      sel.dataset.sig = sig;
+      sel.textContent = '';
+      [{ uid:'all', name:'모두', lv:-1 }].concat(people).forEach(function(p){
+        var o = document.createElement('option');
+        o.value = p.uid; o.textContent = p.lv < 0 ? '모두 (모든 사람)' : p.name + ' (+' + p.lv + ')';
+        sel.appendChild(o);
+      });
+      if (keep && people.concat([{ uid:'all' }]).some(function(p){ return p.uid === keep; })) sel.value = keep;
+    }
+    var armedSend = admArm.key === 'giftSend' && Date.now() - admArm.at < 4000;
+    $('admGiftBtn').textContent = armedSend ? '정말 보낼까요? (한 번 더)' : '선물 보내기';
+    $('admGiftBtn').classList.toggle('armed', armedSend);
+    var gl = $('admGifts'); gl.textContent = '';
+    if (online.adm.gifts === null) admEmpty(gl, '불러오는 중…');
+    else if (!online.adm.gifts.length) admEmpty(gl, '보낸 선물이 없어요.');
+    else online.adm.gifts.forEach(function(g){
+      admItem(gl, (g.to === 'all' ? '모두' : (g.toName || '한 사람')) + ' · ' + giftText(g) + (g.msg ? ' · "' + g.msg + '"' : '') +
+                  ' · 받은 사람 ' + (g.got === null ? '…' : g.got + '명'),
+              [{ label:'거두기', act:'giftDel', data:{ id:g.id }, key:'giftDel' + g.id }]);
+    });
+    var rl = $('admRank'); rl.textContent = '';
+    var banned = {};
+    (online.adm.bans || []).forEach(function(b){ banned[b.uid] = 1; });
+    if (!online.ranking) admEmpty(rl, '불러오는 중…');
+    else if (!online.ranking.length) admEmpty(rl, '랭킹에 아무도 없어요.');
+    else online.ranking.forEach(function(r, i){
+      admItem(rl, (i + 1) + '. ' + String(r.name || '이름 없음') + ' · 최고 +' + (r.best | 0) + ' · ' + gold(Number(r.peak) || 0), [
+        { label:'지우기', act:'rankDel', data:{ uid:r.uid }, key:'rankDel' + r.uid },
+        { label:banned[r.uid] ? '막힘' : '막기', act:'ban', data:{ uid:r.uid, name:String(r.name || '').slice(0, 12) }, key:'ban' + r.uid }
+      ]);
+    });
+    var bl = $('admBans'); bl.textContent = '';
+    if (online.adm.bans === null) admEmpty(bl, '불러오는 중…');
+    else if (!online.adm.bans.length) admEmpty(bl, '막은 사람이 없어요.');
+    else online.adm.bans.forEach(function(b){
+      admItem(bl, String(b.name || '이름 없음') + ' · ' + b.uid.slice(0, 8) + '…', [{ label:'풀기', act:'unban', data:{ uid:b.uid }, key:'unban' + b.uid }]);
+    });
+    var ml = $('admRooms'); ml.textContent = '';
+    if (online.adm.rooms === null) admEmpty(ml, '불러오는 중…');
+    else if (!online.adm.rooms.length) admEmpty(ml, '단톡방이 없어요.');
+    else online.adm.rooms.forEach(function(r){
+      admItem(ml, r.name + (r.id === room.id ? ' (보는 중)' : ''), [{ label:'보기', act:'roomOpen', data:{ id:r.id, name:r.name }, key:'roomOpen' + r.id }]);
+    });
+  }
+  /* 되돌리기 어려운 일(선물 보내기 · 막기 · 거두기)은 4초 안에 한 번 더 눌러야 합니다 */
+  function admArmed(key){
+    if (admArm.key === key && Date.now() - admArm.at < 4000){ admArm = { key:'', at:0 }; return true; }
+    admArm = { key:key, at:Date.now() };
+    setTimeout(function(){ if (admArm.key === key && Date.now() - admArm.at >= 4000){ admArm = { key:'', at:0 }; renderAdmin(); } }, 4100);
+    renderAdmin();
+    return false;
+  }
+  function admFail(e){ admNote('하지 못했어요' + (e && e.code === 'permission-denied' ? ' — Firebase 규칙을 새로 게시했는지, 이 계정이 admins 에 있는지 확인해 주세요.' : '. 잠시 뒤 다시 해 주세요.')); }
+  function adminAct(a, d){
+    if (!online.admin || !online.user) return;
+    var F = online.fb, db = online.db;
+    if (/^(gold1|gold10|gold0|setlv|vaultNow|vaultRand|energy)$/.test(a) && rolling) return admNote('망치질이 끝난 뒤에 해 주세요.');
+    if (a === 'gold1' || a === 'gold10' || a === 'gold0'){
+      state.gold = a === 'gold0' ? 0 : state.gold + (a === 'gold1' ? 1e8 : 1e9);
+      if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      admNote(a === 'gold0' ? '골드를 0 으로 만들었어요.' : '골드를 더했어요.');
+    } else if (a === 'setlv'){
+      var lv = Math.max(0, Math.min(MAX, Math.round(Number($('admLv').value) || 0)));
+      state.level = lv;
+      returnAuto();
+      autoItems();
+      noteBest(state.sword, lv);
+      if (lv > state.stats.best){ state.stats.best = lv; state.stats.bestSw = { seed:state.sword.seed, el:state.sword.el, rar:state.sword.rar, kind:swordKind(state.sword) }; }
+      $('rollText').textContent = '—';
+      highlight(null);
+      admNote('지금 무기를 +' + lv + ' 으로 바꿨어요.');
+    } else if (a === 'vaultNow' || a === 'vaultRand'){
+      if (state.vault.length >= VAULT_MAX) return admNote('무기고가 가득 찼어요 (' + VAULT_MAX + '칸).');
+      var w = a === 'vaultNow' ? state.sword : rollSword();
+      var v = { seed:w.seed >>> 0, el:w.el, rar:w.rar, kind:swordKind(w), lv:MAX };
+      state.vault.push(v);
+      noteBest(v, MAX);
+      admNote('무기고에 +' + MAX + ' ' + vaultSword(v).name + ' 을(를) 넣었어요.');
+    } else if (a === 'energy'){
+      state.energy.full = 0;
+      energyTick();
+      admNote('기력을 가득 채웠어요.');
+    } else if (a === 'attend'){
+      var ref = F.doc(db, 'attend', online.user.uid);
+      F.getDoc(ref).then(function(snap){
+        if (!snap.exists()) return admNote('출석 기록이 아직 없어요. 그냥 받으면 돼요.');
+        var x = snap.data(), last = x.last && x.last.toMillis ? x.last.toMillis() : Date.now();
+        return F.setDoc(ref, { last:F.Timestamp.fromMillis(Math.min(last, Date.now()) - 86400000), day:x.day | 0, total:x.total | 0 }).then(function(){
+          refreshAttend();
+          admNote('출석을 하루 되돌렸어요. 오늘 보상을 한 번 더 받을 수 있어요.');
+        });
+      }).catch(admFail);
+      return;
+    } else if (a === 'noticeSet'){
+      var text = $('admNotice').value.replace(/\s+$/, '').slice(0, 200);
+      if (!text.trim()) return admNote('공지 내용을 써 주세요.');
+      F.setDoc(F.doc(db, 'notice', 'main'), { text:text, at:F.serverTimestamp() })
+        .then(function(){ $('admNotice').value = ''; admNote('공지를 올렸어요. 모든 사람 화면 맨 위에 떠요.'); }, admFail);
+      return;
+    } else if (a === 'noticeOff'){
+      F.deleteDoc(F.doc(db, 'notice', 'main')).then(function(){ admNote('공지를 내렸어요.'); }, admFail);
+      return;
+    } else if (a === 'giftSend'){
+      var to = $('admGiftTo').value || 'all', g = Math.max(0, Math.min(1e11, Math.round(Number($('admGiftGold').value) || 0)));
+      var item = $('admGiftItem').value, n = item ? Math.max(1, Math.min(99, Math.round(Number($('admGiftN').value) || 1))) : 0;
+      if (!g && !item) return admNote('골드나 아이템을 넣어 주세요.');
+      if (!admArmed('giftSend')) return;
+      var who = to === 'all' ? '' : (adminPeople().filter(function(p){ return p.uid === to; })[0] || { name:'' }).name.slice(0, 12);
+      F.addDoc(F.collection(db, 'gifts'), { to:to, toName:who, gold:g, item:item, n:n, msg:$('admGiftMsg').value.trim().slice(0, 60), at:F.serverTimestamp() })
+        .then(function(){ $('admGiftMsg').value = ''; admNote((to === 'all' ? '모두' : who + '님') + '에게 선물을 보냈어요. 다음에 접속하면 받아요.'); adminRefresh(); }, admFail);
+      return;
+    } else if (a === 'giftDel'){
+      if (!admArmed('giftDel' + d.id)) return;
+      F.deleteDoc(F.doc(db, 'gifts', d.id)).then(function(){ admNote('선물을 거뒀어요. 아직 안 받은 사람은 이제 못 받아요.'); adminRefresh(); }, admFail);
+      return;
+    } else if (a === 'rankDel' || a === 'ban'){
+      if (!admArmed(a + d.uid)) return;
+      var wipe = function(){
+        return Promise.all([F.deleteDoc(F.doc(db, 'ranking', d.uid)), F.deleteDoc(F.doc(db, 'arena', d.uid))]);
+      };
+      (a === 'ban' ? F.setDoc(F.doc(db, 'bans', d.uid), { name:d.name || '', at:F.serverTimestamp() }).then(wipe) : wipe()).then(function(){
+        admNote(a === 'ban' ? (d.name || '그 사람') + '님을 막았어요. 랭킹 · 결투장 · 단톡방 · 선물을 쓸 수 없어요.' : '랭킹 · 결투장에서 지웠어요.');
+        loadRanking(); loadArena(); adminRefresh();
+      }, admFail);
+      return;
+    } else if (a === 'unban'){
+      F.deleteDoc(F.doc(db, 'bans', d.uid)).then(function(){ admNote('막은 걸 풀었어요.'); adminRefresh(); }, admFail);
+      return;
+    } else if (a === 'roomOpen'){
+      roomRemember(d.id, d.name);
+      roomListen(d.id, d.name);
+      save(); render();
+      roomShow();
+      return;
+    } else if (a === 'refresh'){
+      loadRanking(); loadArena(); adminRefresh();
+      return;
+    } else return;
+    render(); save();
   }
 
   /* ═════════ 카카오톡 안에서 열었을 때 ═════════
@@ -5386,6 +5863,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   $('attendBtn').addEventListener('click', claimAttend);
   $('loginBtn').addEventListener('click', onlineLogin);
   $('logoutBtn').addEventListener('click', onlineLogout);
+  $('noticeClose').addEventListener('click', function(){
+    if (online.notice) try { localStorage.setItem(NOTICE_SEEN, online.notice.key); } catch (e) {}
+    renderNotice();
+  });
+  $('admin').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-adm]');
+    if (b) adminAct(b.dataset.adm, b.dataset);
+  });
   $('rankRefresh').addEventListener('click', loadRanking);
   $('rankNameBtn').addEventListener('click', function(){
     var v = cleanName($('rankName').value);

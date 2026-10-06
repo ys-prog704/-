@@ -690,6 +690,16 @@ img{max-width:100%}
 }
 .btn-synth:hover:not(:disabled){filter:brightness(1.07)}
 .btn-synth.armed{background:var(--boom);color:#fff}
+.leap{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;width:100%;max-width:440px;margin-top:10px;padding:9px 12px;border-radius:12px;
+  background:linear-gradient(90deg,rgba(255,95,208,.10),rgba(255,176,46,.10),rgba(95,232,255,.10));border:1px solid rgba(255,95,208,.38)}
+.leap-text{flex:1 1 190px;margin:0;font-size:13px;line-height:1.5;color:var(--parch)}
+.leap-text b{background:linear-gradient(90deg,#FF5FD0,#FFB02E,#5FE8FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.leap-odds{font-family:var(--font-mono);font-weight:600;color:#FFC04A}
+.leap-sub{font-size:12px;color:var(--ash-2)}
+.btn-leap{flex:0 0 auto;color:#140A10;background:linear-gradient(90deg,#FF7FDC,#FFC04A,#7FEFFF);padding:10px 16px}
+.btn-leap:hover:not(:disabled){filter:brightness(1.07)}
+.btn-leap.armed{background:var(--boom);color:#fff}
+.vault-acts .btn-leap{flex:1 1 140px;padding:13px 16px}
 .vault-acts .btn-sell{flex:1 1 128px}
 .btn-look{flex:1 1 110px;color:var(--parch);background:var(--iron-2);box-shadow:0 0 0 1px var(--line-2) inset}
 .vcard .aw{
@@ -1045,6 +1055,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <button class="btn btn-sell" id="sellBtn" type="button">판매<span class="cost" id="sellPrice">0 G</span></button>
       </div>
 
+      <div class="leap" id="leap" hidden>
+        <p class="leap-text"><b>+21 도전</b> <span class="leap-odds" id="leapOdds"></span><br><span class="leap-sub" id="leapSub"></span></p>
+        <button class="btn btn-leap" id="leapBtn" type="button">도전하기</button>
+      </div>
+
       <p class="bellows" id="bellows" hidden>
         골드가 부족합니다 &#8212;
         <button id="bellowsBtn" type="button">풀무질해서 300 G 벌기</button>
@@ -1248,6 +1263,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="vault-grid" id="vaultGrid"></div>
     <div class="vault-acts">
       <button class="btn btn-synth" id="synthBtn" type="button" disabled>합성하기<span class="cost" id="synthNote">두 자루를 골라 주세요</span></button>
+      <button class="btn btn-leap" id="vaultLeapBtn" type="button" disabled>+21 도전<span class="cost" id="vaultLeapNote">+20 한 자루를 골라 주세요</span></button>
       <button class="btn btn-sell" id="vaultSellBtn" type="button" disabled>팔기<span class="cost" id="vaultSellNote">한 자루를 골라 주세요</span></button>
       <button class="btn btn-look" id="vaultLookBtn" type="button" disabled>크게 보기<span class="cost">고른 무기</span></button>
     </div>
@@ -1374,7 +1390,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var RAR_POWER = [0, 1, 2, 3, 4];
   var HUNT_DROP = [{ item:'bless', p:.06 }];   // 이겼을 때 가끔 아이템
   var SYNTH_MAX = 21;                        // 합성으로 만들 수 있는 가장 높은 단계 (랭킹 규칙의 best 상한과 같게)
-  var SYNTH_RATE = .5;                       // 합성 성공 확률 — 실패하면 ② 재료만 사라지고 ① 은 그대로
+  var SYNTH_RATE = 1;                        // 합성 성공 확률 (1 = 반드시 성공). 1 보다 작으면 두 번 눌러 확인하고, 실패하면 ② 재료만 사라짐
+  /* +21 도전: +15 ~ +20 한 자루로 바로 +21 에 도전하는 확률. 실패하면 그 무기는 부서집니다.
+     +20 한 자루(40%)는 두 자루 합성(100%)보다 살짝 손해, +19 이하는 아이템을 써서 +20 까지 올리는 길보다 낮게 잡았습니다. */
+  var LEAP = { 15:.01, 16:.02, 17:.03, 18:.05, 19:.10, 20:.40 };
   var VAULT_MAX = 12;                        // 무기고 칸 수
   function levelPrice(lv){ return lv <= MAX ? LEVELS[lv].price : Math.round(LEVELS[MAX].price * Math.pow(2.5, lv - MAX)); }
 
@@ -3063,6 +3082,19 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
     $('bellows').hidden = !(!maxed && state.gold < row.cost && price <= 0);
 
+    var lp = LEAP[lv], leap = $('leap');
+    leap.hidden = !lp;
+    if (lp){
+      var vfull = state.vault.length >= VAULT_MAX, armedA = leapIsArmed('anvil'), lbtn = $('leapBtn');
+      $('leapOdds').textContent = '성공 ' + Math.round(lp * 100) + '%';
+      $('leapSub').textContent = vfull ? '무기고가 가득 차서 도전할 수 없어요 (+21 은 무기고에 들어가요)'
+                               : armedA ? '한 번 더 누르면 도전해요 · 실패하면 이 +' + lv + ' 무기가 부서져요'
+                               : '+' + lv + ' 한 자루로 바로 +21 · 실패하면 부서져요 · 아이템은 쓰이지 않아요';
+      lbtn.disabled = rolling || vfull;
+      lbtn.textContent = armedA ? '정말 도전?' : '도전하기';
+      lbtn.classList.toggle('armed', armedA);
+    }
+
     ['bless','master'].forEach(function(key){
       var cap = key.charAt(0).toUpperCase() + key.slice(1);
       var btn = $('buy' + cap), label = $('pr' + cap);
@@ -3427,7 +3459,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       tone(660, .13, 'triangle', .075);
       tone(990, .24, 'triangle', .062, .1);
       if (state.level === MAX){
-        reveal('+' + MAX + ' 달성!', sw.name, '무기고에 넣어 두었다가 두 자루를 합성하면 ' + Math.round(SYNTH_RATE * 100) + '% 확률로 +' + (MAX + 1) + ' 이 됩니다', sw.R.color, true);
+        reveal('+' + MAX + ' 달성!', sw.name, '두 자루를 합성하면 +' + (MAX + 1) + ', 한 자루로 +21 도전(' + Math.round(LEAP[MAX] * 100) + '%)도 돼요', sw.R.color, true);
         fanfare(4); quake();
       } else if (gain){
         reveal(gain.short + '!', '+' + state.level + ' · ' + featText(gain, sw), '', sw.E.glow, gain.key === 'prism');
@@ -3494,11 +3526,106 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     newSwordMoment(currentSword(), '무기고에 넣었습니다. ');
     render(); save();
   }
+  /* ═════════ +21 도전 ═════════
+     지금 무기(+15 ~ +20)로 도전해 성공하면 +21 은 무기고로 가고 새 무기를 뽑습니다(그래서 무기고 자리가 있어야 함).
+     무기고의 +20 은 그 자리에서 +21 이 됩니다. 실패하면 그 무기는 부서지고, 아이템(축복서 · 장인)은 도전에 쓰이지 않습니다.
+     강화처럼 시도 · 성공 · 파괴 횟수에 들어갑니다. 실수로 누르지 않게 4초 안에 한 번 더 눌러야 합니다. */
+  var leapArm = { key:'', at:0 }, leapTimer = null;
+  function leapKey(w, i){ return 'v' + i + ':' + w.seed + ':' + w.lv; }
+  function leapIsArmed(key){ return leapArm.key === key && Date.now() - leapArm.at < 4000; }
+  function leapArmed(key){
+    clearTimeout(leapTimer);
+    if (leapIsArmed(key)){ leapArm = { key:'', at:0 }; return true; }
+    leapArm = { key:key, at:Date.now() };
+    leapTimer = setTimeout(function(){ leapArm = { key:'', at:0 }; render(); }, 4000);
+    render();
+    return false;
+  }
+  /* 성공: +21 각성 연출과 기록 (made 는 이미 무기고에 들어간 +21) */
+  function leapWin(made, from, tail){
+    noteBest(made, made.lv);
+    noteAwake(made);
+    if (made.lv > state.stats.best){
+      state.stats.best = made.lv;
+      state.stats.bestSw = { seed:made.seed, el:made.el, rar:made.rar, kind:made.kind };
+    }
+    state.stats.wins += 1;
+    var sw = vaultSword(made);
+    flash('ok', 'rgba(255,190,240,.9)');
+    burst(46, 'ok', '#FFB02E');
+    fanfare(4); quake();
+    reveal('+' + from + ' → +' + made.lv + ' 도전 성공!', sw.name, josa(sw.was, '이', '가') + ' 깨어났습니다', '#FF5FD0', true);
+    openShow(sw, '+' + made.lv + ' 각성!', '+' + from + ' 에서 한 번에 +' + made.lv + ' — ' + josa(sw.was, '이', '가') + ' 새로운 모습으로 깨어났어요');
+    verdictSword('ok', '+21 도전 성공! +' + from + ' → +' + made.lv + ' ', sw, tail || '');
+    pushLog('synth', '+21 도전', '+' + from + ' → +' + made.lv + ' ' + sw.name, null);
+    if (roomNews()) roomBot(roomWho() + '이 +' + from + ' 에서 +' + made.lv + ' 도전에 성공했어요! 「' + sw.name + '」 각성');
+  }
+  function leapLose(lost, from, where){
+    state.stats.booms += 1;
+    flash('boom'); quake(); burst(30, 'boom');
+    noise(.5, .13, 1200);
+    tone(90, .55, 'sawtooth', .11);
+    verdictSword('boom', '+21 도전 실패… ' + where + '+' + from + ' ', lost, josa(lost.name, '이', '가').slice(lost.name.length) + ' 산산조각 났어요');
+    pushLog('boom', '도전 실패', where + '+' + from + ' ' + lost.name + ' (+21 도전)', null);
+    if (roomNews()) roomBot(roomWho() + '의 +' + from + ' ' + josa(lost.name, '이', '가') + ' +21 도전에 실패해 산산조각 났어요…');
+  }
+  function leapFromAnvil(){
+    var from = state.level, p = LEAP[from];
+    if (rolling || !p || state.vault.length >= VAULT_MAX) return;
+    if (!leapArmed('anvil')) return;
+    var w = state.sword, old = currentSword(), anvil = $('anvil');
+    state.stats.tries += 1;
+    returnAuto();                                              // 붙어 있던 보상 아이템은 돌려받음 (판매 · 무기고와 같음)
+    if (Math.random() < p){
+      var made = { seed:w.seed >>> 0, el:w.el, rar:w.rar, kind:swordKind(w), lv:SYNTH_MAX };
+      state.vault.push(made);
+      state.level = 0;
+      giveSword(rollSword());
+      $('rollText').textContent = '—';
+      highlight(null);
+      leapWin(made, from, ' (무기고에 들어갔어요)');
+      render(); save();
+      return;
+    }
+    state.level = 0;                                           // 바로 저장해서 새로고침으로 되돌릴 수 없게
+    leapLose(old, from, '');
+    anvil.classList.add('fx-boom');
+    rolling = true;
+    render(); save();
+    setTimeout(function(){
+      anvil.classList.remove('fx-boom');
+      giveSword(rollSword());
+      popIn(anvil);
+      newSwordMoment(currentSword(), '부서진 자리에 ');
+      rolling = false;
+      autoItems();
+      render(); save();
+    }, 820);
+  }
+  function leapFromVault(){
+    if (rolling || vaultSel.length !== 1) return;
+    var i = vaultSel[0], w = state.vault[i], p = w && LEAP[w.lv];
+    if (!p) return;
+    if (!leapArmed(leapKey(w, i))) return;
+    state.stats.tries += 1;
+    vaultSel = [];
+    if (Math.random() < p){
+      var made = { seed:w.seed, el:w.el, rar:w.rar, kind:w.kind, lv:SYNTH_MAX };
+      state.vault[i] = made;
+      leapWin(made, w.lv, '');
+    } else {
+      var lost = vaultSword(w);
+      state.vault.splice(i, 1);
+      reveal('+21 도전 실패…', lost.name, '무기고의 +' + w.lv + ' 무기가 부서졌어요', '#E8304A', false);
+      leapLose(lost, w.lv, '무기고 ');
+    }
+    render(); save();
+  }
   function synthesize(){
     if (rolling || vaultSel.length !== 2) return;
     var a = state.vault[vaultSel[0]], b = state.vault[vaultSel[1]];
     if (!a || !b || a.lv !== b.lv || a.lv >= SYNTH_MAX) return;
-    if (!synthArmed){                                          // 실패하면 한 자루를 잃으니 한 번 더 눌러 확인
+    if (SYNTH_RATE < 1 && !synthArmed){                       // 실패할 수 있으면 한 자루를 잃으니 한 번 더 눌러 확인
       synthArmed = true;
       clearTimeout(synthTimer);
       synthTimer = setTimeout(function(){ synthArmed = false; renderVault(); }, 4000);
@@ -3595,9 +3722,11 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     $('vaultCount').textContent = V.length + ' / ' + VAULT_MAX;
     $('vaultLead').textContent = V.length
-      ? '두 자루를 고르면 합성할 수 있어요(성공 ' + Math.round(SYNTH_RATE * 100) + '%). 성공하면 먼저 고른 무기가 +' + (MAX + 1) +
-        ' 로 각성해 새 모습이 되고 두 번째 무기는 재료로 사라져요. 실패하면 두 번째 무기(재료)만 사라지고 먼저 고른 무기는 그대로예요.'
-      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 ' + Math.round(SYNTH_RATE * 100) + '% 확률로 +' + (MAX + 1) + ' 로 각성합니다.';
+      ? (SYNTH_RATE < 1
+          ? '두 자루를 고르면 합성할 수 있어요(성공 ' + Math.round(SYNTH_RATE * 100) + '%, 실패하면 두 번째 무기만 사라짐). '
+          : '두 자루를 고르면 합성: 먼저 고른 무기가 +' + (MAX + 1) + ' 로 각성해 새 모습이 되고 두 번째 무기는 재료로 사라져요(반드시 성공). ') +
+        '+' + MAX + ' 한 자루만 골라 +21 도전(' + Math.round(LEAP[MAX] * 100) + '%, 실패하면 부서짐)도 할 수 있어요.'
+      : '+' + MAX + ' 이 되면 "무기고에 넣기"로 모아 두세요. 같은 단계 두 자루를 합성하면 +' + (MAX + 1) + ' 로 각성하고, 한 자루로 +21 에 도전할 수도 있어요.';
     var a = V[vaultSel[0]], c = V[vaultSel[1]], sb = $('synthBtn'), note = $('synthNote');
     if (vaultSel.length === 2 && a && c){
       var okSynth = a.lv === c.lv && a.lv < SYNTH_MAX;
@@ -3607,7 +3736,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       sb.classList.toggle('armed', synthArmed);
       note.textContent = !okSynth ? (a.lv !== c.lv ? '같은 단계끼리만 합성할 수 있어요' : '+' + SYNTH_MAX + ' 이 지금 가장 높은 단계예요')
                        : synthArmed ? '한 번 더 누르기 · 실패하면 ② 재료가 사라져요'
-                       : '+' + a.lv + ' 두 자루 → +' + (a.lv + 1) + ' · 성공 ' + Math.round(SYNTH_RATE * 100) + '%';
+                       : '+' + a.lv + ' 두 자루 → +' + (a.lv + 1) + (SYNTH_RATE < 1 ? ' · 성공 ' + Math.round(SYNTH_RATE * 100) + '%' : '');
     } else {
       synthArmed = false;
       sb.firstChild.nodeValue = '합성하기'; sb.classList.remove('armed');
@@ -3615,6 +3744,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       note.textContent = V.length < 2 ? '+' + MAX + ' 두 자루가 필요해요' : '두 자루를 골라 주세요';
     }
     $('vaultLookBtn').disabled = vaultSel.length !== 1;
+    var lb = $('vaultLeapBtn'), ln = $('vaultLeapNote');
+    if (vaultSel.length === 1 && a && LEAP[a.lv]){
+      var lk = leapKey(a, vaultSel[0]), armedL = leapIsArmed(lk);
+      lb.disabled = rolling;
+      lb.firstChild.nodeValue = armedL ? '정말 도전?' : '+21 도전';
+      lb.classList.toggle('armed', armedL);
+      ln.textContent = armedL ? '한 번 더 누르기 · 실패하면 부서져요' : '성공 ' + Math.round(LEAP[a.lv] * 100) + '% · 실패하면 부서져요';
+    } else {
+      lb.disabled = true; lb.firstChild.nodeValue = '+21 도전'; lb.classList.remove('armed');
+      ln.textContent = vaultSel.length === 1 && a ? '+' + SYNTH_MAX + ' 이 가장 높은 단계예요' : '+' + MAX + ' 한 자루를 골라 주세요';
+    }
     var vb = $('vaultSellBtn'), vn = $('vaultSellNote');
     if (vaultSel.length === 1 && a){
       vb.disabled = rolling;
@@ -5782,6 +5922,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('synthBtn').addEventListener('click', synthesize);
+  $('leapBtn').addEventListener('click', leapFromAnvil);
+  $('vaultLeapBtn').addEventListener('click', leapFromVault);
   $('huntBtn').addEventListener('click', huntFight);
   $('duelBtn').addEventListener('click', duelAction);
   $('roomForm').addEventListener('submit', function(e){

@@ -603,6 +603,7 @@ img{max-width:100%}
 .btn-gift:hover:not(:disabled){filter:brightness(1.07)}
 .attend.done .attend-days,.attend.done .attend-foot{display:none}
 .i-bless{--rail:#5FA463}
+.i-protect{--rail:#C94A40}
 .i-master{--rail:#8A8076}
 .buffs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .buffs:empty{display:none}
@@ -1077,6 +1078,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
             <span><span class="nm">축복의 주문서</span><br><span class="ds">성공 확률 +10%p</span></span>
             <span class="pr" id="prBless">0 G</span>
           </button>
+          <button class="item i-protect" id="buyProtect" type="button">
+            <span><span class="nm">파괴 방지권</span><br><span class="ds">파괴 → 유지 · +15 까지만</span></span>
+            <span class="pr" id="prProtect">0 G</span>
+          </button>
           <button class="item i-master" id="buyMaster" type="button">
             <span><span class="nm">장인의 손길</span><br><span class="ds">성공 확률 +15%p</span></span>
             <span class="pr" id="prMaster">0 G</span>
@@ -1298,7 +1303,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         <tbody id="chartBody"></tbody>
       </table>
     </div>
-    <p class="mult-note" id="profitNote">+7 이상에서 팔면 평균적으로 남아요. +16 까지는 그냥 강화해도 평균적으로 남지만, 그 위는 파괴될 위험이 커서 평균적으로는 손해인 도박이에요. 파괴를 막는 아이템은 없어요(축복서·장인의 손길로 성공 확률만 올릴 수 있어요).</p>
+    <p class="mult-note" id="profitNote">+7 이상에서 팔면 평균적으로 남아요. 파괴 방지권은 +15 까지만 쓸 수 있고, 방지권만 써서 +15 까지 올려 팔면 조금(약 5%) 손해예요. 대신 거기서 방지권 없이 +16 에 도전하면 부서지는 경우까지 쳐도 평균적으로 남아요(약 11~17%). +16 부터는 파괴를 막을 수 없어 위험이 커요(축복서·장인의 손길로 성공 확률만 올릴 수 있어요).</p>
     <p class="mult-note" id="multNote"></p>
   </details>
 
@@ -1328,8 +1333,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      s 성공 / x 파괴 (유지는 1-s-x), cost 시도 비용, price 일반 등급 판매가.
      하락은 없습니다. +0~+3 은 실패해도 유지뿐이고, +4 부터 파괴될 수 있습니다.
      판매가는 +7 부터 "한 단계 더 해서 파는 게 지금 파는 것보다 평균적으로 남도록" 정했습니다
-     (+6~+15 는 아이템 없이도 남음). +16~+19 는 파괴 위험이 커서 평균적으로 손해인 도박 구간이고,
-     파괴를 막는 아이템은 없습니다(축복서 + 장인을 같이 쓰면 +19 → +20 만 겨우 남음). */
+     (+6~+15 는 아이템 없이도 남음). 파괴 방지권은 +15 까지만 듣고, 방지권만으로 +15 까지 올려 팔면 약 5% 손해,
+     그 뒤 +16 에 팔면 남도록 방지권 값을 정했습니다(protectMult). +16~+19 는 파괴 위험이 커서 평균적으로 손해인 도박 구간입니다. */
   var LEVELS = [
     { s:1.00, x:0.00, cost:100,    price:0 },
     { s:0.95, x:0.00, cost:220,    price:180 },
@@ -2423,8 +2428,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 게임 상태 ═════════ */
   var ITEMS = {
     bless:   { label:'축복',       full:'축복의 주문서', short:'축복서', mult:3 },
+    protect: { label:'파괴 방지',  full:'파괴 방지권',   short:'방지권', mult:5.5 },   // 값은 protectMult (등급마다 다름)
     master:  { label:'장인의 손길', full:'장인의 손길',   short:'장인',   mult:7 }
   };
+  /* 파괴 방지권은 +15 까지(+14 → +15 강화까지)만 씁니다. 값은 무기 등급만큼 비싸져서(강화 비용 × (6.5 × 등급 배수 − 1)),
+     어느 등급이든 방지권만 써서 +15 까지 올려 팔면 약 5% 손해이고, 그 뒤 방지권 없이 +16 에 팔면 평균 11 ~ 17% 남습니다. */
+  var PROTECT_UPTO = 15;
+  function protectMult(rar){ return 6.5 * RARITIES[rar].mult - 1; }
   var START_GOLD = 1000000;
   /* v4 부터 모두 처음부터 다시 시작합니다 — 예전 저장(v2·v3)과 예전 저장 코드는 읽지 않습니다.
      (예전 저장은 지우지 않고 그대로 두므로, 되돌리려면 SAVE_KEY 만 바꾸면 됩니다) */
@@ -2468,7 +2478,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return {
       gold: START_GOLD, level: 0, sword: sw, found: found, foundKind: foundKind, vault: [], dexBest: blankBest(), awake: 0,
       energy: { full:0 }, duel: { n:0, w:0, dn:0, dw:0 }, hunt: { n:0, w:0, sel:-1 }, rooms: [], roomId: '',
-      buffs: { bless:false, master:false },
+      buffs: { bless:false, protect:false, master:false },
       auto: { bless:false, master:false },
       items: { bless:0, master:0 },
       attend: { last:'', day:0, total:0 },
@@ -2540,8 +2550,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function sellPrice(){ return Math.round(LEVELS[state.level].price * RARITIES[state.sword.rar].mult); }
 
   /* 아이템은 확률을 재분배할 뿐, 세 구간(성공·유지·파괴)의 합은 항상 1입니다.
-     축복 +10%p, 장인 +15%p 는 유지·파괴에서 비율대로 덜어 옵니다. 파괴를 아예 막는 아이템은 없습니다
-     (방지권이 있으면 돈만 있으면 +20 · +21 이 너무 쉬워져서 없앴습니다). */
+     축복 +10%p, 장인 +15%p 는 유지·파괴에서 비율대로 덜어 옵니다. 파괴 방지권은 남은 파괴를 유지로 바꾸지만
+     +15 까지만(PROTECT_UPTO) 듣습니다 — +16 부터는 파괴를 막을 방법이 없습니다(돈만 있으면 +20 · +21 이 너무 쉬워지지 않게). */
   function odds(level, buffs){
     var row = LEVELS[level];
     if (row.s === null) return null;
@@ -2553,6 +2563,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
     if (buffs.bless) boost(0.10);
     if (buffs.master) boost(0.15);
+    if (buffs.protect && level < PROTECT_UPTO){ k += x; x = 0; }
     return { s:s, k:k, x:x };
   }
   /* 출석 · 사냥으로 받은 보상 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
@@ -2588,14 +2599,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ['bless', 'master'].forEach(function(key){
       if (state.auto[key] && state.buffs[key]) state.items[key] = Math.min(999, state.items[key] + 1);
     });
-    state.buffs = { bless:false, master:false };
+    state.buffs = { bless:false, protect:false, master:false };
     state.auto = { bless:false, master:false };
   }
   function itemPrice(key){
     var row = LEVELS[state.level];
     if (row.cost === null) return null;
-    return Math.round(row.cost * ITEMS[key].mult);
+    return Math.round(row.cost * (key === 'protect' ? protectMult(state.sword.rar) : ITEMS[key].mult));
   }
+  /* 지금 단계에서 파괴 방지권이 듣는지: 파괴가 있는 +4 부터, +15 까지(+14 → +15 강화까지) */
+  function protectUsable(){ return state.level < PROTECT_UPTO && LEVELS[state.level].x > 0; }
 
   /* ═════════ 저장 1 · 브라우저 자동 저장 ═════════ */
   function save(){
@@ -2650,11 +2663,13 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     });
     var it = data.items || {}, at = data.attend || {}, hu = data.hunt || {}, en = data.energy || {}, du = data.duel || {};
     function cnt(v){ return Math.min(999, num(v, 0) | 0); }
-    /* 파괴 방지권은 없어졌습니다. 예전 진행에 남아 있던 것은 — 받아 두었거나 보상으로 붙어 있던 것은 축복의 주문서로
-       바꾸고, 골드로 사서 붙여 둔 것은 산 값(그 단계 강화 비용 × 4)을 돌려줍니다. */
+    /* 파괴 방지권은 이제 상점에서만 사고 +15 까지만 씁니다. 예전 진행에 남아 있던 보상 방지권(받아 두었거나 보상으로
+       붙어 있던 것)은 축복의 주문서로 바꾸고, 골드로 사서 붙여 둔 방지권은 지금 단계에서 쓸 수 있으면 그대로 두고,
+       못 쓰는 단계(+15 이상)면 예전 값(그 단계 강화 비용 × 4)을 돌려줍니다. */
     var hadProt = !!(data.buffs && data.buffs.protect), protAuto = hadProt && !!(data.auto && data.auto.protect);
+    var protKeep = hadProt && !protAuto && level < PROTECT_UPTO && LEVELS[level].x > 0;
     var protBless = cnt(it.protect) + (protAuto ? 1 : 0);
-    var protRefund = hadProt && !protAuto && LEVELS[level].cost !== null ? LEVELS[level].cost * 4 : 0;
+    var protRefund = hadProt && !protAuto && !protKeep && LEVELS[level].cost !== null ? LEVELS[level].cost * 4 : 0;
     state = {
       gold: num(data.gold, base.gold) + protRefund,
       level: level,
@@ -2669,6 +2684,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
               sel: typeof hu.sel === 'number' && hu.sel >= -1 && hu.sel < MONSTERS.length ? hu.sel | 0 : -1 },
       buffs: {
         bless:   !!(data.buffs && data.buffs.bless),
+        protect: protKeep,
         master:  !!(data.buffs && data.buffs.master)
       },
       items: { bless:Math.min(999, cnt(it.bless) + protBless), master:cnt(it.master) },
@@ -2700,8 +2716,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     ['bless', 'master'].forEach(function(k){ state.auto[k] = !!(data.auto && data.auto[k]) && state.buffs[k]; });
     if (protBless || protRefund){
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
-      pushLog('gift', '안내', '파괴 방지권이 없어져서 ' + [protBless ? '축복의 주문서 ' + protBless + '개로 바꿨어요' : '',
-              protRefund ? '산 값 ' + gold(protRefund) + '를 돌려받았어요' : ''].filter(Boolean).join(' · '), null);
+      pushLog('gift', '안내', '파괴 방지권이 바뀌어서 ' + [protBless ? '보상 방지권은 축복의 주문서 ' + protBless + '개로 바꿨어요' : '',
+              protRefund ? '+15 위라 못 쓰는 방지권 값 ' + gold(protRefund) + '를 돌려받았어요' : ''].filter(Boolean).join(' · '), null);
     }
     autoItems();
     /* 최고 단계 기록이 생기기 전 저장도 지금 무기 · 무기고 · 최고 기록 무기만큼은 채워 둡니다 */
@@ -2733,7 +2749,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var st = state.stats, w = state.sword;
     var body = b64enc(JSON.stringify({
       g:Math.round(state.gold), l:state.level,
-      b:(state.buffs.bless ? 1 : 0) | (state.buffs.master ? 4 : 0) | (state.auto.bless ? 8 : 0) | (state.auto.master ? 32 : 0),
+      b:(state.buffs.bless ? 1 : 0) | (state.buffs.protect ? 2 : 0) | (state.buffs.master ? 4 : 0) | (state.auto.bless ? 8 : 0) | (state.auto.master ? 32 : 0),
       t:st.tries, w:st.wins, k:st.booms, e:st.best,
       s:Math.round(st.spent), r:Math.round(st.earned), p:Math.round(st.peak),
       n:st.pulls, m:st.legends,
@@ -2763,8 +2779,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var d = JSON.parse(b64dec(parts[1]));
     var out = {
       gold:d.g, level:d.l, sound:state.sound, owner:state.owner, synced:state.synced, log:[],
-      buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },      // protect: 예전 코드의 파괴 방지권 (adopt 가 옮김)
-      auto:{ bless:!!(d.b & 8), protect:!!(d.b & 16), master:!!(d.b & 32) },
+      buffs:{ bless:!!(d.b & 1), protect:!!(d.b & 2), master:!!(d.b & 4) },      // protect: 산 파괴 방지권 (adopt 가 +15 까지만 남김)
+      auto:{ bless:!!(d.b & 8), protect:!!(d.b & 16), master:!!(d.b & 32) },     // auto.protect: 예전 보상 방지권 (축복서로 바꿈)
       stats:{ tries:d.t, wins:d.w, booms:d.k, best:d.e, spent:d.s, earned:d.r, peak:d.p, pulls:d.n, legends:d.m }
     };
     if (Array.isArray(d.x) && d.x.length >= 3) out.sword = { seed:d.x[0], el:d.x[1], rar:d.x[2], kind:d.x[3] | 0 };
@@ -3095,7 +3111,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       lbtn.classList.toggle('armed', armedA);
     }
 
-    ['bless','master'].forEach(function(key){
+    ['bless','protect','master'].forEach(function(key){
       var cap = key.charAt(0).toUpperCase() + key.slice(1);
       var btn = $('buy' + cap), label = $('pr' + cap);
       var ip = itemPrice(key), held = state.buffs[key], have = state.items[key];
@@ -3104,15 +3120,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (held){ label.textContent = (state.auto[key] ? '보상 적용' : '적용됨') + (have ? ' · ' + have + '개 더' : ''); btn.disabled = true; }
       else if (have > 0){ label.textContent = autoWhen(key) + ' 자동 · ' + have + '개'; btn.disabled = true; }   // 때가 되면 저절로 씀
       else if (ip === null){ label.textContent = '—'; btn.disabled = true; }
+      else if (key === 'protect' && state.level >= PROTECT_UPTO){ label.textContent = '+15 까지만'; btn.disabled = true; }
       else {
         label.textContent = gold(ip);
-        btn.disabled = rolling || state.gold < ip;
+        btn.disabled = rolling || state.gold < ip || (key === 'protect' && !protectUsable());
       }
     });
 
     var buffWrap = $('buffs');
     buffWrap.textContent = '';
-    ['bless','master'].forEach(function(key){
+    ['bless','protect','master'].forEach(function(key){
       if (!state.buffs[key]) return;
       var chip = document.createElement('span');
       chip.className = 'chip i-' + key;
@@ -3419,7 +3436,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     state.gold -= row.cost;
     state.stats.spent += row.cost;
     state.stats.tries += 1;
-    state.buffs = { bless:false, master:false };
+    state.buffs = { bless:false, protect:false, master:false };
     state.auto = { bless:false, master:false };
 
     var anvil = $('anvil');
@@ -5893,6 +5910,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   function buy(key){
     if (rolling || state.buffs[key] || state.items[key] > 0) return;     // 보상 아이템은 때가 되면 저절로 쓰입니다
+    if (key === 'protect' && !protectUsable()) return;                // 파괴가 없거나 +15 위
     var price = itemPrice(key);
     if (price === null || state.gold < price) return;
     state.gold -= price;
@@ -6001,6 +6019,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   });
 
   $('buyBless').addEventListener('click', function(){ buy('bless'); });
+  $('buyProtect').addEventListener('click', function(){ buy('protect'); });
   $('buyMaster').addEventListener('click', function(){ buy('master'); });
   $('attendBtn').addEventListener('click', claimAttend);
   $('loginBtn').addEventListener('click', onlineLogin);

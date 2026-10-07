@@ -917,7 +917,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   <dl class="hud">
     <div><dt>보유 골드</dt><dd class="v-gold" id="hudGold">0</dd></div>
     <div><dt>최고 강화</dt><dd id="hudBest">+0</dd></div>
-    <div><dt>도감</dt><dd class="v-dex" id="hudDex">0 / 192</dd></div>
+    <div><dt>도감</dt><dd class="v-dex" id="hudDex">0 / 222</dd></div>
     <div><dt>파괴</dt><dd class="v-boom" id="hudBoom">0</dd></div>
   </dl>
 
@@ -1427,14 +1427,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 무기 종류 ═════════  w = 뽑힐 비율(%)
      모양만 다르고 확률·가격은 같습니다. 전설·신화는 속성마다 정해진 이름 있는 무기라서,
-     그 속성·등급에 그림이 있는 종류 중에서만 뽑습니다(검은 모든 속성에 있습니다). */
+     그 속성·등급에 그림이 있는 종류 중에서만 뽑습니다(검은 모든 속성에 있습니다).
+     병맛 무기(대파 · 바게트 · 고등어 …)는 일반 · 희귀 · 영웅에서만 나옵니다(아래 JOKE-SPRITES). */
   var KINDS = [
-    { name:'검',     w:40 },
-    { name:'도끼',   w:15 },
-    { name:'지팡이', w:15 },
-    { name:'창',     w:15 },
-    { name:'철퇴',   w:15 }
+    { name:'검',     w:38 },
+    { name:'도끼',   w:14 },
+    { name:'지팡이', w:14 },
+    { name:'창',     w:14 },
+    { name:'철퇴',   w:14 },
+    { name:'병맛 무기', w:6 }
   ];
+  var JOKE_KIND = 5;
 
   /* ═════════ 무기 그림 ═════════
      Dungeon Crawl Stone Soup 의 CC0 타일 그림입니다 (assets/weapons/CREDITS.md).
@@ -1449,6 +1452,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   var SPRITE_POOLS = [[["dagger", "short1", "short6", "long1", "long6", "great1", "falchion1", "falchion4", "scimitar1", "rapier1", "cutlass1", "cutlass5", "claymore"], ["short2", "short3", "short5", "long3", "falchion2", "falchion3", "rapier3", "cutlass3", "cutlass9", "great3u", "double1", "katana2", "dagger3"], ["great3", "long5", "long7", "claymore2", "claymoreB", "falchion5", "falchion7", "triple1", "triple2", "double2"]], [["handAxe1", "warAxe4", "warAxe6", "broadAxe4", "broadAxe6", "battleAxe4", "battleAxe6", "execAxe4", "execAxe6"], ["handAxe2", "warAxe5", "broadAxe5", "battleAxe5", "execAxe5"], ["handAxe3", "warAxe7", "broadAxe7", "battleAxe7", "execAxe7"]], [["qstaff1"], ["qstaff2", "qstaff3"], ["mummyStaff", "qstaff3"]], [["spear1", "spear4", "spear6", "halberd4", "bardiche4", "scythe1"], ["spear5", "halberd5", "bardiche5", "scythe2"], ["spear2", "spear3", "spear7", "scythe3"]], [["club", "mace1", "maceL1", "mstar1", "mstar4", "estar1", "hammer1", "spikedClub"], ["club2", "mace2", "maceL2", "mstar2", "mstar5", "estar4", "hammer2", "mace7"], ["mace3", "maceL3", "mstar3", "mstar7", "estar2", "estar3", "estar7", "hammer3"]]];
   var SPRITE_SIGNATURE = [[["power", "flamingDeath"], ["chillyDeath", "winter"], ["great4", "arcBlade"], ["doomKnight", "zonguldrok"], ["golden", "order"], ["scimitar3", "plutonium"], ["galeCutlass", "gyre"], ["morg", "ancient"], ["katana1", "claymore3"], ["bloodbane", "cerebov"]], [[null, "woe"], ["arga", null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], [null, null], ["trog", "trog2"]], [[null, null], [null, null], ["wucadMu", null], [null, "majin"], [null, "dispater"], ["olgreb", null], [null, null], [null, null], [null, null], [null, null]], [[null, null], ["crystalSpear", null], [null, null], ["curseScythe", null], ["guard", null], ["wyrmbane", null], [null, null], [null, null], [null, "prune"], ["octopus", null]], [["firestarter", "asmodeus"], [null, null], [null, null], ["torment", null], ["brilliance", "undeadhunter"], [null, null], [null, null], [null, null], ["eos", "variability"], ["skullcrusher", null]]];
   /* WEAPON-SPRITES:END */
+  /* JOKE-SPRITES:BEGIN */
+  /* 병맛 무기 그림 — tools/build_jokes.py 가 만듭니다. 직접 고치지 마세요. JOKE_POOLS[등급] = 일반 · 희귀 · 영웅 */
+  var JOKE_DATA = {"jkDaepa":{"P":[3.16,29.07],"T":[28.84,3.39],"g":19.11,"h":3.04,"s":-0.16,"ko":"대파","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB7UlEQVR42sWWP0gbURzHv3cNcnDLjaLSKVgogQ6CcyeH1LlrCnaKQzB0aaFOksHBbAUJlFRL6FQsYuwgIVgkCXQppEkuf1QUEmoDF+gd3lD4dXrxLlxzMXcv+W53PPh8v9/3e+8O4ChZUshtjcgT/vLrkqsJkRc81YigqnZdWxF5bkFbNRyNWU1wM1BqlXHxrgvD7AlWeDqbB3fJkkIru0+IJZUlhTLXMQrFgzTKYHqGW2Fu8AAvI1pNR6oRAQAkkke27bBK4DH96WweL8JPbfBBMTMBbtMfvoOzJkqtMgCgqnZxFgMZZk8Q/E7PlEge4c3GM5RaZVTVLtqqYWuCNSDwgs89ktFWDWg1Hb2caYP6OgNOcK2mA8BQsC+nYBCezuZdE/vWgBP855df6OXMkcCeDMiSQj/OTxA9XOu/Gwc+dnKmZvs7heJBmg/Pjn3FiveF67da/7nerODh5cLkkxMRZU/36O121PPHRRwn+fG3fRSKRV+CiV7gO5sZz9UHRoX/MX/jRrvyFT60ASf4h4/vfYX/18Ck4I4GBvecJxwAHgzCO1oducJniDN/oekdrnBbA7KkUO7TK7yOrGIx+Bj1ZgX1ZoUrvH8KGNx6w/k97SNdNqWDLZIlhdafL/f/aDFJMSgzgmlpqvBJ6x9wx3x5bDOGTgAAAABJRU5ErkJggg=="},"jkLadle":{"P":[3.98,28.02],"T":[28.02,3.98],"g":24.4,"h":5.16,"s":0.71,"ko":"국자","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABtUlEQVR42u2Xv0sbYRjHP2dMCMmStkJDLzE0iWZQyJBAaKCTs0tXF8E/wN2Cg2AG9wZXByfBoTg4KAiGhCtpKLQULmqKrRcOFYmRCwGRt1OOpoo/4F4dvAdeOO573Of7PO/L9zh47qXIeGnQHxI33be6LUW6gaA/JJrHBts7FUpajaM/vwl4PQCsra5cMzEgYwI9OEAkOkzn8orO5RWZXP7adAac7v7jQoGSVqOqlalq5T49HIsTVtU+E4MyJrC5sU5ldxuAyQ9ThN9EbE19OwKAaSCsbktxfAvqus54Osu79xMAnJ6Ytz7vuIHRVIqA12ObGE9nbc1sHsk1YHVbyuL8HKOpFOZh4064tDNQ13XiyREa+3vg9fVpxq891EgM0zAA8MjIAJ8/gK7XefHyFT++VblondlLjcT4qpXtPFCcTL7mscGn5RUW5+f69Ewub1//C3es6/O2Jc7blpiemRU3xXDQHxK95Xjs3gWXVj34958HLtyFu3AX7jz4SeHrn7dEYan4NPDCUlEko0MiGR0SicTYo8CV/01kcnmajS8I32tMw3D203nfSTxW9w/+tXJLRv0Fvl43OOAfo2YAAAAASUVORK5CYII="},"jkScratcher":{"P":[2.01,29.19],"T":[28.38,2.81],"g":28.1,"h":3.04,"s":-0.14,"ko":"효자손","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABw0lEQVR42uWXMUjDUBCG/5RQQislU0FxqkVKEelcHe2kk4Kjo4OTddHNxaEOQqcOoYuLQ8ciDqJLKcUxhBAeRTJVCiGFUGgpHfocJCGpLWLSvA49yBAS8h9333+XBzCKuCBSLCPigkjjgkgtUqKzkuDCFv+SbwAANakKAChWTAxGlqMbCVtcbdRxeHyHptJHNpOE8nzkaQcfpnhNqqKp9LG1EcP5aRpP9U/ktg3nncHI4rgwy97rqOjqOgDguqw4iaynUnh/+UCxYobTgl5H9dy7xQHgofzqsMCzcML95S40YkAjBooVEwAcEENJoKvrTuk18tNzud3H49vY44CF23DadnK77zybJb5w+CxSohYpUekqTe0BZF9MJp1bnNmYPTtI0qaU9y3OBU0gn5kAAIbjCWSd/3efI0GBu73YwXA8QSzq71N8UNo1YkDWeY+3Q+/7UoCzxYMAFwjCuCDSk/0ouubIN3C+IbR7bi8Tv8D5gnAauBaJrABwLMcrPw82AFAbdWeHMym522qFXILuZddCLzs/D7hhWVko7X8m8OtngvV4tdcq6/HKuaHrmiO0SIQdcO4KFHIJmt2M0qUfIrFq8Q2xnjj1OfDqJwAAAABJRU5ErkJggg=="},"jkBaguette":{"P":[2.92,29.08],"T":[29.08,2.92],"g":7.4,"h":3.04,"s":0.0,"ko":"바게트","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB+0lEQVR42t2Xv0sbYRjHP3dNQ5pACQ4icSgiNkUazOLSqYOLQxw6uqSbUlwqhYzObh26lC6VDv4BN9wiIoWi44Xc4uEtIQ3SIaSI9dDi2yHccV5zPzzvtdB3uZ/h+32+n+fI+8A/Xsp9CZUKZeGenztDTzd3X+KnB2sM7TY9q8vSNsI1ocoWLhXKYq9VwdQ1yrMLADRrNxORJn521BKHW/Pior8vLvr74nBrXryo5MWbxZExaT3gRg5g6hpq9SUAT54+A+DVyjvagyLnzlBRZIq7a/f9Dp+/DrxrVzzzJnTFTV3z7nWOB9SqE7wGDNthpyPpK/CL19c+8LNvAjDTGEVeny6O/V0u69ifLzcwPm7QOR5g2A7Nt6vee8HqAR7IYJ5XHR4pl6jXV2x/+kZ9ujhW/M5fQRRzN4Gwyu9swC8+01i/8czPPEo8tYFg7KaueRUb338lFk/VA3HM+a0kFr91AmHMDduhPltIxDy1gSjmfu63EU9sII45kEo8UQ8kYT71+GEq8dgEZDBPbEAW80QGZDKP7QF/5T9OLCbnqpkyj0wg+JcK8GVzNVPmsQb2WhWpzEMNBPdxspiP7YFg0+VVhxPrlKmJXObMg8ubC4Z22zvqmjGqXgLz0C1Zz+rSs7p/bSSCo5S02bBUKItmjcj9m/ThNGyA/K/XH7FNnWCC28c9AAAAAElFTkSuQmCC"},"jkSlipper":{"P":[3.77,28.23],"T":[28.23,3.77],"g":18.4,"h":3.74,"s":0.0,"ko":"삼선 슬리퍼","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB3ElEQVR42u2XzU7bUBBGjy0X0qRBiVGRWrmhQpVgBanEmlUU9qn6An2Q9D36CKnafd8CqmyDVCIBCsgxxXatRnBZIFv+I7bDTVjArHwtW+ebz+O5c+GphzJvQKVUE+G141nKQgT44M3dFgCX4xEAZ4PfERHavMFhOEB1zYARwhehyYbX977hjvqcHP+kUtUz31Flwu1/Y4a/PuOZff7rHc5PjxLPubYlX4Cf+bv973eF9ucHntlHa3yJiHCuTPkOhDMHpopwbYtr144UoSozc1/E6sevCRHDwYH8ajfaPSGEEEa7F1wLIYTe7Aq92Q3W5UZH6M2uiPeEB8PLjU4AMdq9BFSrbQdrrbadKkCZVUB1zQDg4q/KZHx4d3/9U2A9wIv6DgCT8SGvXtYTXXCmGqiUamJzt8XbxhaVqk5ZNQNQGhi4F17YAR8e73Dnp0e4N3oAzJN5YQfugwO8frMRcSJP5oUcmAYPx3BwwE3pPQDL3nEmPJcDeeF+s1la+ZAbnulAUfi1a6fu+TMJyAN3rsxgc4m32LyhPiY8Vw3ME54qIJz9vOEJAYuGRwQ8Bjz1EywSnhhKp8Fn+ccLOxCf2cJwx7MU2fCIA45nKYwQ8elVtuWZnTDrKPUcsuMWZ+CoM6my7RoAAAAASUVORK5CYII="},"jkSwatter":{"P":[2.42,29.58],"T":[28.93,3.07],"g":21.7,"h":5.16,"s":0.0,"ko":"파리채","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABxklEQVR42u2XP0jDQBTGv9QYQv9oWyqKQ+yoDqFD3Tt16BhwdelenBxLRyeRDuLgJM6lOjg4lNDZoYhD0Q4lgwQpEpDYswjnoBeSNFQxSYXSb3rhAr/33bv3LuEQsmJikrLYJAbnXufCBpe7VbS1DgDgsXg1lgQXFrzcrVrPLAGvJCJhwi+Ozy241rgDAKTqeUdZ+DDhRNWhfa+xWFJkoJ4HKrfUJAa3EBZcUmSYQxNE1cFn4+CzcRBVhzk0sbgSBd0QEOmQGh+2c7vEwhokRcag+4TASuCGMxBRdc/YrcDOAHPOQAxGVN0Rs515P+3DJAYXCcJ94+ba4ZAlYpekyNb66MEIZg7ExCRN1fN4Obkf22K3czuctgxrFvieA5nNdWvLmXPm1l17NzywMyAp8tewcdXZLi84APiaAwIv1uhOAm+DV0QzCSxvrY71/iR4ICVQiiUAcPS2/aBNgvtKgHVAW+vAaPYc8/5jNLJabRL8z11gh/cO26Atw/O9SWBfrVfpH9Fce4/GS1lqv9lC1xw+h8/hsw2PiUn6H3DO68vGaPZ+nOGBu0/v5+hu4YAK2+mp1txxG14+n0HILmGa4n77Fzuz+gTmqWbnXuB62QAAAABJRU5ErkJggg=="},"jkMackerel":{"P":[4.12,27.88],"T":[27.88,4.12],"g":7.6,"h":3.04,"s":0.0,"ko":"고등어","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACEklEQVR42mNgGAUDDBjpYQk3h8B/GPvrjw+MdHMAzOKiDTsYGBgYGDZu28dwd1YXiiMYaWmxcloZXOzDwwcMX54+ZPh55SSKA5hoYXnRhh0MymllDG1+Dgzqlz4wGPx4xbCrv57hx6vHGOqZaGE5MuBU+8Uwpb+D4c69hwyMr55hpAEWaiYwZMv9vZwYqjbtY2gLC2N49vItw7XrN6ifC7D5GAYWTp/HMC03gSE+p4TB286MYe2iBRi+p1oUbNy2D8PyK8sm0Sd/6+W1/RfWsPqvl9f2v3bHif9y/mn/P3398X/LnmP/hTWs/gtrWP1HjiaqhQA3h8B/5GyGzefedmYMPx5cwxr0FDkAZvnTXVtQ8jnM8kPHzzFcu34DZ7xT5ABslnOr62BY3lhaRNBykh2AHuzSbj5YfU6s5WSFAKFgJ8VykhyAzfeUWk50SYgt3o+0FzEwMDAwzJi3jIGBgYEsy0kqiv29nBg2QoP9SHsRw7OXbxk2bd1JkeVEOQC9uN3VX48S5NgaGVRrESFbfvbWA4YTi+bDq1RsNRtVQoCbQ+A/ssFnbz1guLJ3H8OXpw/hFlPqa6y5gJtD4D/Mx8hsZABrzVDLcngUwCyD+VZAXgGS6LbtY/jw8AHD252rqOprrGkAvcZSTiuDW04Li4nK+7U7TuCtSqmaBnABYfcwBlo7Am9jY8BDYEDBgAQ9vQEAs55MsHLFrcMAAAAASUVORK5CYII="},"jkSqueak":{"P":[2.7,29.3],"T":[25.33,6.67],"g":24.0,"h":7.99,"s":-0.0,"ko":"뿅망치","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABsUlEQVR42u2Xv0tCURTHP08cHjzLtyZhEGEgQkHQ4NCf0eBYS39BQ0ODQ4PQ4hAW1ChNIk0G0aaDFJhI9GtJ6pXbKxUcgtsg7+ErrbRbL8Kz3vPu58v3nnfOvSAxNFUXmqoL3AhN1YWoJYSR6U+ERxa8cbs20LcemfCH/AapfZOZlxZfdcEjGx4+nmAvOGWvf7aHIhMeO4kQCAUxrqoAlJ7rLDeeaLZMRaoDveDTKzEbDjA7OsKPOKCpumgUwzzcnDvgl6k0gVAQwCFkzrgD6OrEQA40W6bimz+nXDE5yqgAXKbSjhxLCMBpYJxdn79rTSjfLUIL8BZuXFUd9dDLCUVWH9j1+R1n3ulAp4il6g1nXtUW4pHZDUvP9a5QK7YeDfL3cRrFMNfptnCvLPjCzhPlikkpOWE70fk7Js0a+fs4AIfZAoUKgC6vE45NhUlm3zsBOOHbqxQqsHmgf9gf+hpAohwVuTjCmoaaqouLyYi4mIyIqFdt59QSIhdHrC8iZ2J2g79ddw1u55Sj7sA7c12DS78lDQKXft0awofwIfz/w42M/vtwS4Br8D/xsnUzXgGtbpoJn1fh8QAAAABJRU5ErkJggg=="},"jkRecorder":{"P":[3.91,28.09],"T":[28.09,3.91],"g":6.8,"h":1.62,"s":0.0,"ko":"리코더","src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB2klEQVR42uWWvUtCURjGn6uHuCDBLTRwUCrUhCAKoj8ggqaao6WtqT+hIdewLaI5hKQlAgmLqIQQhwYRArlqog6S11QyQRA6TR78uJrauTp4tvvB+T3v877veQ8wDssgSrTTN90w4GYT6SpCUzit5Wgi7KWJsJeqidANQ8j84joAIBI6b3NCp2X032WZPZvMNlURZBgOlAtpKNk4YnIUFx4fzCaCrCLRSrUkCFpVfD36ciGNYMCHSCTK/nG5/ahUSwIACLzh2dQDACAY8MHucCImRxnc5fYDAINrkoLJaSvurs+a4Gpg7gIMokQjoXMAYPBWu9UW4Qnf3DrA6ckBe9+Y96EcNjaLke5ur9Ljwx1qECWq+elnECWaCHspreXo18drE7zXPfQ8bF+wCsikZAj4+TPnXATUT7mikoTn8hZ5JTcQfGS2D+wAL9sHElC3fWpmDgtWgbXZf23X9xN5UUmCED0yKZkLvK+c2yzGtj7nsb++G3iCiEeNtueVHJaXbFwjJ93yXS6k2UgFwB3edRa8vz2yscqr4HpKQb3gYnIUhc887A4nnp9eNCs40qnPAWB/b2M0V+jGitd6qhG1vK+tzAIAbu7j2vd5qwv+qyOufT6QiJHBx3L9Al/ITsYnUQvEAAAAAElFTkSuQmCC"}};
+  var JOKE_POOLS = [["jkDaepa","jkLadle","jkScratcher"],["jkBaguette","jkSlipper","jkSwatter"],["jkMackerel","jkSqueak","jkRecorder"]];
+  /* JOKE-SPRITES:END */
+  /* 병맛 무기는 종류 하나로 붙입니다: 일반 · 희귀 · 영웅 그림만 있고, 전설 · 신화는 없음 */
+  Object.keys(JOKE_DATA).forEach(function(k){ SPRITE_DATA[k] = JOKE_DATA[k]; });
+  SPRITE_POOLS[JOKE_KIND] = JOKE_POOLS;
+  SPRITE_SIGNATURE[JOKE_KIND] = ELEMENTS.map(function(){ return [null, null]; });
 
   /* AWAKEN-SPRITES:BEGIN */
   /* +21 각성 무기 그림 — tools/build_awakened.py 가 만듭니다. 직접 고치지 마세요. */
@@ -1535,6 +1547,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var name = rar >= 3 ? D.ko : E.word + ' ' + creature + '의 ' + D.ko, was = '';
     var ak = lv > MAX ? awakeKey(seed, kind) : null;
     if (ak && AWAKEN_DATA[ak]){ was = name; key = ak; D = AWAKEN_DATA[ak]; name = D.ko; epithet = ''; }
+    else if (lv > MAX && kind === JOKE_KIND){ was = name; name = '각성한 ' + name; }   // 병맛 무기는 각성해도 병맛 (모습은 그대로)
     var n = D.n || 32;
     var S = (6 + lv * .08) * 32 / n;           // 그림 한 픽셀이 캔버스에서 차지하는 크기 — 단계마다 커집니다 (각성 그림은 두 배 촘촘)
     var L = Math.hypot(D.T[0] - D.P[0], D.T[1] - D.P[1]);
@@ -2513,7 +2526,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   /* 각성 도감: 종류 × 형태(3) = 15칸 */
   function awakeIndex(w){ return swordKind(w) * 3 + awakeForm(w.seed); }
-  function noteAwake(w){ if (w.lv > MAX) state.awake |= 1 << awakeIndex(w); }
+  function noteAwake(w){ if (w.lv > MAX && AWAKEN_FORMS[swordKind(w)]) state.awake |= 1 << awakeIndex(w); }
   function awakeSample(kind, form){
     for (var seed = 1; seed < 1000; seed++)
       if (awakeForm(seed) === form) return makeSword(seed, MAX + 1, (kind * 3 + form) % ELEMENTS.length, 2, kind);
@@ -3012,7 +3025,9 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     flash('ok', hexA(sw.R.color, sw.rar >= 3 ? .9 : .6));
     burst(14 + sw.rar * 9, 'ok', sw.R.color);
     fanfare(sw.rar);
-    reveal(sw.rar >= 2 ? sw.R.name + '!' : '새 ' + sw.K.name + '!', sw.name,
+    var joke = sw.kind === JOKE_KIND;
+    if (joke){ tone(520, .06, 'square', .05); tone(780, .06, 'square', .05, .07); tone(1170, .12, 'square', .05, .14); }   // 뿅뿅
+    reveal(joke ? (sw.rar >= 1 ? sw.R.name + ' ' : '') + '병맛 무기!' : sw.rar >= 2 ? sw.R.name + '!' : '새 ' + sw.K.name + '!', sw.name,
            sw.epithet ? '「' + sw.epithet + '」' : sw.R.name + ' · ' + sw.E.name + ' 속성',
            sw.R.color, sw.rar === 4);
     if (sw.rar === 4) quake();
@@ -3306,6 +3321,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     grid.textContent = '';
     awakeCells = [];
     KINDS.forEach(function(K, k){
+      if (!AWAKEN_FORMS[k]) return;                             // 각성 그림이 따로 없는 종류(병맛 무기)는 빼고
       var col = document.createElement('div');
       col.className = 'awake-col';
       var head = document.createElement('span');
@@ -3395,14 +3411,15 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var l = document.createElement('span');
     l.className = 'lead'; l.textContent = '새 무기 종류';
     el.appendChild(l);
+    var total = KINDS.reduce(function(a, K){ return a + K.w; }, 0);
     KINDS.forEach(function(K){
       var s = document.createElement('span'), b = document.createElement('b');
       b.textContent = K.name;
-      s.appendChild(b); s.appendChild(document.createTextNode(' ' + K.w + '%'));
+      s.appendChild(b); s.appendChild(document.createTextNode(' ' + Math.round(K.w / total * 100) + '%'));
       el.appendChild(s);
     });
     var f = document.createElement('span');
-    f.className = 'fine'; f.textContent = '모양만 다르고 확률·가격은 같아요. 전설·신화는 속성마다 정해진 무기 중에서 나와요.';
+    f.className = 'fine'; f.textContent = '모양만 다르고 확률·가격은 같아요. 전설·신화는 속성마다 정해진 무기 중에서 나와요. 병맛 무기(대파 · 바게트 · 고등어 …)는 일반 ~ 영웅에서만 나와요.';
     el.appendChild(f);
   }
 
@@ -3559,6 +3576,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return false;
   }
   /* 성공: +21 각성 연출과 기록 (made 는 이미 무기고에 들어간 +21) */
+  /* 각성 한 줄 — 병맛 무기는 새 그림 없이 이름만 각성합니다 */
+  function wakeText(sw){ return josa(sw.was, '이', '가') + (sw.kind === JOKE_KIND ? ' 깨어났어요 — 모습은 그대로, 병맛도 그대로' : ' 새로운 모습으로 깨어났어요'); }
   function leapWin(made, from, tail){
     noteBest(made, made.lv);
     noteAwake(made);
@@ -3572,7 +3591,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     burst(46, 'ok', '#FFB02E');
     fanfare(4); quake();
     reveal('+' + from + ' → +' + made.lv + ' 도전 성공!', sw.name, josa(sw.was, '이', '가') + ' 깨어났습니다', '#FF5FD0', true);
-    openShow(sw, '+' + made.lv + ' 각성!', '+' + from + ' 에서 한 번에 +' + made.lv + ' — ' + josa(sw.was, '이', '가') + ' 새로운 모습으로 깨어났어요');
+    openShow(sw, '+' + made.lv + ' 각성!', '+' + from + ' 에서 한 번에 +' + made.lv + ' — ' + wakeText(sw));
     verdictSword('ok', '+21 도전 성공! +' + from + ' → +' + made.lv + ' ', sw, tail || '');
     pushLog('synth', '+21 도전', '+' + from + ' → +' + made.lv + ' ' + sw.name, null);
     if (roomNews()) roomBot(roomWho() + '이 +' + from + ' 에서 +' + made.lv + ' 도전에 성공했어요! 「' + sw.name + '」 각성');
@@ -3681,7 +3700,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     fanfare(4); quake();
     if (sw.awake){
       reveal('+' + made.lv + ' 각성!', sw.name, josa(sw.was, '이', '가') + ' 깨어났습니다', '#FF5FD0', true);
-      openShow(sw, '+' + made.lv + ' 각성!', josa(sw.was, '이', '가') + ' 새로운 모습으로 깨어났어요');
+      openShow(sw, '+' + made.lv + ' 각성!', wakeText(sw));
     } else reveal('+' + made.lv + ' 합성 성공!', sw.name, '+' + a.lv + ' 두 자루가 하나로', '#FF5FD0', true);
     verdictSword('ok', '합성 성공! +' + made.lv + ' ', sw, ' (재료: ' + nameB + ')');
     pushLog('synth', '합성', '+' + a.lv + ' ×2 → +' + made.lv + ' ' + sw.name, null);
@@ -4132,7 +4151,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       roomBot(roomWho() + ' +' + from + ' 강화 실패 (단계는 그대로)');
   }
   function roomPull(sw){
-    if (roomNews() && sw.rar >= ROOM_POST.pull) roomBot(roomWho() + '이 [' + sw.R.name + '] ' + josa(sw.name, '을', '를') + ' 뽑았어요!');
+    if (roomNews() && (sw.rar >= ROOM_POST.pull || sw.kind === JOKE_KIND)) roomBot(roomWho() + '이 [' + sw.R.name + '] ' + josa(sw.name, '을', '를') + ' 뽑았어요!');
   }
   function roomSell(lv, name, price){
     var cmd = room.cmd === 'sell';

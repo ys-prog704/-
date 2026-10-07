@@ -32,7 +32,7 @@ service cloud.firestore {
         && d.lv is int && d.lv >= 0 && d.lv <= 21
         && d.rar is int && d.rar >= 0 && d.rar <= 4
         && d.el is int && d.el >= 0 && d.el <= 9
-        && d.kind is int && d.kind >= 0 && d.kind <= 4
+        && d.kind is int && d.kind >= 0 && d.kind <= 5                    // 검 · 도끼 · 지팡이 · 창 · 철퇴 · 병맛 무기
         && d.seed is int && d.seed >= 0 && d.seed <= 4294967295
         && d.pw == d.lv + d.rar + (d.lv > 20 ? 2 : 0);
     }

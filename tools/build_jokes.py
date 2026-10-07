@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""병맛 무기 그림 빌드 스크립트.
+"""특수 무기 그림 빌드 스크립트.
 
 이 게임을 위해 새로 그린 32×32 픽셀 그림 9종(대파 · 국자 · 효자손 · 바게트 · 삼선 슬리퍼 · 파리채 ·
 고등어 · 뿅망치 · 리코더)입니다. +21 각성 그림을 그린 tools/build_awakened.py 의 도형 엔진을
@@ -9,7 +9,7 @@
   2) index.html 의 /* JOKE-SPRITES:BEGIN */ ~ /* JOKE-SPRITES:END */ 사이를
      data: URI 와 위치 정보(보통 무기 그림과 같은 P · T · g · h · s)로 다시 씁니다.
 
-게임은 병맛 무기를 무기 종류 하나("병맛 무기")로 붙여서 일반 · 희귀 · 영웅 등급에서만 뽑습니다.
+게임은 이 그림들을 무기 종류 하나("특수 무기")로 붙여서 일반 · 희귀 · 영웅 등급에서만 뽑습니다.
 
 사용법:  pip install pillow numpy scipy
          python3 tools/build_jokes.py            (index.html 까지 갱신)
@@ -228,7 +228,7 @@ def build():
         print('  %-12s %-7s 배율 %.2f  P=%s T=%s g=%.1f h=%.1f  %4d B' % (key, ko, sc, data[key]['P'], data[key]['T'], g, h, len(data[key]['src'])))
     preview(sheet)
     with open(os.path.join(OUT, 'CREDITS.md'), 'w', encoding='utf-8') as f:
-        f.write('# 병맛 무기 그림\n\n이 게임을 위해 새로 그린 그림입니다(tools/build_jokes.py 가 도형으로 그림). '
+        f.write('# 특수 무기 그림\n\n이 게임을 위해 새로 그린 그림입니다(tools/build_jokes.py 가 도형으로 그림). '
                 '[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) — 자유롭게 쓸 수 있습니다.\n\n'
                 '| 파일 | 이름 | 등급 |\n| --- | --- | --- |\n' +
                 '\n'.join('| `%s.png` | %s | %s |' % (k, ko, ['일반', '희귀', '영웅'][r]) for k, r, ko, _ in DESIGNS) + '\n')
@@ -237,7 +237,7 @@ def build():
 
 def inject(data, pools):
     block = ('/* JOKE-SPRITES:BEGIN */\n'
-             '  /* 병맛 무기 그림 — tools/build_jokes.py 가 만듭니다. 직접 고치지 마세요. JOKE_POOLS[등급] = 일반 · 희귀 · 영웅 */\n'
+             '  /* 특수 무기 그림 — tools/build_jokes.py 가 만듭니다. 직접 고치지 마세요. JOKE_POOLS[등급] = 일반 · 희귀 · 영웅 */\n'
              '  var JOKE_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n'
              '  var JOKE_POOLS = ' + json.dumps(pools, separators=(',', ':')) + ';\n'
              '  /* JOKE-SPRITES:END */')

@@ -1,4 +1,4 @@
-# 병맛 무기 그림
+# 특수 무기 그림
 
 이 게임을 위해 새로 그린 그림입니다(tools/build_jokes.py 가 도형으로 그림). [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) — 자유롭게 쓸 수 있습니다.
 

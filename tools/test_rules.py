@@ -121,7 +121,7 @@ expect('단계 +22 → 거부', write(t1, 'arena/' + u1, ar(22, 0), ['at']), Fal
 expect('씨앗이 32비트를 넘음 → 거부', write(t1, 'arena/' + u1, ar(5, 0, seed=4294967296), ['at']), False)
 expect('남의 대표 무기 쓰기 → 거부', write(t2, 'arena/' + u1, ar(1, 0), ['at']), False)
 expect('모르는 필드 → 거부', write(t1, 'arena/' + u1, ar(5, 0, gold=1), ['at']), False)
-expect('병맛 무기(종류 5) 대표 무기 → 허용', write(t1, 'arena/' + u1, ar(9, 1, kind=5), ['at']), True)
+expect('특수 무기(종류 5) 대표 무기 → 허용', write(t1, 'arena/' + u1, ar(9, 1, kind=5), ['at']), True)
 expect('없는 종류(6) → 거부', write(t1, 'arena/' + u1, ar(9, 1, kind=6), ['at']), False)
 expect('로그인 안 해도 대표 무기 보기 → 허용', read(None, 'arena/' + u2), True)
 

@@ -14,6 +14,15 @@
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://ys-prog704.github.io/-/">
 <meta name="twitter:card" content="summary_large_image">
+<!-- 홈 화면 앱: 설치하면 주소창 없이 전체 화면으로 열립니다 (manifest.webmanifest · sw.js · assets/app/) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#100E0C">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/app/icon-192.png">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="검 키우기">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap">
@@ -354,6 +363,10 @@ img{max-width:100%}
 .kakao .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
 .btn-kakao{color:#191600;background:#FEE500;border-color:#FEE500;font-weight:700}
 .btn-kakao:hover{color:#191600;background:#FFEB3B;border-color:#FFEB3B}
+.btn-app{color:var(--parch);border-color:color-mix(in srgb, var(--ember) 70%, transparent);font-weight:600}
+.btn-app:hover{border-color:var(--ember);background:color-mix(in srgb, var(--ember) 12%, transparent)}
+.notice.app-tip{background:color-mix(in srgb, var(--ember) 11%, var(--iron));border-color:color-mix(in srgb, var(--ember) 50%, transparent)}
+.app-tip .notice-tag{color:var(--ember)}
 
 /* ── 온라인 (로그인 · 랭킹) ── */
 .online{margin-top:18px;padding:10px 15px}
@@ -902,11 +915,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       <p class="tagline">한 자루를 끝까지 키우세요. 부서지면 새 무기가 뽑힙니다. 확률은 전부 공개됩니다.</p>
     </div>
     <div class="brand-tools">
+      <button class="btn-ghost btn-app" id="installBtn" type="button" hidden>앱으로 설치</button>
       <button class="btn-ghost btn-kakao" id="inviteBtn" type="button">카톡으로 친구 초대</button>
       <button class="btn-ghost" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
       <button class="btn-ghost" id="resetBtn" type="button">초기화</button>
     </div>
   </header>
+
+  <div class="notice app-tip" id="appTip" role="status" hidden>
+    <b class="notice-tag">앱으로 설치</b>
+    <span class="notice-text" id="appTipText"></span>
+    <button class="btn-ghost small" id="appTipClose" type="button">닫기</button>
+  </div>
 
   <div class="notice" id="notice" role="status" hidden>
     <b class="notice-tag">운영자 공지</b>
@@ -6070,6 +6090,58 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     loginReturnCheck();
     if (online.on && Date.now() - online.rankAt > 60000) loadRanking();
   });
+
+  /* ═════════ 홈 화면 앱 ═════════
+     안드로이드(크롬 · 삼성 인터넷)는 브라우저가 설치 창을 띄울 수 있을 때 "앱으로 설치" 버튼을 보여 주고,
+     아이폰은 직접 설치 창을 못 띄우므로 버튼을 누르면 "공유 → 홈 화면에 추가" 방법을 알려 줍니다.
+     이미 앱으로 열었거나 카톡 같은 앱 안 브라우저에서는 버튼을 숨깁니다. sw.js 는 https 에서만 등록합니다. */
+  var appPrompt = null;
+  function appStandalone(){
+    return navigator.standalone === true || (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches));
+  }
+  function appIOS(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); }
+  function appTip(text){
+    $('appTipText').textContent = text;
+    $('appTip').hidden = !text;
+  }
+  function appButton(){
+    var show = !appStandalone() && !inAppBrowser() && (!!appPrompt || appIOS());
+    $('installBtn').hidden = !show;
+  }
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();                 // 브라우저가 알아서 띄우는 대신, 버튼을 눌렀을 때 띄웁니다
+    appPrompt = e;
+    appButton();
+  });
+  window.addEventListener('appinstalled', function(){
+    appPrompt = null;
+    appButton();
+    appTip('설치됐어요! 이제 홈 화면의 "검 키우기" 아이콘으로 열면 앱처럼 전체 화면으로 열려요.');
+  });
+  $('installBtn').addEventListener('click', function(){
+    if (appPrompt){
+      var e = appPrompt;
+      appPrompt = null;
+      e.prompt();
+      (e.userChoice || Promise.resolve({})).then(function(c){
+        if (c && c.outcome === 'dismissed') appTip('나중에 설치하려면 브라우저 메뉴(⋮)에서 "앱 설치" 또는 "홈 화면에 추가"를 누르세요.');
+        appButton();
+      });
+      return;
+    }
+    if (appIOS()){
+      appTip('아이폰: 화면 아래(또는 위)의 공유 버튼(□↑)을 누르고 "홈 화면에 추가"를 고르세요. ' +
+             '홈 화면 앱은 사파리와 저장이 따로라서, 로그인하면 진행이 그대로 이어져요(로그인 없이는 저장 코드로 옮기기).');
+      return;
+    }
+    appTip('브라우저 메뉴(⋮)에서 "앱 설치" 또는 "홈 화면에 추가"를 누르세요.');
+  });
+  $('appTipClose').addEventListener('click', function(){ appTip(''); });
+  appButton();
+  if ('serviceWorker' in navigator && location.protocol === 'https:'){
+    var appSW = function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); };
+    if (document.readyState === 'complete') appSW(); else window.addEventListener('load', appSW);
+  }
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;

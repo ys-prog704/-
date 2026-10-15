@@ -47,6 +47,10 @@ ba.RAMPS.update({
     'steelDk': ['#2A2F38', '#3E4450', '#565E6C', '#727B8A'],
     'holeDk':  ['#0A0806', '#16120C', '#241D14'],
     'bambooDk': ['#2A1C06', '#45300E', '#5E4416'],
+    'pinkP':   ['#3A0618', '#6E0E32', '#A81C52', '#D8337A', '#F466A2', '#FFB2D0'],
+    'tear':    ['#06204A', '#0E3E84', '#1E66C2', '#4A9AF0', '#9ACCFF', '#E6F4FF'],
+    'cork':    ['#4A2E14', '#7A5028', '#A8784A', '#CFA272', '#E8C79A'],
+    'line':    ['#8C96A6', '#C8D0DC', '#F4F7FB'],
 })
 
 
@@ -164,7 +168,107 @@ def recorder():
     return parts, -16.8, 17.4, -10
 
 
-# (키, 등급 0 일반 · 1 희귀 · 2 영웅, 한국어 이름, 그리는 함수)
+# ── 전설: 친구들 이름이 붙은 무기 (속성과 상관없이 셋 중 하나가 똑같은 확률로) ──
+def pic(u0, v0, down, right):
+    """(u0, v0) 에서 그림 기준 아래로 down, 오른쪽으로 right 만큼 간 점 — 매달린 물건을 똑바로 세울 때."""
+    k = math.sqrt(.5)
+    return (u0 + (down + right) * k, v0 + (right - down) * k)
+
+
+def heart_half(cv, s, side, crack):
+    """하트 반쪽(side=-1 왼쪽, +1 오른쪽). 뾰족한 끝이 손잡이 쪽. crack 은 가운데 갈라진 선(위 → 아래)."""
+    pts = []
+    for i in range(25):
+        t = math.pi * i / 24                                    # 0 = 위쪽 오목한 곳 → π = 아래 뾰족한 끝
+        x = 16 * math.sin(t) ** 3
+        y = 13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
+        pts.append((side * x * s, cv + y * s))
+    return pts + [(u, v) for u, v in reversed(crack)][1:-1]
+
+
+def solo_staff():
+    """정수의 솔로 지팡이 — 나무 지팡이 끝에 쩍 갈라진 분홍 하트, 눈물 한 방울"""
+    s, cv = 0.40, 12.6
+    top, bot = cv + 5 * s, cv - 17 * s
+    crack = [(0, top), (1.1, top - 1.8), (-0.9, top - 3.8), (1.0, top - 5.8), (-0.8, top - 7.8), (0.4, bot + 1.4), (0, bot)]
+    left = [(u - 0.45, v + 0.35) for u, v in heart_half(cv, s, -1, crack)]
+    right = [(u + 0.45, v - 0.1) for u, v in heart_half(cv, s, 1, crack)]
+    parts = [Part(sym([(0.9, -17.2), (1.0, bot + 0.6)]), 'wood', 'dome'),
+             Part(ell(0, -16.9, 1.3, 1.3), 'wood', 'dome'),
+             Part(sym([(1.5, -9.6), (1.5, -8.4)]), 'gold', 'dome', weight=1.6),
+             Part(left, 'pinkP', 'dome', weight=1.2),
+             Part(right, 'pinkP', 'dome', weight=1.2),
+             Part(ell(-2.6, cv + 1.4, 0.9, 0.6, rot=-40), 'pinkP', 'flat', bias=0.4, weight=2.4),
+             Part(stroke([(u * 1.1, v) for u, v in crack[:-1]], 0.55), 'holeDk', 'flat', weight=3)]
+    c = pic(4.2, cv - 2.2, 3.2, 1.2)
+    parts.append(Part([pic(c[0], c[1], -1.5, 0)] + [pic(c[0], c[1], 0.3 + 0.7 * math.sin(math.radians(a)), 0.75 * math.cos(math.radians(a)))
+                                                     for a in range(-20, 210, 15)], 'tear', 'dome', weight=2))
+    parts[-1].pts = [(c[0] + (u - c[0]) * 1.5, c[1] + (v - c[1]) * 1.5) for u, v in parts[-1].pts]
+    return parts, -17.2, top + 0.6, 6
+
+
+def fishing_rod():
+    """소헌이의 낚싯대 — 코르크 손잡이, 릴, 금색 가이드, 줄 끝에 걸려 올라온 삼선 슬리퍼"""
+    parts = [Part(stroke([(0, -16.0), (0, -9.0)], 2.5, 2.2), 'cork', 'dome'),
+             Part(ell(0, -16.6, 1.5, 1.3), 'sole', 'dome'),
+             Part(stroke([(0, -9.2), (0, 6), (0, 18.6)], 1.3, 0.45), 'blueP', 'dome'),
+             Part(sym([(1.0, -9.4), (1.0, -8.2)]), 'gold', 'dome', weight=1.6),
+             Part(stroke([(0.6, -6.6), (2.2, -6.2)], 0.8), 'silver', 'dome'),
+             Part(ell(3.1, -6.4, 1.8, 1.8), 'silver', 'dome'),
+             Part(ell(3.1, -6.4, 0.7, 0.7), 'steelDk', 'dome', weight=2.4),
+             Part(stroke([(3.1, -6.4), (4.4, -4.8)], 0.55), 'gold', 'flat', weight=2)]
+    for v in (-1.5, 5.5, 12.0, 17.2):
+        parts.append(Part(ell(0.75, v, 0.45, 0.45), 'gold', 'dome', weight=2.2))
+    tip = (0.3, 18.6)
+    end = pic(tip[0], tip[1], 5.4, 0)
+    parts.append(Part(stroke([tip, pic(tip[0], tip[1], 2.7, 0.2), end], 0.45), 'line', 'flat', bias=0.2, weight=1.4))
+    # 슬리퍼: 걸린 쪽(뒤꿈치 끈)이 위, 발끝이 아래로 늘어짐. 그림 기준으로 똑바로 세워서 그림
+    L, W = 11.0, 2.9
+    sole = []
+    for a in range(0, 360, 10):
+        t = (1 - math.cos(math.radians(a))) / 2                  # 0 = 뒤꿈치(위) → 1 = 발끝(아래)
+        wide = W * (0.78 + 0.3 * t) * (abs(math.sin(math.radians(a))) ** 0.6)
+        sole.append(pic(end[0], end[1], 0.6 + L * t, wide if a < 180 else -wide))
+    parts.append(Part(sole, 'sole', 'bevel', bevel=0.9))
+    strap = [pic(end[0], end[1], d, side * (W + 0.25)) for d, side in ((1.3, -1), (1.3, 1), (6.2, 1), (6.2, -1))]
+    parts.append(Part(strap, 'blueP', 'dome', weight=1.4))
+    for d in (2.5, 3.8, 5.1):
+        parts.append(Part([pic(end[0], end[1], d - 0.28, -W), pic(end[0], end[1], d - 0.28, W), pic(end[0], end[1], d + 0.28, W), pic(end[0], end[1], d + 0.28, -W)],
+                          'stripe', 'flat', bias=0.25, weight=3))
+    parts.append(Part(stroke([pic(end[0], end[1], -0.2, 0), pic(end[0], end[1], 1.0, 0.5), pic(end[0], end[1], 1.4, -0.3)], 0.45), 'silver', 'flat', weight=2.5))
+    return parts, -17.0, 18.6, 4
+
+
+def bone_sword():
+    """현근이의 뼈다귀검 — 칼날이 커다란 뼈다귀(한입 베어 문 자국), 코등이는 빨간 강아지 목줄과 금색 이름표"""
+    w = 1.9
+    left = []                                                    # -u 쪽 가장자리: 위(끝) → 아래, 가운데쯤 이빨 자국 두 개
+    for i in range(81):
+        v = 13.2 - 20.4 * i / 80
+        d = 0.0
+        if abs(v - 5.0) < 2.7:                                   # 크게 한입 + 가장자리에 이빨 자국(물결)
+            d = max(0.0, math.sqrt(2.7 ** 2 - (v - 5.0) ** 2) - 0.55 * abs(math.sin(math.pi * (v - 5.0) / 1.35)))
+        left.append((-w + d, v))
+    shaft = [(w, -7.2), (w, 13.2)] + left
+    parts = []
+    parts += ba.grip(-16.4, -9.2, 1.25, 'leather', 'bone', 3)
+    parts.append(Part(ell(0, -17.0, 1.6, 1.4), 'bone', 'dome'))
+    for u in (-1.7, 1.7):
+        parts.append(Part(ell(u, -6.4, 2.0, 1.9), 'bone', 'dome'))
+    parts.append(Part(shaft, 'bone', 'dome'))
+    for u in (-1.75, 1.75):
+        parts.append(Part(ell(u, 14.6, 2.2, 2.2), 'bone', 'dome'))
+    parts.append(Part(ell(0, 13.9, 1.7, 1.4), 'bone', 'dome'))
+    parts.append(Part(rect(-4.6, 4.6, -9.6, -7.6), 'redP', 'dome', weight=1.3))
+    for u in (-3.0, -1.0, 1.0, 3.0):
+        parts.append(Part(ell(u, -8.6, 0.35, 0.35), 'yellowP', 'flat', bias=0.3, weight=3))
+    tag = pic(0.6, -9.6, 1.8, 0)
+    parts.append(Part(stroke([(0.6, -9.4), tag], 0.4), 'gold', 'flat', weight=2))
+    parts.append(Part(ell(tag[0], tag[1], 1.25, 1.25), 'gold', 'dome', weight=1.6))
+    return parts, -17.4, 16.8, -7
+
+
+# (키, 등급 0 일반 · 1 희귀 · 2 영웅 · 3 전설, 한국어 이름, 그리는 함수[, 전설 별칭])
 DESIGNS = [
     ('jkDaepa',     0, '대파',        daepa),
     ('jkLadle',     0, '국자',        ladle),
@@ -175,6 +279,9 @@ DESIGNS = [
     ('jkMackerel',  2, '고등어',      mackerel),
     ('jkSqueak',    2, '뿅망치',      squeak),
     ('jkRecorder',  2, '리코더',      recorder),
+    ('jkSoloStaff', 3, '정수의 솔로 지팡이', solo_staff,  '혼자라서 더 강하다'),
+    ('jkFishRod',   3, '소헌이의 낚싯대',   fishing_rod, '월척 대신 슬리퍼'),
+    ('jkBoneSword', 3, '현근이의 뼈다귀검', bone_sword,  '동네 강아지들이 줄을 선다'),
 ]
 
 
@@ -212,8 +319,8 @@ def tint(img, el, k):
 
 def build():
     os.makedirs(OUT, exist_ok=True)
-    data, pools, sheet = {}, [[], [], []], []
-    for key, rar, ko, fn in DESIGNS:
+    data, pools, sheet = {}, [[], [], [], []], []
+    for key, rar, ko, fn, *rest in DESIGNS:
         parts, vmin, vmax, vg = fn()
         org, sc = ba.place(parts, vmin, vmax)
         img, _ = ba.render(parts, org, sc)
@@ -223,6 +330,8 @@ def build():
         h, s = ba.blade_half(img, P, T, g)
         data[key] = {'P': [round(P[0], 2), round(P[1], 2)], 'T': [round(T[0], 2), round(T[1], 2)],
                      'g': round(g, 2), 'h': h, 's': s, 'ko': ko, 'src': ba.uri(img)}
+        if rest:
+            data[key]['epi'] = rest[0]
         pools[rar].append(key)
         sheet.append((key, img))
         print('  %-12s %-7s 배율 %.2f  P=%s T=%s g=%.1f h=%.1f  %4d B' % (key, ko, sc, data[key]['P'], data[key]['T'], g, h, len(data[key]['src'])))
@@ -231,13 +340,13 @@ def build():
         f.write('# 특수 무기 그림\n\n이 게임을 위해 새로 그린 그림입니다(tools/build_jokes.py 가 도형으로 그림). '
                 '[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) — 자유롭게 쓸 수 있습니다.\n\n'
                 '| 파일 | 이름 | 등급 |\n| --- | --- | --- |\n' +
-                '\n'.join('| `%s.png` | %s | %s |' % (k, ko, ['일반', '희귀', '영웅'][r]) for k, r, ko, _ in DESIGNS) + '\n')
+                '\n'.join('| `%s.png` | %s | %s |' % (k, ko, ['일반', '희귀', '영웅', '전설'][r]) for k, r, ko, *_ in DESIGNS) + '\n')
     return data, pools
 
 
 def inject(data, pools):
     block = ('/* JOKE-SPRITES:BEGIN */\n'
-             '  /* 특수 무기 그림 — tools/build_jokes.py 가 만듭니다. 직접 고치지 마세요. JOKE_POOLS[등급] = 일반 · 희귀 · 영웅 */\n'
+             '  /* 특수 무기 그림 — tools/build_jokes.py 가 만듭니다. 직접 고치지 마세요. JOKE_POOLS[등급] = 일반 · 희귀 · 영웅 · 전설 */\n'
              '  var JOKE_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n'
              '  var JOKE_POOLS = ' + json.dumps(pools, separators=(',', ':')) + ';\n'
              '  /* JOKE-SPRITES:END */')

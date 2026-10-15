@@ -13,3 +13,6 @@
 | `jkMackerel.png` | 고등어 | 영웅 |
 | `jkSqueak.png` | 뿅망치 | 영웅 |
 | `jkRecorder.png` | 리코더 | 영웅 |
+| `jkSoloStaff.png` | 정수의 솔로 지팡이 | 전설 |
+| `jkFishRod.png` | 소헌이의 낚싯대 | 전설 |
+| `jkBoneSword.png` | 현근이의 뼈다귀검 | 전설 |

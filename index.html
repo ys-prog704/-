@@ -915,6 +915,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="brand-tools">
       <button class="btn-ghost btn-app" id="installBtn" type="button" hidden>앱으로 설치</button>
       <button class="btn-ghost btn-kakao" id="inviteBtn" type="button">카톡으로 친구 초대</button>
+      <button class="btn-ghost" id="miniBtn" type="button" aria-pressed="false" hidden
+              title="화면 구석에 항상 위에 떠 있는 작은 창 (크롬 · 엣지 PC). 창 안에서 Esc 를 누르면 위장 모드">미니 대장간</button>
       <button class="btn-ghost" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
       <button class="btn-ghost" id="resetBtn" type="button">초기화</button>
     </div>
@@ -2902,7 +2904,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 소리 (WebAudio 합성, 파일 없음) ═════════ */
   var actx = null;
   function audio(){
-    if (!state.sound) return null;
+    if (!state.sound || (mini && mini.win && mini.disguise)) return null;   // 위장 모드에서는 소리 없음
     try {
       if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
@@ -3425,7 +3427,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function sweep(r, done){
     var el = $('marker');
     el.classList.add('on');
-    if (reduced()){ el.style.left = (r * 100).toFixed(3) + '%'; setTimeout(done, 120); return; }
+    // 본 화면이 최소화 · 가려져 있으면(미니 대장간으로 강화할 때) 애니메이션 프레임이 오지 않으므로 바로 멈춥니다
+    if (reduced() || document.hidden){ el.style.left = (r * 100).toFixed(3) + '%'; setTimeout(done, 120); return; }
     var dur = 950, laps = 2, t0 = performance.now();
     function frame(now){
       var t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
@@ -6117,6 +6120,128 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var appSW = function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); };
     if (document.readyState === 'complete') appSW(); else window.addEventListener('load', appSW);
   }
+
+  /* ═════════ 미니 대장간 ═════════
+     화면 구석에 항상 위에 떠 있는 손바닥만 한 창입니다 (크롬 · 엣지 PC 의 Document Picture-in-Picture, 없으면 버튼을 숨김).
+     창 안의 강화 · 판매는 본 화면의 버튼을 그대로 눌러서, 규칙(판매 두 번 확인 · +20 무기고 넣기)이 한곳에만 있습니다.
+     위장 모드(창 안에서 Esc 또는 오른쪽 위 버튼): 메모장처럼 보이고, 소리가 꺼지고, 탭 · 창 제목이 "업무일지"가 됩니다.
+     무기는 오른쪽 아래에 작은 회색 낙서처럼 숨어 있다가 마우스를 올리면 커집니다. 위장 여부는 이 기기에 기억합니다. */
+  var mini = { win:null, disguise:false, sig:'', title:document.title };
+  try { mini.disguise = localStorage.getItem('forge-mini-disguise') === '1'; } catch (e) {}
+  var MINI_HTML =
+    '<div class="memo"><span>파일</span><span>편집</span><span>보기</span></div>' +
+    '<div class="top"><canvas id="cv" width="300" height="300"></canvas>' +
+    '<div class="info"><b id="nm"></b><span id="gd"></span></div></div>' +
+    '<div id="od"></div><p id="vd"></p>' +
+    '<div class="row"><button id="fb" type="button"></button><button id="sb" type="button"></button></div>' +
+    '<button id="dg" type="button" title="위장 모드 (Esc)"></button>';
+  var MINI_CSS =
+    ':root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;height:100%}' +
+    'body{background:#100E0C;color:#F3ECE0;font:13px/1.4 "IBM Plex Sans KR",system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;padding:10px;overflow:hidden;user-select:none}' +
+    '.memo{display:none}.top{display:flex;gap:10px;align-items:center}' +
+    '#cv{width:92px;height:92px;flex:none;border-radius:10px;background:radial-gradient(circle,#2A231C,#1A1613 70%);box-shadow:0 0 0 1px #332B22 inset}' +
+    '.info{display:flex;flex-direction:column;gap:3px;min-width:0;padding-right:34px}' +
+    '#nm{font-size:14px;font-weight:700;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}' +
+    '#gd,#od{font-family:"IBM Plex Mono",ui-monospace,monospace}#gd{color:#D9A441;font-size:12px}#od{color:#B6A997;font-size:11.5px}' +
+    '#vd{margin:0;min-height:2.8em;color:#B6A997;font-size:12.5px}#vd.v-ok{color:#5FA463}#vd.v-boom{color:#C94A40}' +
+    '.row{display:flex;gap:6px;margin-top:auto}' +
+    'button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:9px 6px;cursor:pointer}button:disabled{opacity:.45;cursor:default}' +
+    '#fb{flex:1.4;background:#E8622C;color:#100E0C}#sb{flex:1;background:#221C17;color:#D9A441;box-shadow:0 0 0 1px #463A2D inset}' +
+    '#sb.armed{background:#C94A40;color:#F3ECE0;box-shadow:none}' +
+    '#dg{position:fixed;top:8px;right:8px;padding:3px 7px;font-size:11px;font-weight:500;background:none;color:#8A7F72;box-shadow:0 0 0 1px #332B22 inset;border-radius:6px}' +
+    /* 위장 모드 — 메모장 */
+    'body.disg{color-scheme:light;background:#fff;color:#000;font:13px/1.6 Consolas,"D2Coding","맑은 고딕",monospace;padding:0;gap:0}' +
+    'body.disg .memo{display:flex;gap:14px;padding:4px 10px;font:12px "Segoe UI","맑은 고딕",sans-serif;border-bottom:1px solid #e5e5e5}' +
+    'body.disg .top,body.disg #od,body.disg #vd,body.disg .row{padding-left:10px;padding-right:10px}body.disg .top{padding-top:8px}' +
+    'body.disg #nm,body.disg #gd,body.disg #od,body.disg #vd{font:inherit;color:#000}' +
+    'body.disg #cv{position:fixed;right:8px;bottom:8px;width:28px;height:28px;background:none;box-shadow:none;border-radius:0;filter:grayscale(1);opacity:.3;transition:width .15s,height .15s,opacity .15s,filter .15s}' +
+    'body.disg #cv:hover{width:92px;height:92px;filter:none;opacity:1}' +
+    'body.disg .row{margin-top:8px;padding-bottom:10px}' +
+    'body.disg button,body.disg #fb,body.disg #sb{flex:none;background:#fdfdfd;color:#000;border:1px solid #adadad;border-radius:3px;padding:3px 12px;font:12px "Segoe UI","맑은 고딕",sans-serif;box-shadow:none}' +
+    'body.disg #sb.armed{color:#c00;border-color:#c00}body.disg #dg{top:3px;right:6px;border:0;background:none;box-shadow:none;color:#bbb}';
+  function miniMemoTitle(){
+    var d = new Date();
+    return '업무일지_' + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.txt - 메모장';
+  }
+  function miniSet(el, text){ if (el.textContent !== text) el.textContent = text; }
+  function miniTitle(){
+    var on = !!(mini.win && mini.disguise);
+    document.title = on ? miniMemoTitle() : mini.title;
+    if (mini.win) mini.win.document.title = on ? miniMemoTitle() : '미니 대장간';
+  }
+  function miniButton(){
+    var b = $('miniBtn');
+    b.hidden = !window.documentPictureInPicture;
+    b.textContent = mini.win ? '미니 창 닫기' : '미니 대장간';
+    b.setAttribute('aria-pressed', String(!!mini.win));
+  }
+  function miniSync(){
+    var w = mini.win;
+    if (!w) return;
+    var d = w.document, D = mini.disguise, sw = currentSword(), lv = state.level, o = odds(lv, state.buffs);
+    d.body.classList.toggle('disg', D);
+    var sig = state.sword.seed + ':' + lv + ':' + state.sword.rar + ':' + sw.key;
+    if (sig !== mini.sig){ mini.sig = sig; renderStill(d.getElementById('cv'), sw, false); }
+
+    var nm = d.getElementById('nm');
+    miniSet(nm, D ? '진행 단계: ' + lv + '단계' : '+' + lv + ' ' + sw.name);
+    nm.style.color = D ? '' : sw.R.color;
+    miniSet(d.getElementById('gd'), D ? '예산 잔액: ' + fmt(state.gold) : fmt(state.gold) + ' G');
+    miniSet(d.getElementById('od'), o === null ? (D ? '최종 단계 — 보관 대기' : '최고 단계 — 무기고에 넣을 수 있어요')
+      : D ? '승인 ' + pct(o.s) + ' / 보류 ' + pct(o.k) + ' / 반려 ' + pct(o.x)
+          : '성공 ' + pct(o.s) + ' · 유지 ' + pct(o.k) + ' · 파괴 ' + pct(o.x));
+
+    var v = $('verdict'), kind = (/\bv-(\w+)/.exec(v.className) || [])[1] || '', vd = d.getElementById('vd');
+    vd.className = D ? '' : 'v-' + kind;
+    miniSet(vd, !D ? v.textContent
+      : rolling ? '검토 중…'
+      : kind === 'ok' ? '승인 완료 — ' + lv + '단계'
+      : kind === 'boom' ? '반려 — 처음부터 다시 진행'
+      : kind === 'keep' ? '보류 — 단계 유지' : '');
+
+    var F = $('forgeBtn'), S = $('sellBtn'), fb = d.getElementById('fb'), sb = d.getElementById('sb');
+    var fCost = $('forgeCost').textContent, sPrice = $('sellPrice').textContent, armed = S.classList.contains('armed');
+    function num(t){ return /\d/.test(t) ? ' (' + t.replace(/\s*G$/, '') + ')' : ''; }   // "판매 불가" 같은 글은 빼고 숫자만
+    miniSet(fb, D ? (lv === MAX ? '보관' : '제출') + num(fCost) : F.firstChild.nodeValue + ' ' + fCost);
+    miniSet(sb, D ? (armed ? '정말 정산할까요?' : '정산' + num(sPrice))
+                  : /\d/.test(sPrice) || armed ? S.firstChild.nodeValue + ' ' + sPrice : sPrice);
+    fb.disabled = F.disabled;
+    sb.disabled = S.disabled;
+    sb.classList.toggle('armed', armed);
+    miniSet(d.getElementById('dg'), D ? '⋯' : '위장');
+  }
+  function miniDisguise(){
+    mini.disguise = !mini.disguise;
+    try { localStorage.setItem('forge-mini-disguise', mini.disguise ? '1' : '0'); } catch (e) {}
+    miniTitle(); miniSync();
+  }
+  function miniOpen(){
+    if (mini.win){ mini.win.close(); return; }
+    if (!window.documentPictureInPicture) return;
+    window.documentPictureInPicture.requestWindow({ width: 280, height: 300 }).then(function(w){
+      mini.win = w; mini.sig = '';
+      var d = w.document;
+      var font = d.createElement('link');
+      font.rel = 'stylesheet';
+      font.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;700&display=swap';
+      var css = d.createElement('style');
+      css.textContent = MINI_CSS;
+      d.head.appendChild(font); d.head.appendChild(css);
+      d.body.innerHTML = MINI_HTML;
+      d.getElementById('fb').addEventListener('click', function(){ $('forgeBtn').click(); miniSync(); });
+      d.getElementById('sb').addEventListener('click', function(){ $('sellBtn').click(); miniSync(); });
+      d.getElementById('dg').addEventListener('click', miniDisguise);
+      d.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ e.preventDefault(); miniDisguise(); } });
+      w.addEventListener('pagehide', function(){
+        if (mini.win !== w) return;
+        mini.win = null; miniTitle(); miniButton();
+      });
+      w.setInterval(miniSync, 200);   // 미니 창의 타이머라서 본 화면이 최소화돼도 느려지지 않습니다
+      miniTitle(); miniButton(); miniSync();
+    }).catch(function(){});
+  }
+  $('miniBtn').addEventListener('click', miniOpen);
+  miniButton();
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;

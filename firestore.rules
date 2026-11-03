@@ -126,6 +126,68 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // 무덤: +15 이상 무기가 강화하다 부서지면 묘비가 하나 남습니다. 누구나 보고, 자기 묘비만 만들고, 고칠 수 없습니다.
+    // 반응(r/{uid}): 묘비마다 사람마다 하나 — 🌼 조문(f) 또는 🤣 비웃기(l). 바꾸거나 지울 수 있습니다.
+    match /graves/{id} {
+      allow read: if true;
+      allow create: if signedIn() && !banned()
+        && onlyKeys(['uid', 'name', 'sword', 'lv', 'rar', 'el', 'kind', 'seed', 'cause', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+        && request.resource.data.sword is string
+        && request.resource.data.sword.size() >= 1 && request.resource.data.sword.size() <= 40
+        && request.resource.data.lv is int && request.resource.data.lv >= 15 && request.resource.data.lv <= 21
+        && request.resource.data.rar is int && request.resource.data.rar >= 0 && request.resource.data.rar <= 4
+        && request.resource.data.el is int && request.resource.data.el >= 0 && request.resource.data.el <= 9
+        && request.resource.data.kind is int && request.resource.data.kind >= 0 && request.resource.data.kind <= 5
+        && request.resource.data.seed is int && request.resource.data.seed >= 0 && request.resource.data.seed <= 4294967295
+        && request.resource.data.cause is string
+        && request.resource.data.cause.size() >= 1 && request.resource.data.cause.size() <= 30
+        && request.resource.data.at == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      match /r/{uid} {
+        allow read: if true;
+        allow create, update: if isOwner(uid) && !banned()
+          && onlyKeys(['k', 'at'])
+          && request.resource.data.k in ['f', 'l']
+          && request.resource.data.at == request.time
+          && exists(/databases/$(database)/documents/graves/$(id));
+        allow delete: if isOwner(uid) || isAdmin();
+      }
+    }
+
+    // 오늘의 무기: 하루짜리 도전 기록. 누구나 보고 자기 것만 올립니다. 한국 날짜로 하루에 한 번만 씁니다.
+    // day 는 서버 시간의 한국 날짜(YYYYMMDD)여야 하고, score = day × 10^8 + lv × 10^6 + left 라서
+    // 점수순으로만 정렬해도 오늘 순위가 나옵니다(단계 → 남은 골드 순).
+    function todayInt() {
+      return (request.time + duration.value(9, 'h')).year() * 10000
+        + (request.time + duration.value(9, 'h')).month() * 100
+        + (request.time + duration.value(9, 'h')).day();
+    }
+    function validDaily() {
+      return onlyKeys(['name', 'day', 'lv', 'left', 'end', 'score', 't', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+        && request.resource.data.day == todayInt()
+        && request.resource.data.lv is int && request.resource.data.lv >= 0 && request.resource.data.lv <= 20
+        && request.resource.data.left is int && request.resource.data.left >= 0 && request.resource.data.left <= 999999
+        && request.resource.data.end in ['stop', 'boom', 'gold']
+        && (request.resource.data.end != 'boom' || request.resource.data.left == 0)
+        && request.resource.data.score == request.resource.data.day * 100000000
+             + request.resource.data.lv * 1000000 + request.resource.data.left
+        && request.resource.data.t is string && request.resource.data.t.size() <= 16
+        && request.resource.data.at == request.time;
+    }
+    match /daily/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid) && !banned() && validDaily();
+      allow update: if isOwner(uid) && !banned() && validDaily()
+        && kstDay(request.time) > kstDay(resource.data.at);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
     // 결투장 대표 무기: 누구나 볼 수 있고 자기 것만 올립니다. 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
     match /arena/{uid} {
       allow read: if true;

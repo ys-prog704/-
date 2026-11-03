@@ -589,6 +589,27 @@ img{max-width:100%}
 .ach.got span{color:var(--ash-2)}
 .ach.on{box-shadow:0 0 0 1px var(--gold) inset;background:color-mix(in srgb, var(--gold) 12%, var(--iron-2))}
 .ach:focus-visible{outline:2px solid var(--gold)}
+.grave-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:560px;overflow-y:auto}
+.grave{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 8px 8px;background:var(--iron-2);border-radius:70px 70px 6px 6px;box-shadow:0 0 0 1px var(--line-2) inset;text-align:center;min-width:0}
+.grave.me{box-shadow:0 0 0 1px var(--gold) inset}
+.grave canvas{width:72px;height:72px;filter:grayscale(.6) brightness(.9)}
+.grave .rip{font-family:var(--font-mono);font-size:10px;letter-spacing:.25em;color:var(--ash)}
+.grave b{font-size:12.5px;color:var(--gold);word-break:keep-all}
+.grave .gn,.grave .gt{font-size:11px;color:var(--ash-2)}
+.grave .gc{font-size:11.5px;color:var(--ash-2);font-style:italic}
+.grave .rx{display:flex;gap:4px;margin-top:4px}
+.grave .rx button{all:unset;cursor:pointer;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--iron-3);font-family:var(--font-mono)}
+.grave .rx button.on{box-shadow:0 0 0 1px var(--gold) inset}
+.grave .rx button:disabled{opacity:.4;cursor:default}
+.grave .rx button:focus-visible{outline:2px solid var(--gold)}
+.grave-empty{grid-column:1/-1;font-size:12px;color:var(--ash);padding:10px 4px}
+.daily-box{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.daily-box canvas{width:110px;height:110px;flex:none;background:var(--iron-2);border-radius:var(--r-sm)}
+.daily-info{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--ash-2)}
+.daily-info b{font-size:13px;color:var(--gold)}
+.daily-lv{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--parch)}
+.daily-msg{min-height:1.3em}
+.daily-btns{display:flex;gap:6px;margin-top:4px}
 .fun-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9000;max-width:calc(100vw - 32px);
   padding:10px 16px;border-radius:999px;background:var(--iron-3);color:var(--parch);font-size:13.5px;font-weight:600;
   box-shadow:0 0 0 1px var(--gold) inset,0 8px 30px rgba(0,0,0,.5);animation:funIn .25s ease-out}
@@ -1245,6 +1266,38 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         </div>
         <ol class="rank-list" id="lupinList"></ol>
         <p class="fun-note">1등은 🥷 오늘의 월급루팡. 💀 를 누르면 그 사람의 다음 강화 파괴 확률이 3% 올라가요 (하루에 한 번).</p>
+      </section>
+
+      <section class="panel rank" id="dailyPanel">
+        <div class="rank-head">
+          <h2>오늘의 무기 🎲 &middot; 하루 한 판</h2>
+          <button class="btn-ghost small" id="dailyRefresh" type="button">새로고침</button>
+        </div>
+        <div class="daily-box">
+          <canvas id="dailyCv" width="120" height="120" role="img" aria-label="오늘의 무기"></canvas>
+          <div class="daily-info">
+            <b id="dailyName"></b>
+            <span class="daily-lv" id="dailyLv">+0</span>
+            <span id="dailyOdds"></span>
+            <span id="dailyGold"></span>
+            <span class="daily-msg" id="dailyMsg" aria-live="polite"></span>
+            <div class="daily-btns">
+              <button class="btn-ghost small" id="dailyForge" type="button">강화</button>
+              <button class="btn-ghost small" id="dailyStop" type="button">멈추기</button>
+            </div>
+          </div>
+        </div>
+        <ol class="rank-list" id="dailyList"></ol>
+        <p class="fun-note">매일 모두에게 같은 무기와 1,000,000 G 를 줘요. 확률 · 비용은 본 게임과 같고 저주는 없어요. 부서지거나 골드가 모자라거나 멈추면 끝 — 오른 단계가 기록되고, 같으면 남은 골드가 많은 사람이 이겨요(부서지면 남은 골드 0). 본 게임 저장과는 따로예요.</p>
+      </section>
+
+      <section class="panel rank" id="graves" hidden>
+        <div class="rank-head">
+          <h2>무덤 ⚰️ &middot; +15 이상 파괴</h2>
+          <button class="btn-ghost small" id="graveRefresh" type="button">새로고침</button>
+        </div>
+        <div class="grave-grid" id="graveGrid"></div>
+        <p class="fun-note">+15 이상 무기가 강화하다 부서지면 묘비가 남아요(로그인했을 때). 🌼 조문 / 🤣 비웃기는 묘비마다 하나씩 누를 수 있고, 바꿀 수 있어요.</p>
       </section>
 
       <section class="panel rank" id="achPanel">
@@ -5164,6 +5217,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         noticeListen();
         loadRanking();
         loadArena();
+        funOnline();
         setInterval(function(){ if (!document.hidden){ loadRanking(); loadArena(); } }, 180000);
         renderOnline();
         render();
@@ -5516,6 +5570,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     $('online').hidden = !online.on && !online.failed;
     $('rank').hidden = !online.on;
     $('lupin').hidden = !online.on;
+    $('graves').hidden = !online.on;
     if (!online.on){
       $('loginBtn').hidden = $('logoutBtn').hidden = $('onlineNote').hidden = true;
       $('onlineWho').textContent = '온라인 기능(로그인·출석·랭킹)을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침 해 주세요. 게임은 이 기기에 저장하며 계속할 수 있어요.';
@@ -6470,14 +6525,17 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     { t:'올빼미',          d:'새벽 1 ~ 5시에 강화' },
     { t:'파산 직전',       d:'골드가 1,000 G 아래로' },
     { t:'흑마법사',        d:'저주를 10번 보냄' },
-    { t:'저주 따위',       d:'저주받은 채로 강화 성공' }
+    { t:'저주 따위',       d:'저주받은 채로 강화 성공' },
+    { t:'조문객',          d:'무덤에서 🌼 조문 10번' },
+    { t:'상주',            d:'내 묘비가 5개' },
+    { t:'오늘의 장인',     d:'오늘의 무기 1등' }
   ];
   function normFun(f){
     f = f && typeof f === 'object' ? f : {};
     var n = function(v, max){ return typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(max, Math.floor(v))) : 0; };
     return { ach: n(f.ach, 1073741823), title: typeof f.title === 'number' && f.title >= 0 && f.title < 30 ? f.title | 0 : -1,
              pick: !!f.pick, wd: n(f.wd, 20991231), wn: n(f.wn, 99999), wt: n(f.wt, 1e9),
-             keep: n(f.keep, 1e6), win: n(f.win, 1e6), hb: n(f.hb, 1e6), cs: n(f.cs, 1e6), seen: n(f.seen, 1e15) };
+             keep: n(f.keep, 1e6), win: n(f.win, 1e6), hb: n(f.hb, 1e6), cs: n(f.cs, 1e6), seen: n(f.seen, 1e15), cond: n(f.cond, 1e6), gr: n(f.gr, 1e6) };
   }
   function kst(){
     var d = new Date(Date.now() + 9 * 3600000);
@@ -6516,6 +6574,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (st.best >= 20) achGet(3, true);
     if (state.fun.wt >= 100) achGet(9, true);
     if (state.fun.cs >= 10) achGet(12, true);
+    if (state.fun.cond >= 10) achGet(14, true);
+    if (state.fun.gr >= 5) achGet(15, true);
   }
   var achSig = '';
   function renderAch(){
@@ -6547,6 +6607,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     achSync();
     if (curse.pending.length && !state.buffs.curse) state.buffs.curse = Math.min(CURSE_MAX, curse.pending.length);
     renderAch();
+    renderDaily();
   }
 
   /* ── 강화 전 · 후 ── */
@@ -6562,6 +6623,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (boss.on || (mini.win && miniHidden())) achGet(8);
     if (k.h >= 1 && k.h < 5) achGet(10);
     cursedRoll = !!state.buffs.curse;
+    graveCurse = cursedRoll && curse.pending.length ? curse.pending[curse.pending.length - 1].from : '';
+    graveSneak = !!(boss.on || (mini.win && miniHidden()));
     if (cursedRoll) curseUsed();
     if (lv >= LIVE_LV && roomNews()){
       roomBot('🔴 생중계 — ' + roomWho() + ' +' + lv + ' → +' + (lv + 1) + ' 도전! (성공 ' + pct(o.s) + ' · 파괴 ' + pct(o.x) +
@@ -6582,6 +6645,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       achGet(0);
       if (from >= 15 && ++F.hb >= 3) achGet(6);
       if (from >= 18) achGet(7);
+      if (from >= 15) graveMake(from);
     }
     cursedRoll = false;
     if (state.stats.best >= 10) achGet(1);
@@ -6726,6 +6790,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }, function(){});
     curseListen();
     loadLupin();
+    queueGraves(); loadDaily();
   }
   function funLogout(){
     if (curse.unsub){ curse.unsub(); curse.unsub = null; }
@@ -6733,7 +6798,242 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (state.buffs) state.buffs.curse = 0;
     lupin.list = null; lupin.err = false; lupin.sent = '';
     clearTimeout(lupin.timer);
+    grave.mine = {}; renderGraves();
+    daily.posting = false; renderDaily();
   }
+
+  /* ═════════ 무덤 ⚰️ · 오늘의 무기 🎲 ═════════
+     무덤 — +15 이상 무기가 강화하다 부서지면 graves/{자동 id} 에 묘비를 남깁니다(로그인했을 때).
+            반응은 graves/{id}/r/{uid} = { k:'f'(🌼 조문) | 'l'(🤣 비웃기) } 이고, 개수는 getCountFromServer 로 셉니다.
+     오늘의 무기 — 날짜에서 만든 같은 무기 · 같은 골드로 하루 한 판. 본 게임 저장과 따로 이 기기(DAILY_KEY)에 둡니다.
+            끝나면 daily/{uid} 에 score = day × 10^8 + 단계 × 10^6 + 남은 골드 로 올려서 점수순만으로 오늘 순위를 냅니다. */
+  var graveCurse = '', graveSneak = false;
+  var grave = { list:null, err:false, cnt:{}, mine:{}, timer:null };
+  function graveCause(){
+    var k = kst();
+    if (graveCurse) return (graveCurse.slice(0, 12) + '의 저주로 순직').slice(0, 30);
+    if (graveSneak || workHours(k)) return '업무 중 순직';
+    if (k.h >= 1 && k.h < 5) return '새벽에 순직';
+    return '장렬히 순직';
+  }
+  function graveMake(from){
+    var cause = graveCause();
+    graveCurse = ''; graveSneak = false;
+    if (!online.user || online.conflict || boardsOff()) return;
+    var F = online.fb, uid = online.user.uid, s = state.sword, kind = swordKind(s);
+    var sw = makeSword(s.seed, from, s.el, s.rar, kind);
+    var d = { uid: uid, name: currentName(), sword: String(sw.name).slice(0, 40), lv: from, rar: s.rar | 0, el: s.el | 0,
+              kind: kind, seed: s.seed >>> 0, cause: cause };
+    F.addDoc(F.collection(online.db, 'graves'), Object.assign({}, d, { at: F.serverTimestamp() })).then(function(ref){
+      if (!isUser(uid)) return;
+      state.fun.gr++;
+      if (state.fun.gr >= 5) achGet(15);
+      save();
+      if (grave.list){ grave.list.unshift(Object.assign({ id: ref.id, t: Date.now() }, d)); grave.list = grave.list.slice(0, 20); grave.cnt[ref.id] = { f:0, l:0 }; }
+      renderGraves();
+      pushLog('boom', '무덤', '+' + from + ' ' + d.sword + ' — ' + cause + ' ⚰️ 무덤에 묘비가 섰어요', null);
+      if (roomNews()) roomBot('⚰️ 부고 — ' + roomWho() + '의 +' + from + ' ' + josa(d.sword, '이', '가') + ' ' + cause + '했어요. 무덤에서 조문해 주세요');
+    }, function(){ /* 서버 규칙을 게시하기 전이면 거부됨 */ });
+  }
+  function queueGraves(){ clearTimeout(grave.timer); grave.timer = setTimeout(loadGraves, 900); }
+  function graveCount(id, k){
+    var F = online.fb, q = F.query(F.collection(online.db, 'graves', id, 'r'), F.where('k', '==', k));
+    if (F.getCountFromServer) return F.getCountFromServer(q).then(function(r){ return r.data().count; }, function(){ return 0; });
+    return F.getDocs(q).then(function(qs){ return qs.size; }, function(){ return 0; });
+  }
+  function loadGraves(){
+    if (!online.on) return;
+    var F = online.fb, uid = online.user && online.user.uid;
+    F.getDocs(F.query(F.collection(online.db, 'graves'), F.orderBy('at', 'desc'), F.limit(20))).then(function(qs){
+      grave.list = qs.docs.map(function(d){ var x = d.data(); x.id = d.id; x.t = x.at && x.at.toMillis ? x.at.toMillis() : Date.now(); return x; });
+      grave.err = false; renderGraves();
+      var jobs = [];
+      grave.list.forEach(function(g){
+        jobs.push(Promise.all([graveCount(g.id, 'f'), graveCount(g.id, 'l')]).then(function(c){ grave.cnt[g.id] = { f:c[0], l:c[1] }; }));
+        if (uid) jobs.push(F.getDoc(F.doc(online.db, 'graves', g.id, 'r', uid)).then(function(d){
+          if (isUser(uid)) grave.mine[g.id] = d.exists() ? d.data().k : '';
+        }, function(){}));
+      });
+      Promise.all(jobs).then(renderGraves);
+    }, function(){ grave.err = true; renderGraves(); });
+  }
+  function graveReact(g, k){
+    if (!online.user || boardsOff()) { funToast('로그인하면 조문 · 비웃기를 할 수 있어요'); return; }
+    var F = online.fb, uid = online.user.uid, prev = grave.mine[g.id] || '', next = prev === k ? '' : k;
+    var ref = F.doc(online.db, 'graves', g.id, 'r', uid);
+    var job = next ? F.setDoc(ref, { k: next, at: F.serverTimestamp() }) : F.deleteDoc(ref);
+    job.then(function(){
+      if (!isUser(uid)) return;
+      var c = grave.cnt[g.id] || (grave.cnt[g.id] = { f:0, l:0 });
+      if (prev) c[prev] = Math.max(0, c[prev] - 1);
+      if (next) c[next]++;
+      grave.mine[g.id] = next;
+      if (next === 'f' && prev !== 'f'){ state.fun.cond++; if (state.fun.cond >= 10) achGet(14); save(); }
+      renderGraves();
+    }, function(){ if (isUser(uid)) funToast('아직 준비 중이에요 — 잠시 뒤에 다시 눌러 주세요'); });
+  }
+  function graveWhen(t){
+    var d = new Date(t + 9 * 3600000);
+    return (d.getUTCMonth() + 1) + '월 ' + d.getUTCDate() + '일 ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+  }
+  function renderGraves(){
+    var g = $('graveGrid');
+    if (!g) return;
+    g.textContent = '';
+    var msg = grave.list === null ? (grave.err ? '아직 준비 중이에요. (운영자가 서버 규칙을 새로 게시하면 열려요)' : '불러오는 중…')
+            : !grave.list.length ? '아직 무덤이 비어 있어요. +15 이상에서 부서지면 첫 묘비가 서요…' : '';
+    if (msg){ var e = document.createElement('p'); e.className = 'grave-empty'; e.textContent = msg; g.appendChild(e); return; }
+    var me = online.user && online.user.uid;
+    grave.list.forEach(function(x){
+      var c = document.createElement('div'); c.className = 'grave' + (me && x.uid === me ? ' me' : '');
+      var rip = document.createElement('span'); rip.className = 'rip'; rip.textContent = 'R.I.P';
+      var cv = document.createElement('canvas'); cv.width = 144; cv.height = 144;
+      var b = document.createElement('b'); b.textContent = '+' + (x.lv | 0) + ' ' + String(x.sword || '');
+      var nm = document.createElement('span'); nm.className = 'gn'; nm.textContent = '주인 ' + String(x.name || '이름 없음').slice(0, 12);
+      var tt = document.createElement('span'); tt.className = 'gt'; tt.textContent = graveWhen(x.t);
+      var cs = document.createElement('span'); cs.className = 'gc'; cs.textContent = String(x.cause || '').slice(0, 30);
+      var rx = document.createElement('div'); rx.className = 'rx';
+      var n = grave.cnt[x.id] || { f:0, l:0 }, mine = grave.mine[x.id] || '';
+      [['f', '🌼', '조문'], ['l', '🤣', '비웃기']].forEach(function(K){
+        var bt = document.createElement('button'); bt.type = 'button';
+        bt.className = mine === K[0] ? 'on' : '';
+        bt.textContent = K[1] + ' ' + (n[K[0]] | 0);
+        bt.title = K[2] + (mine === K[0] ? ' 취소' : '');
+        bt.setAttribute('aria-label', K[2] + ' ' + (n[K[0]] | 0) + '개');
+        bt.setAttribute('aria-pressed', String(mine === K[0]));
+        bt.addEventListener('click', function(){ graveReact(x, K[0]); });
+        rx.appendChild(bt);
+      });
+      [rip, cv, b, nm, tt, cs, rx].forEach(function(el){ c.appendChild(el); });
+      g.appendChild(c);
+      try { renderStill(cv, makeSword(x.seed >>> 0, Math.min(MAX, x.lv | 0), x.el | 0, x.rar | 0, x.kind | 0), false); } catch (err) {}
+    });
+  }
+  $('graveRefresh').addEventListener('click', loadGraves);
+
+  /* ── 오늘의 무기 ── */
+  var DAILY_KEY = 'forge-daily-v1', DAILY_GOLD = 1000000;
+  var daily = { run:null, list:null, err:false, busy:false, posting:false, drawn:'' };
+  function dailySword(day){
+    var h = rng32(day * 2654435761 >>> 0), seed = Math.floor(h() * 4294967296) >>> 0;
+    var rar = 2 + Math.floor(h() * 3), el = Math.floor(h() * 10), kind = Math.floor(h() * 6);
+    if (!hasKind(kind, el, rar)) kind = 0;
+    return { seed: seed, rar: rar, el: el, kind: kind };
+  }
+  function dailyRun(){
+    var day = kst().day;
+    if (!daily.run){ try { daily.run = JSON.parse(localStorage.getItem(DAILY_KEY) || 'null'); } catch (e) { daily.run = null; } }
+    var r = daily.run;
+    if (!r || r.day !== day || typeof r.lv !== 'number' || typeof r.gold !== 'number')
+      daily.run = r = { day: day, lv: 0, gold: DAILY_GOLD, best: 0, n: 0, end: '', sent: false, from: 0 };
+    return r;
+  }
+  function dailySave(){ try { localStorage.setItem(DAILY_KEY, JSON.stringify(daily.run)); } catch (e) {} }
+  function dailyResult(r){   // 기록: 단계 · 남은 골드 (부서지면 부서지기 전 단계, 남은 골드 0)
+    return r.end === 'boom' ? { lv: r.from, left: 0 } : { lv: r.lv, left: Math.min(999999, Math.max(0, Math.floor(r.gold))) };
+  }
+  function dailyForge(){
+    var r = dailyRun();
+    if (r.end || daily.busy) return;
+    var row = LEVELS[r.lv];
+    if (row.cost === null || r.gold < row.cost) return;
+    var o = odds(r.lv, {}), x = Math.random(), from = r.lv;
+    daily.busy = true;
+    r.gold -= row.cost; r.n++;
+    $('dailyMsg').textContent = '망치질 중…';
+    renderDaily();
+    setTimeout(function(){
+      daily.busy = false;
+      if (x < o.s){ r.lv = Math.min(MAX, r.lv + 1); r.best = Math.max(r.best, r.lv); tone(660, .1, 'triangle', .05); $('dailyMsg').textContent = '성공! +' + from + ' → +' + r.lv; }
+      else if (x < o.s + o.k){ tone(180, .12, 'sine', .06); $('dailyMsg').textContent = '실패 — +' + from + ' 유지'; }
+      else { r.from = from; r.lv = 0; tone(90, .4, 'sawtooth', .08); dailyEnd('boom'); return; }
+      var nx = LEVELS[r.lv];
+      if (nx.cost === null) dailyEnd('stop');
+      else if (r.gold < nx.cost) dailyEnd('gold');
+      else { dailySave(); renderDaily(); }
+    }, reduced() ? 120 : 420);
+  }
+  function dailyEnd(why){
+    var r = dailyRun();
+    if (r.end) return;
+    r.end = why;
+    var res = dailyResult(r);
+    $('dailyMsg').textContent = why === 'boom' ? '산산조각! 오늘 기록 +' + res.lv + ' (남은 골드 0)'
+      : why === 'gold' ? '골드가 모자라요 — 오늘 기록 +' + res.lv : '멈춤 — 오늘 기록 +' + res.lv + ' · ' + gold(res.left);
+    pushLog(why === 'boom' ? 'boom' : 'ok', '오늘의 무기', '+' + res.lv + (why === 'boom' ? ' 에서 부서짐' : why === 'gold' ? ' (골드 바닥)' : ' 에서 멈춤'), null);
+    dailySave(); renderDaily(); dailyPost();
+  }
+  function dailyPost(){
+    var r = dailyRun();
+    if (!r.end || r.sent || daily.posting || daily.fail === r.day || !online.user || online.conflict || boardsOff()) return;
+    var F = online.fb, uid = online.user.uid, res = dailyResult(r), day = r.day;
+    if (day !== kst().day) return;
+    daily.posting = true;
+    var d = { name: currentName(), day: day, lv: res.lv, left: res.left, end: r.end, score: day * 100000000 + res.lv * 1000000 + res.left, t: myTitle() };
+    F.setDoc(F.doc(online.db, 'daily', uid), Object.assign({}, d, { at: F.serverTimestamp() })).then(function(){
+      daily.posting = false;
+      if (!isUser(uid)) return;
+      r.sent = true; dailySave();
+      loadDaily(function(rank){
+        if (rank === 1) achGet(16);
+        if (roomNews()) roomBot('🎲 오늘의 무기 — ' + roomWho() + ' +' + res.lv + (r.end === 'boom' ? ' 에서 부서짐' : r.end === 'gold' ? ' 에서 골드 바닥' : ' 에서 멈춤') + (rank ? ' (오늘 ' + rank + '등)' : ''));
+      });
+    }, function(){ daily.posting = false; daily.fail = day; });   // 규칙 게시 전이면 거부 — 새로고침하면 다시 시도
+  }
+  function loadDaily(done){
+    if (!online.on) return;
+    var F = online.fb;
+    F.getDocs(F.query(F.collection(online.db, 'daily'), F.orderBy('score', 'desc'), F.limit(15))).then(function(qs){
+      daily.list = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; });
+      daily.err = false; renderDaily();
+      var today = kst().day, me = online.user && online.user.uid, rank = 0;
+      daily.list.filter(function(x){ return x.day === today; }).forEach(function(x, i){ if (x.uid === me && !rank) rank = i + 1; });
+      if (rank === 1 && dailyRun().end) achGet(16);
+      if (done) done(rank);
+    }, function(){ daily.err = true; renderDaily(); if (done) done(0); });
+  }
+  function funOnline(){ queueGraves(); loadDaily(); }
+  function renderDaily(){
+    if (!$('dailyLv')) return;
+    var r = dailyRun(), w = dailySword(r.day), lv = r.end === 'boom' ? r.from : r.lv;
+    var sw = makeSword(w.seed, lv, w.el, w.rar, w.kind), sig = r.day + ':' + lv + ':' + (r.end === 'boom');
+    if (daily.drawn !== sig){ daily.drawn = sig; try { renderStill($('dailyCv'), sw, false); } catch (e) {} }
+    $('dailyCv').style.filter = r.end === 'boom' ? 'grayscale(1) brightness(.6)' : '';
+    $('dailyName').textContent = sw.R.name + ' · ' + sw.name;
+    $('dailyLv').textContent = '+' + r.lv + (r.best > r.lv ? '  (최고 +' + r.best + ')' : '');
+    var row = LEVELS[r.lv], o = odds(r.lv, {});
+    $('dailyOdds').textContent = o ? '성공 ' + pct(o.s) + ' · 유지 ' + pct(o.k) + ' · 파괴 ' + pct(o.x) + ' · 비용 ' + gold(row.cost) : '최고 단계!';
+    $('dailyGold').textContent = '남은 골드 ' + gold(r.gold) + ' · ' + r.n + '번 두드림';
+    if (!$('dailyMsg').textContent) $('dailyMsg').textContent = r.end ? '오늘 판은 끝났어요 — 내일 새 무기가 와요' : '한 판뿐이에요. 어디서 멈출지가 승부!';
+    $('dailyForge').disabled = !!r.end || daily.busy || row.cost === null || r.gold < row.cost;
+    $('dailyStop').disabled = !!r.end || daily.busy || r.n === 0;
+    if (r.end && !r.sent) dailyPost();
+    var ol = $('dailyList'), today = r.day;
+    ol.textContent = '';
+    var list = (daily.list || []).filter(function(x){ return x.day === today; }).slice(0, 10);
+    var msg = !online.on ? '' : daily.list === null ? (daily.err ? '순위는 아직 준비 중이에요. (운영자가 서버 규칙을 새로 게시하면 열려요)' : '불러오는 중…')
+            : !list.length ? (online.user ? '오늘은 아직 기록이 없어요. 첫 번째가 되어 보세요!' : '오늘은 아직 기록이 없어요. 로그인하면 순위에 올라가요.') : '';
+    if (msg){ var e = document.createElement('li'); e.className = 'empty'; e.textContent = msg; ol.appendChild(e); return; }
+    list.forEach(function(x, i){
+      var li = document.createElement('li');
+      if (online.user && x.uid === online.user.uid) li.className = 'me';
+      var no = document.createElement('span'); no.className = 'no'; no.textContent = i === 0 ? '👑' : i + 1;
+      var who = document.createElement('span'); who.className = 'who';
+      var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = String(x.name || '이름 없음').slice(0, 12);
+      var tt = document.createElement('span'); tt.className = 'sw ttl';
+      tt.textContent = (x.end === 'boom' ? '💥 부서짐' : x.end === 'gold' ? '골드 바닥' : '멈춤 · ' + gold(x.left | 0)) + (x.t ? ' · 「' + String(x.t).slice(0, 16) + '」' : '');
+      who.appendChild(nm); who.appendChild(tt);
+      var sc = document.createElement('span'); sc.className = 'sc';
+      var lvv = document.createElement('span'); lvv.className = 'lv'; lvv.textContent = '+' + (x.lv | 0);
+      sc.appendChild(lvv);
+      li.appendChild(no); li.appendChild(who); li.appendChild(sc);
+      ol.appendChild(li);
+    });
+  }
+  $('dailyForge').addEventListener('click', dailyForge);
+  $('dailyStop').addEventListener('click', function(){ var r = dailyRun(); if (!r.end && !daily.busy && r.n > 0) dailyEnd('stop'); });
+  $('dailyRefresh').addEventListener('click', function(){ loadDaily(); });
+
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;

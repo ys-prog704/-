@@ -513,6 +513,10 @@ Firebase 의 로그인 창(`signInWithPopup`)은 `firebaseapp.com` 을 거쳐 �
 
 ### 웹사이트에 올리기
 
+**대표 주소: https://sword-forge.web.app/** (Firebase Hosting, 무료). 올리기: `firebase deploy --only hosting --project sword-forge`
+(`firebase.json` 의 `hosting` — 저장소 폴더를 그대로 올리고 README · 규칙 · tools 는 뺍니다). GitHub Pages 주소도 같은 파일로 계속 열립니다.
+구글 로그인 버튼이 뜨려면 아래 "승인된 JavaScript 원본"에 `https://sword-forge.web.app` 도 추가하세요.
+
 저장소를 그대로 올리면 됩니다. 빌드는 없고, 게임에 필요한 파일은 `index.html` 하나입니다
 (홈 화면 앱으로 설치하려면 `manifest.webmanifest` · `sw.js` · `assets/app/` 도 같이).
 
@@ -563,7 +567,7 @@ Firebase 의 로그인 창(`signInWithPopup`)은 `firebaseapp.com` 을 거쳐 �
 
 **운영자 정하기 (한 번, Firebase 콘솔에서):**
 
-1. 운영자로 쓸 구글 계정으로 게임(https://ys-prog704.github.io/-/)에 한 번 로그인합니다. 평소 계정이든 따로 만든 계정이든 됩니다.
+1. 운영자로 쓸 구글 계정으로 게임(https://sword-forge.web.app/)에 한 번 로그인합니다. 평소 계정이든 따로 만든 계정이든 됩니다.
 2. Firebase 콘솔 → **Authentication → 사용자** 에서 그 계정(이메일)의 **사용자 UID** 를 복사합니다.
 3. **Firestore Database → 데이터 → 컬렉션 시작** → 컬렉션 ID `admins` → 문서 ID 에 복사한 UID 를 붙여넣고,
    필드 하나(예: 이름 `name`, 유형 문자열, 값 `운영자`)를 넣고 저장합니다.

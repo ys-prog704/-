@@ -266,6 +266,36 @@ expect('운영자가 방 사람 내보내기', delete(ta, 'rooms/r1/members/' + 
 expect('운영자는 자기 출석을 되돌릴 수 있음', write(ta, 'attend/' + ua, {'day': 3, 'total': 3, 'last': utcnow - dt.timedelta(days=1)}), True)
 expect('운영자도 남의 출석은 못 고침', write(ta, 'attend/' + u1, {'day': 0, 'total': 0, 'last': utcnow}), False)
 
+# 오늘의 월급루팡 (lupin) — score = day × 100000 + n
+u5, t5 = user(); u6, t6 = user(); u7, t7 = user()
+D = int((utcnow + dt.timedelta(hours=9)).strftime('%Y%m%d'))
+lp = lambda n, **kw: dict({'name': '성연', 'day': D, 'n': n, 'score': D * 100000 + n, 't': '장인', 'ach': 5}, **kw)
+expect('루팡 기록 올리기 → 허용', write(t5, 'lupin/' + u5, lp(3), ['at']), True)
+expect('루팡 점수 부풀리기 → 거부', write(t5, 'lupin/' + u5, lp(3, score=D * 100000 + 99), ['at']), False)
+expect('남의 루팡 기록 쓰기 → 거부', write(t6, 'lupin/' + u5, lp(3), ['at']), False)
+expect('루팡 기록에 모르는 칸 → 거부', write(t5, 'lupin/' + u5, lp(3, x=1), ['at']), False)
+expect('칭호 17자 → 거부', write(t5, 'lupin/' + u5, lp(3, t='가' * 17), ['at']), False)
+expect('루팡 at 이 서버 시간이 아님 → 거부', write(t5, 'lupin/' + u5, lp(3, at=utcnow)), False)
+expect('루팡 기록은 로그인 안 해도 읽기', read(None, 'lupin/' + u5), True)
+
+# 저주 (curses/{보낸 사람}) — 랭킹에 있는 남에게, 한국 날짜로 하루 한 번
+write('owner', 'ranking/' + u6, {'name': '민수'})
+cu = lambda to, **kw: dict({'to': to, 'toName': '민수', 'from': '성연'}, **kw)
+expect('저주 보내기 → 허용', write(t5, 'curses/' + u5, cu(u6), ['at']), True)
+expect('같은 날 두 번째 저주 → 거부', write(t5, 'curses/' + u5, cu(u6), ['at']), False)
+write('owner', 'curses/' + u5, cu(u6, at=utcnow - dt.timedelta(hours=25)))
+expect('다음 날 저주 → 허용', write(t5, 'curses/' + u5, cu(u6), ['at']), True)
+expect('자기 자신에게 저주 → 거부', write(t6, 'curses/' + u6, cu(u6), ['at']), False)
+expect('랭킹에 없는 사람에게 저주 → 거부', write(t6, 'curses/' + u6, cu(u5), ['at']), False)
+expect('남인 척 저주 → 거부', write(t7, 'curses/' + u5, cu(u6), ['at']), False)
+expect('저주에 모르는 칸 → 거부', write(t7, 'curses/' + u7, cu(u6, x=1), ['at']), False)
+expect('받는 사람이 저주 찾기 (to == 나)', query(t6, 'curses', [('to', u6)]), True)
+expect('남이 받은 저주 찾기 → 거부', query(t7, 'curses', [('to', u6)]), False)
+expect('받는 사람이 저주 읽기', read(t6, 'curses/' + u5), True)
+expect('보낸 사람이 자기 저주 읽기', read(t5, 'curses/' + u5), True)
+expect('제3자가 저주 읽기 → 거부', read(t7, 'curses/' + u5), False)
+expect('일반 사람이 저주 지우기 → 거부', delete(t6, 'curses/' + u5), False)
+
 for r, n, s in results: print('%s  %s  (HTTP %d)' % (r, n, s))
 fails = [n for r, n, _ in results if r == 'FAIL']
 print('\n%d/%d 통과' % (len(results) - len(fails), len(results)) + ('' if not fails else '  실패: ' + ', '.join(fails)))

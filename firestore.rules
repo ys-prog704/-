@@ -86,6 +86,46 @@ service cloud.firestore {
         && request.resource.data.at == request.time;
     }
 
+    // 오늘의 월급루팡: 평일 9 ~ 18시(한국 시간)에 강화한 횟수. 누구나 보고 자기 것만 올립니다.
+    // score = day(YYYYMMDD) × 100000 + n 이라서 점수순으로만 정렬해도 오늘 것이 위에 옵니다(복합 색인 없이).
+    // ach 는 업적 묶음(비트), t 는 고른 칭호 — 다른 기기에서 로그인해도 업적이 돌아옵니다.
+    match /lupin/{uid} {
+      allow read: if true;
+      allow delete: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && !banned()
+        && onlyKeys(['name', 'day', 'n', 'score', 't', 'ach', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 12
+        && request.resource.data.day is int
+        && request.resource.data.day >= 20260101 && request.resource.data.day <= 20991231
+        && request.resource.data.n is int && request.resource.data.n >= 0 && request.resource.data.n <= 99999
+        && request.resource.data.score == request.resource.data.day * 100000 + request.resource.data.n
+        && request.resource.data.t is string && request.resource.data.t.size() <= 16
+        && request.resource.data.ach is int && request.resource.data.ach >= 0 && request.resource.data.ach < 1073741824
+        && request.resource.data.at == request.time;
+    }
+
+    // 저주: 보내는 사람마다 문서 하나(curses/{보낸 사람}) — 한국 날짜로 하루에 한 번만 새로 쓸 수 있습니다.
+    // 받는 사람(to)은 랭킹에 있는 다른 사람이어야 하고, 받는 사람과 보낸 사람만 읽습니다.
+    function validCurse() {
+      return onlyKeys(['to', 'toName', 'from', 'at'])
+        && request.resource.data.to is string && request.resource.data.to.size() >= 1 && request.resource.data.to.size() <= 128
+        && request.resource.data.to != request.auth.uid
+        && exists(/databases/$(database)/documents/ranking/$(request.resource.data.to))
+        && request.resource.data.toName is string
+        && request.resource.data.toName.size() >= 1 && request.resource.data.toName.size() <= 12
+        && request.resource.data.from is string
+        && request.resource.data.from.size() >= 1 && request.resource.data.from.size() <= 12
+        && request.resource.data.at == request.time;
+    }
+    match /curses/{from} {
+      allow read: if signedIn() && (request.auth.uid == from || resource.data.to == request.auth.uid);
+      allow create: if isOwner(from) && !banned() && validCurse();
+      allow update: if isOwner(from) && !banned() && validCurse()
+        && kstDay(request.time) > kstDay(resource.data.at);
+      allow delete: if isAdmin();
+    }
+
     // 결투장 대표 무기: 누구나 볼 수 있고 자기 것만 올립니다. 힘(pw)은 단계 + 등급 + 각성(+21 이면 2) 이어야 합니다.
     match /arena/{uid} {
       allow read: if true;

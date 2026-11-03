@@ -573,6 +573,26 @@ img{max-width:100%}
 .rank-list .nm{font-size:12.5px;font-weight:600}
 .rank-list .sw{font-size:11px}
 .rank-list .sc{text-align:right}
+.rank-list .curse{all:unset;cursor:pointer;font-size:13px;line-height:1;padding:3px 4px;margin-left:6px;border-radius:4px;opacity:.8;vertical-align:middle}
+.rank-list .curse:hover:not(:disabled){opacity:1;background:var(--iron-3)}
+.rank-list .curse:disabled{opacity:.25;cursor:default}
+.rank-list .curse:focus-visible{outline:2px solid var(--gold)}
+.rank-list .ttl{color:var(--gold)}
+.lupin-me{font-size:11.5px;color:var(--ash-2);font-family:var(--font-mono);white-space:nowrap}
+.fun-note{margin:8px 0 0;font-size:11.5px;color:var(--ash)}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
+.ach{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:7px 9px;border-radius:var(--r-sm);background:var(--iron-2);cursor:default}
+.ach b{font-size:12.5px;font-weight:600;color:var(--ash)}
+.ach span{font-size:11px;color:var(--ash)}
+.ach.got{cursor:pointer;box-shadow:0 0 0 1px var(--line-2) inset}
+.ach.got b{color:var(--gold)}
+.ach.got span{color:var(--ash-2)}
+.ach.on{box-shadow:0 0 0 1px var(--gold) inset;background:color-mix(in srgb, var(--gold) 12%, var(--iron-2))}
+.ach:focus-visible{outline:2px solid var(--gold)}
+.fun-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9000;max-width:calc(100vw - 32px);
+  padding:10px 16px;border-radius:999px;background:var(--iron-3);color:var(--parch);font-size:13.5px;font-weight:600;
+  box-shadow:0 0 0 1px var(--gold) inset,0 8px 30px rgba(0,0,0,.5);animation:funIn .25s ease-out}
+@keyframes funIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 .rank-list .lv{display:block;font-family:var(--font-display);font-size:18px;line-height:1;color:var(--ember)}
 .rank-list .pk{display:block;margin-top:2px;font-family:var(--font-mono);font-size:10.5px;color:var(--gold)}
 .rank-list .empty{display:block;background:none;padding:2px 0;font-size:12.5px;color:var(--ash)}
@@ -904,6 +924,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 <body>
 
 <div class="flash" id="flash" aria-hidden="true"></div>
+<div class="fun-toast" id="funToast" role="status" hidden></div>
 
 <div class="forge" id="forge">
 
@@ -1215,6 +1236,24 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
           <input id="rankName" maxlength="12" autocomplete="nickname" spellcheck="false">
           <button class="btn-ghost small" id="rankNameBtn" type="button">바꾸기</button>
         </div>
+      </section>
+
+      <section class="panel rank" id="lupin" hidden>
+        <div class="rank-head">
+          <h2>오늘의 월급루팡 &middot; 평일 9 ~ 18시 강화</h2>
+          <span class="lupin-me" id="lupinMe"></span>
+        </div>
+        <ol class="rank-list" id="lupinList"></ol>
+        <p class="fun-note">1등은 🥷 오늘의 월급루팡. 💀 를 누르면 그 사람의 다음 강화 파괴 확률이 3% 올라가요 (하루에 한 번).</p>
+      </section>
+
+      <section class="panel rank" id="achPanel">
+        <div class="rank-head">
+          <h2>업적 &middot; 칭호</h2>
+          <span class="lupin-me" id="achCount"></span>
+        </div>
+        <div class="ach-grid" id="achGrid"></div>
+        <p class="fun-note">딴 업적을 누르면 칭호로 달려요. 칭호는 월급루팡 순위에 이름과 함께 보여요.</p>
       </section>
 
       <aside class="panel ledger">
@@ -2509,7 +2548,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       auto: { bless:false },
       items: { bless:0 },
       attend: { last:'', day:0, total:0 },
-      sound: true, log: [], owner: null, synced: '',
+      sound: true, log: [], owner: null, synced: '', fun: normFun(null),
       stats: { tries:0, wins:0, booms:0, best:0, spent:0, earned:0, peak:START_GOLD,
                pulls:1, legends: sw.rar >= 3 ? 1 : 0, bestSw:null }
     };
@@ -2588,6 +2627,10 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       s += add;
     }
     if (buffs.bless) boost(0.10);
+    if (buffs.curse){   // 받은 저주 한 겹마다 파괴 +3%p (유지에서 먼저, 모자라면 성공에서)
+      var c = Math.min(CURSE_ADD * Math.min(CURSE_MAX, buffs.curse), k + s), fk = Math.min(c, k);
+      k -= fk; s -= c - fk; x += c;
+    }
     return { s:s, k:k, x:x };
   }
   /* 출석 · 사냥으로 받은 보상 아이템은 모아 둘 수 없고, 효과가 있는 바로 다음 강화에 자동으로 쓰입니다.
@@ -2712,6 +2755,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
         total: num(at.total, 0) | 0
       },
       sound: data.sound !== false,
+      fun: normFun(data.fun),
       owner: typeof data.owner === 'string' && data.owner.length <= 128 ? data.owner : null,
       synced: typeof data.synced === 'string' && data.synced.length <= 4000 ? data.synced : '',
       log: Array.isArray(data.log) ? data.log.filter(function(e){
@@ -3055,6 +3099,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var o = odds(lv, state.buffs), maxed = o === null;
     var sw = currentSword();
     appBadge();
+    funRender();
 
     $('hudGold').textContent = fmt(state.gold);
     $('hudBest').textContent = '+' + state.stats.best;
@@ -3427,12 +3472,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   /* ═════════ 굴림 마커 ═════════  두 바퀴 돌고 실제 굴림값에서 멈춥니다 */
-  function sweep(r, done){
+  function sweep(r, done, slow){
     var el = $('marker');
     el.classList.add('on');
     // 본 화면이 최소화 · 가려져 있으면(미니 대장간으로 강화할 때) 애니메이션 프레임이 오지 않으므로 바로 멈춥니다
     if (reduced() || document.hidden){ el.style.left = (r * 100).toFixed(3) + '%'; setTimeout(done, 120); return; }
-    var dur = 950, laps = 2, t0 = performance.now();
+    var dur = slow || 950, laps = slow ? 4 : 2, t0 = performance.now();
     function frame(now){
       var t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
       el.style.left = (((e * (laps + r)) % 1) * 100).toFixed(3) + '%';
@@ -3452,6 +3497,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (r < o.s) kind = 'success';
     else if (r < o.s + o.k) kind = 'keep';
     else kind = 'boom';
+    var slow = funBefore(state.level, o);
 
     rolling = true;
     state.gold -= row.cost;
@@ -3474,7 +3520,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       $('rollText').textContent = '굴림 ' + (r * 100).toFixed(1) + ' / 100';
       highlight(kind);
       resolve(kind, r);
-    });
+    }, slow);
   }
 
   function resolve(kind, r){
@@ -3527,6 +3573,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     }
 
     if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+    funAfter(kind, from);
 
     setTimeout(function(){
       anvil.classList.remove('fx-success','fx-keep','fx-boom');
@@ -4151,7 +4198,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       roomBot(roomWho() + ' +' + from + ' → +' + (from + 1) + ' 강화 성공! (' + sw.name + ')' + (from + 1 >= MAX ? ' 드디어 +' + MAX + '!' : ''));
     else if (kind === 'boom' && (cmd || from >= ROOM_POST.boom))
       roomBot(roomWho() + '의 +' + from + ' ' + josa(sw.name, '이', '가') + ' 산산조각 났어요…');
-    else if (kind === 'keep' && cmd)
+    else if (kind === 'keep' && (cmd || from >= LIVE_LV))
       roomBot(roomWho() + ' +' + from + ' 강화 실패 (단계는 그대로)');
   }
   function roomPull(sw){
@@ -5127,6 +5174,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function onAuth(user){
     online.authReady = true;
     online.user = user || null;
+    funLogout();
     online.attend = null; online.attendLoaded = false; online.attendError = false;
     online.conflict = ''; online.myRank = null; online.lastCode = ''; online.saveFail = false; online.note = '';
     online.arenaSent = ''; online.arenaDenied = false; online.duelNews = '';
@@ -5153,6 +5201,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       loadArena();
       roomOnLogin();
       loadGifts();
+      funLogin();
       renderOnline(); render();
     });
   }
@@ -5415,6 +5464,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   function loadRanking(){
     if (!online.on) return;
+    loadLupin();
     var F = online.fb;
     F.getDocs(F.query(F.collection(online.db, 'ranking'), F.orderBy('score', 'desc'), F.limit(RANK_SIZE))).then(function(qs){
       online.ranking = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; });
@@ -5455,6 +5505,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       var lv = document.createElement('span'); lv.className = 'lv'; lv.textContent = '+' + (r.best | 0);
       var pk = document.createElement('span'); pk.className = 'pk'; pk.textContent = gold(Number(r.peak) || 0);
       sc.appendChild(lv); sc.appendChild(pk);
+      var cb = curseBtn(r);
+      if (cb) lv.after(cb);
       li.appendChild(no); li.appendChild(who); li.appendChild(sc);
       ol.appendChild(li);
     });
@@ -5463,6 +5515,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function renderOnline(){
     $('online').hidden = !online.on && !online.failed;
     $('rank').hidden = !online.on;
+    $('lupin').hidden = !online.on;
     if (!online.on){
       $('loginBtn').hidden = $('logoutBtn').hidden = $('onlineNote').hidden = true;
       $('onlineWho').textContent = '온라인 기능(로그인·출석·랭킹)을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침 해 주세요. 게임은 이 기기에 저장하며 계속할 수 있어요.';
@@ -6394,6 +6447,292 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     window.launchQueue.setConsumer(function(p){ if (p && p.targetURL) appAction(p.targetURL); });
   } else if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches){
     appAction(location.href);
+  }
+
+  /* ═════════ 친구들과 놀기: 업적 · 칭호 · 오늘의 월급루팡 · 저주 · 강화 생중계 ═════════
+     업적 — 이 기기에 저장하고(state.fun.ach 비트), 로그인하면 lupin 문서에도 올려서 다른 기기에서도 돌아옵니다.
+            딴 업적을 누르면 칭호가 됩니다(고르지 않으면 가장 최근 업적).
+     월급루팡 — 평일 9 ~ 18시(한국 시간)에 강화한 횟수를 lupin/{uid} 에 올려 오늘 순위를 냅니다. 1등은 🥷.
+     저주 — 랭킹 · 월급루팡 줄의 💀 → curses/{나}. 받은 사람의 다음 강화 파괴 +3%p(최대 3겹), 하루에 한 번(서버 규칙).
+     생중계 — 단톡방에 있을 때 +18 이상 도전이면 대장간봇이 "도전 중!"을 먼저 알리고, 굴림을 길게 보여 줍니다. */
+  var LIVE_LV = 18, CURSE_ADD = 0.03, CURSE_MAX = 3;
+  var ACH = [
+    { t:'산산조각 입문',   d:'처음으로 무기가 부서짐' },
+    { t:'어엿한 대장장이', d:'+10 달성' },
+    { t:'장인',            d:'+15 달성' },
+    { t:'전설의 대장장이', d:'+20 달성' },
+    { t:'제자리걸음 장인', d:'"유지"만 10번 연속' },
+    { t:'손이 뜨겁다',     d:'+5 위에서 5번 연속 성공' },
+    { t:'불운의 아이콘',   d:'+15 위에서 무기가 3번 부서짐' },
+    { t:'멘탈 붕괴',       d:'+18 위에서 무기가 부서짐' },
+    { t:'투명 대장장이',   d:'업무 화면 · 위장 중에 강화' },
+    { t:'프로 월급루팡',   d:'평일 9 ~ 18시에 강화 100번' },
+    { t:'올빼미',          d:'새벽 1 ~ 5시에 강화' },
+    { t:'파산 직전',       d:'골드가 1,000 G 아래로' },
+    { t:'흑마법사',        d:'저주를 10번 보냄' },
+    { t:'저주 따위',       d:'저주받은 채로 강화 성공' }
+  ];
+  function normFun(f){
+    f = f && typeof f === 'object' ? f : {};
+    var n = function(v, max){ return typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(max, Math.floor(v))) : 0; };
+    return { ach: n(f.ach, 1073741823), title: typeof f.title === 'number' && f.title >= 0 && f.title < 30 ? f.title | 0 : -1,
+             pick: !!f.pick, wd: n(f.wd, 20991231), wn: n(f.wn, 99999), wt: n(f.wt, 1e9),
+             keep: n(f.keep, 1e6), win: n(f.win, 1e6), hb: n(f.hb, 1e6), cs: n(f.cs, 1e6), seen: n(f.seen, 1e15) };
+  }
+  function kst(){
+    var d = new Date(Date.now() + 9 * 3600000);
+    return { day: d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate(), h: d.getUTCHours(), wd: d.getUTCDay() };
+  }
+  function workHours(k){ return k.wd >= 1 && k.wd <= 5 && k.h >= 9 && k.h < 18; }
+  function myTitle(){ var F = state.fun; return F.title >= 0 && F.title < ACH.length && (F.ach & (1 << F.title)) ? ACH[F.title].t : ''; }
+
+  var funToastT = null;
+  function funToast(t){
+    var el = $('funToast');
+    el.hidden = true; void el.offsetWidth;
+    el.textContent = t; el.hidden = false;
+    clearTimeout(funToastT);
+    funToastT = setTimeout(function(){ el.hidden = true; }, 3400);
+  }
+
+  /* ── 업적 ── */
+  function achGet(i, quiet){
+    var F = state.fun;
+    if (F.ach & (1 << i)) return;
+    F.ach |= 1 << i;
+    if (!F.pick) F.title = i;
+    if (!quiet){
+      pushLog('gift', '업적', '「' + ACH[i].t + '」 — ' + ACH[i].d, null);
+      funToast('🏅 업적 「' + ACH[i].t + '」 — ' + ACH[i].d);
+      if (roomNews()) roomBot(roomWho() + '이 업적 「' + ACH[i].t + '」' + josa(ACH[i].t, '을', '를').slice(-1) + ' 땄어요! (' + ACH[i].d + ')');
+    }
+    queueLupin(true);
+  }
+  function achSync(){   // 최고 단계 · 파괴 횟수처럼 기록으로 알 수 있는 업적 (업데이트 전 기록도 조용히 채움)
+    var st = state.stats;
+    if (st.booms >= 1) achGet(0, true);
+    if (st.best >= 10) achGet(1, true);
+    if (st.best >= 15) achGet(2, true);
+    if (st.best >= 20) achGet(3, true);
+    if (state.fun.wt >= 100) achGet(9, true);
+    if (state.fun.cs >= 10) achGet(12, true);
+  }
+  var achSig = '';
+  function renderAch(){
+    var F = state.fun, g = $('achGrid'), got = 0;
+    var sig = F.ach + ':' + F.title;
+    if (sig === achSig) return;
+    achSig = sig;
+    g.textContent = '';
+    ACH.forEach(function(A, i){
+      var has = !!(F.ach & (1 << i));
+      if (has) got++;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ach' + (has ? ' got' : '') + (has && F.title === i ? ' on' : '');
+      var t = document.createElement('b'), d = document.createElement('span');
+      t.textContent = has ? (F.title === i ? '🏅 ' : '') + A.t : '???';
+      d.textContent = A.d;
+      b.appendChild(t); b.appendChild(d);
+      if (has){
+        b.title = '칭호로 달기';
+        b.addEventListener('click', function(){ F.title = i; F.pick = true; save(); render(); queueLupin(true); renderLupin(); });
+      } else b.disabled = true;
+      g.appendChild(b);
+    });
+    $('achCount').textContent = got + ' / ' + ACH.length + (myTitle() ? ' · 칭호 「' + myTitle() + '」' : '');
+  }
+  function funRender(){
+    if (!state.fun) state.fun = normFun(null);
+    achSync();
+    if (curse.pending.length && !state.buffs.curse) state.buffs.curse = Math.min(CURSE_MAX, curse.pending.length);
+    renderAch();
+  }
+
+  /* ── 강화 전 · 후 ── */
+  var cursedRoll = false;
+  function funBefore(lv, o){
+    var F = state.fun, k = kst();
+    if (workHours(k)){
+      if (F.wd !== k.day){ F.wd = k.day; F.wn = 0; }
+      F.wn++; F.wt++;
+      if (F.wt >= 100) achGet(9);
+      queueLupin();
+    }
+    if (boss.on || (mini.win && miniHidden())) achGet(8);
+    if (k.h >= 1 && k.h < 5) achGet(10);
+    cursedRoll = !!state.buffs.curse;
+    if (cursedRoll) curseUsed();
+    if (lv >= LIVE_LV && roomNews()){
+      roomBot('🔴 생중계 — ' + roomWho() + ' +' + lv + ' → +' + (lv + 1) + ' 도전! (성공 ' + pct(o.s) + ' · 파괴 ' + pct(o.x) +
+              (cursedRoll ? ' · 💀 저주 ' + state.buffs.curse + '겹' : '') + ')');
+      return 2600;
+    }
+    return 0;
+  }
+  function funAfter(kind, from){
+    var F = state.fun;
+    if (kind === 'keep'){ F.keep++; F.win = 0; if (F.keep >= 10) achGet(4); }
+    else if (kind === 'success'){
+      F.keep = 0; F.win = from >= 5 ? F.win + 1 : 0;
+      if (F.win >= 5) achGet(5);
+      if (cursedRoll) achGet(13);
+    } else {
+      F.keep = 0; F.win = 0;
+      achGet(0);
+      if (from >= 15 && ++F.hb >= 3) achGet(6);
+      if (from >= 18) achGet(7);
+    }
+    cursedRoll = false;
+    if (state.stats.best >= 10) achGet(1);
+    if (state.stats.best >= 15) achGet(2);
+    if (state.stats.best >= 20) achGet(3);
+    if (state.gold < 1000) achGet(11);
+  }
+
+  /* ── 오늘의 월급루팡 ── */
+  var lupin = { list:null, err:false, sent:'', timer:null };
+  function lupinPayload(){
+    var F = state.fun, day = kst().day, n = F.wd === day ? F.wn : 0;
+    return { name: currentName(), day: day, n: n, score: day * 100000 + n, t: myTitle(), ach: F.ach };
+  }
+  function queueLupin(now){
+    if (!online.user || online.conflict || boardsOff()) return;
+    clearTimeout(lupin.timer);
+    lupin.timer = setTimeout(sendLupin, now ? 600 : 4000);
+  }
+  function sendLupin(){
+    if (!online.user || online.conflict || boardsOff()) return;
+    var p = lupinPayload(), sig = JSON.stringify(p), F = online.fb, uid = online.user.uid;
+    if (sig === lupin.sent) return;
+    F.setDoc(F.doc(online.db, 'lupin', uid), Object.assign({}, p, { at: F.serverTimestamp() })).then(function(){
+      if (!isUser(uid)) return;
+      lupin.sent = sig;
+      if (lupin.list){
+        lupin.list = lupin.list.filter(function(r){ return r.uid !== uid; }).concat([Object.assign({ uid: uid }, p)]);
+        lupin.list.sort(function(a, b){ return b.score - a.score; });
+      }
+      renderLupin();
+    }, function(){ /* 서버 규칙을 게시하기 전이면 거부됨 — 게임은 그대로 */ });
+  }
+  function loadLupin(){
+    if (!online.on) return;
+    var F = online.fb;
+    F.getDocs(F.query(F.collection(online.db, 'lupin'), F.orderBy('score', 'desc'), F.limit(15))).then(function(qs){
+      lupin.list = qs.docs.map(function(d){ var x = d.data(); x.uid = d.id; return x; });
+      lupin.err = false; renderLupin();
+    }, function(){ lupin.err = true; renderLupin(); });
+  }
+  function renderLupin(){
+    var ol = $('lupinList'), F = state.fun, today = kst().day;
+    $('lupinMe').textContent = '나 오늘 ' + (F.wd === today ? F.wn : 0) + '번' + (workHours(kst()) ? '' : ' · 지금은 퇴근 시간');
+    ol.textContent = '';
+    var list = (lupin.list || []).filter(function(r){ return r.day === today && r.n > 0; }).slice(0, 10);
+    var msg = lupin.list === null ? (lupin.err ? '아직 준비 중이에요. (운영자가 서버 규칙을 새로 게시하면 열려요)' : '불러오는 중…')
+            : !list.length ? '오늘은 아직 아무도 몰래 강화하지 않았어요. 평일 9 ~ 18시에 강화하면 올라가요!' : '';
+    if (msg){
+      var e = document.createElement('li');
+      e.className = 'empty'; e.textContent = msg;
+      ol.appendChild(e);
+      return;
+    }
+    list.forEach(function(r, i){
+      var li = document.createElement('li');
+      if (online.user && r.uid === online.user.uid) li.className = 'me';
+      var no = document.createElement('span'); no.className = 'no'; no.textContent = i === 0 ? '🥷' : i + 1;
+      var who = document.createElement('span'); who.className = 'who';
+      var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = String(r.name || '이름 없음');
+      var tt = document.createElement('span'); tt.className = 'sw ttl';
+      tt.textContent = (i === 0 ? '오늘의 월급루팡' : '') + (i === 0 && r.t ? ' · ' : '') + (r.t ? '「' + String(r.t).slice(0, 16) + '」' : '');
+      who.appendChild(nm); who.appendChild(tt);
+      var sc = document.createElement('span'); sc.className = 'sc';
+      var lv = document.createElement('span'); lv.className = 'lv'; lv.textContent = (r.n | 0) + '번';
+      sc.appendChild(lv);
+      var cb = curseBtn(r);
+      if (cb) sc.appendChild(cb);
+      li.appendChild(no); li.appendChild(who); li.appendChild(sc);
+      ol.appendChild(li);
+    });
+  }
+
+  /* ── 저주 ── */
+  var curse = { unsub:null, pending:[], sent:0 };
+  function curseBtn(r){
+    if (!online.user || boardsOff() || !r.uid || r.uid === online.user.uid) return null;
+    var b = document.createElement('button'), done = curse.sent === kst().day, name = String(r.name || '이름 없음').slice(0, 12);
+    b.type = 'button'; b.className = 'curse'; b.textContent = '💀';
+    b.disabled = done;
+    b.title = done ? '저주는 하루에 한 번 — 내일 또 보내요' : name + '님에게 저주 보내기 (다음 강화 파괴 +3%)';
+    b.setAttribute('aria-label', b.title);
+    b.addEventListener('click', function(){ sendCurse(r.uid, name); });
+    return b;
+  }
+  function sendCurse(to, name){
+    if (!online.user || boardsOff() || to === online.user.uid || curse.sent === kst().day) return;
+    var F = online.fb, uid = online.user.uid, day = kst().day;
+    F.setDoc(F.doc(online.db, 'curses', uid), { to: to, toName: name, from: currentName(), at: F.serverTimestamp() }).then(function(){
+      if (!isUser(uid)) return;
+      curse.sent = day;
+      state.fun.cs++;
+      if (state.fun.cs >= 10) achGet(12);
+      pushLog('gift', '저주', name + '님에게 저주를 보냈어요 💀 (다음 강화 파괴 +3%)', null);
+      funToast('💀 ' + name + '님에게 저주를 보냈어요');
+      if (roomNews()) roomBot(roomWho() + '이 ' + name + '님에게 저주를 걸었어요 💀 다음 강화 파괴 +3%');
+      save(); renderRank(); renderLupin();
+    }, function(){
+      if (!isUser(uid)) return;
+      funToast('저주를 보내지 못했어요 — 하루에 한 번만 되고, 랭킹에 있는 사람에게만 보낼 수 있어요');
+    });
+  }
+  function curseUsed(){   // 이번 강화로 받은 저주를 다 씀
+    curse.pending.forEach(function(p){ if (p.at > state.fun.seen) state.fun.seen = p.at; });
+    curse.pending = [];
+  }
+  function curseListen(){
+    var F = online.fb, uid = online.user.uid;
+    F.getDoc(F.doc(online.db, 'curses', uid)).then(function(d){   // 오늘 이미 보냈는지
+      if (!isUser(uid) || !d.exists()) return;
+      var at = d.data().at, t = at && at.toMillis ? at.toMillis() : 0;
+      if (t && new Date(t + 9 * 3600000).toISOString().slice(0, 10).replace(/-/g, '') === String(kst().day)){ curse.sent = kst().day; renderRank(); renderLupin(); }
+    }, function(){});
+    curse.unsub = F.onSnapshot(F.query(F.collection(online.db, 'curses'), F.where('to', '==', uid), F.limit(30)), function(qs){
+      if (!isUser(uid)) return;
+      var now = Date.now(), got = [];
+      qs.docs.forEach(function(d){
+        var x = d.data(), t = x.at && x.at.toMillis ? x.at.toMillis() : 0;
+        if (t > state.fun.seen && now - t < 86400000) got.push({ from: String(x.from || '누군가').slice(0, 12), at: t });
+      });
+      var fresh = got.filter(function(g){ return !curse.pending.some(function(p){ return p.at === g.at && p.from === g.from; }); });
+      curse.pending = got;
+      state.buffs.curse = Math.min(CURSE_MAX, got.length);
+      fresh.forEach(function(g){
+        pushLog('boom', '저주', g.from + '님이 저주를 걸었어요 💀 다음 강화 파괴 +3%', null);
+        funToast('💀 ' + g.from + '님의 저주! 다음 강화 파괴 +3%');
+      });
+      render();
+    }, function(){});
+  }
+  function funLogin(){
+    var F = online.fb, uid = online.user.uid;
+    F.getDoc(F.doc(online.db, 'lupin', uid)).then(function(d){   // 다른 기기에서 딴 업적 · 칭호 가져오기
+      if (!isUser(uid)) return;
+      if (d.exists()){
+        var x = d.data(), had = state.fun.ach;
+        state.fun.ach |= (x.ach | 0) & 1073741823;
+        if (!state.fun.pick && x.t) ACH.forEach(function(A, i){ if (A.t === x.t && (state.fun.ach & (1 << i))){ state.fun.title = i; state.fun.pick = true; } });
+        if (state.fun.ach !== had) save();
+      }
+      queueLupin(true); render();
+    }, function(){});
+    curseListen();
+    loadLupin();
+  }
+  function funLogout(){
+    if (curse.unsub){ curse.unsub(); curse.unsub = null; }
+    curse.pending = []; curse.sent = 0;
+    if (state.buffs) state.buffs.curse = 0;
+    lupin.list = null; lupin.err = false; lupin.sent = '';
+    clearTimeout(lupin.timer);
   }
 
   $('soundBtn').addEventListener('click', function(){

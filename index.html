@@ -915,6 +915,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     <div class="brand-tools">
       <button class="btn-ghost btn-app" id="installBtn" type="button" hidden>앱으로 설치</button>
       <button class="btn-ghost btn-kakao" id="inviteBtn" type="button">카톡으로 친구 초대</button>
+      <button class="btn-ghost" id="bossBtn" type="button"
+              title="업무 화면으로 숨기기 (` 키). 다시 ` 키 또는 두 번 클릭하면 돌아와요">숨기기</button>
       <button class="btn-ghost" id="miniBtn" type="button" aria-pressed="false" hidden
               title="화면 구석에 항상 위에 떠 있는 작은 창 (크롬 · 엣지 PC). 창 안에서 Esc 를 누르면 위장 모드">미니 대장간</button>
       <button class="btn-ghost" id="soundBtn" type="button" aria-pressed="true">소리 켬</button>
@@ -2904,7 +2906,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   /* ═════════ 소리 (WebAudio 합성, 파일 없음) ═════════ */
   var actx = null;
   function audio(){
-    if (!state.sound || (mini && mini.win && mini.disguise)) return null;   // 위장 모드에서는 소리 없음
+    if (!state.sound || (boss && boss.on) || (mini && mini.win && mini.mode !== 'off')) return null;   // 업무 화면 · 위장 중에는 소리 없음
     try {
       if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
@@ -3052,6 +3054,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     var lv = state.level, row = LEVELS[lv];
     var o = odds(lv, state.buffs), maxed = o === null;
     var sw = currentSword();
+    appBadge();
 
     $('hudGold').textContent = fmt(state.gold);
     $('hudBest').textContent = '+' + state.stats.best;
@@ -6125,9 +6128,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
      화면 구석에 항상 위에 떠 있는 손바닥만 한 창입니다 (크롬 · 엣지 PC 의 Document Picture-in-Picture, 없으면 버튼을 숨김).
      창 안의 강화 · 판매는 본 화면의 버튼을 그대로 눌러서, 규칙(판매 두 번 확인 · +20 무기고 넣기)이 한곳에만 있습니다.
      위장 모드(창 안에서 Esc 또는 오른쪽 위 버튼): 메모장처럼 보이고, 소리가 꺼지고, 탭 · 창 제목이 "업무일지"가 됩니다.
-     무기는 오른쪽 아래에 작은 회색 낙서처럼 숨어 있다가 마우스를 올리면 커집니다. 위장 여부는 이 기기에 기억합니다. */
-  var mini = { win:null, disguise:false, sig:'', title:document.title };
-  try { mini.disguise = localStorage.getItem('forge-mini-disguise') === '1'; } catch (e) {}
+     무기는 오른쪽 아래에 작은 회색 낙서처럼 숨어 있다가 마우스를 올리면 커집니다.
+     오른쪽 위 버튼은 끔 → 위장 → 자동(마우스를 올린 동안만 게임, 치우면 메모장) 순서로 돕니다. 이 기기에 기억합니다.
+     단축키(미니 창): 스페이스 · Enter 강화, S 판매, Esc 위장 켜고 끄기, ` 업무 화면. */
+  var mini = { win:null, mode:'off', hover:false, sig:'', title:document.title };
+  try {
+    var miniSaved = localStorage.getItem('forge-mini-disguise');
+    mini.mode = miniSaved === '1' || miniSaved === 'on' ? 'on' : miniSaved === 'auto' ? 'auto' : 'off';
+  } catch (e) {}
   var MINI_HTML =
     '<div class="memo"><span>파일</span><span>편집</span><span>보기</span></div>' +
     '<div class="top"><canvas id="cv" width="300" height="300"></canvas>' +
@@ -6164,9 +6172,12 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     return '업무일지_' + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.txt - 메모장';
   }
   function miniSet(el, text){ if (el.textContent !== text) el.textContent = text; }
+  function miniHidden(){   // 미니 창이 지금 메모장으로 보여야 하는지
+    return !!(boss && boss.on) || mini.mode === 'on' || (mini.mode === 'auto' && !mini.hover);
+  }
   function miniTitle(){
-    var on = !!(mini.win && mini.disguise);
-    document.title = on ? miniMemoTitle() : mini.title;
+    var on = !!(mini.win && miniHidden());
+    document.title = boss && boss.on ? bossTitle() : on ? miniMemoTitle() : mini.title;
     if (mini.win) mini.win.document.title = on ? miniMemoTitle() : '미니 대장간';
   }
   function miniButton(){
@@ -6178,7 +6189,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function miniSync(){
     var w = mini.win;
     if (!w) return;
-    var d = w.document, D = mini.disguise, sw = currentSword(), lv = state.level, o = odds(lv, state.buffs);
+    var d = w.document, D = miniHidden(), sw = currentSword(), lv = state.level, o = odds(lv, state.buffs);
     d.body.classList.toggle('disg', D);
     var sig = state.sword.seed + ':' + lv + ':' + state.sword.rar + ':' + sw.key;
     if (sig !== mini.sig){ mini.sig = sig; renderStill(d.getElementById('cv'), sw, false); }
@@ -6208,11 +6219,14 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     fb.disabled = F.disabled;
     sb.disabled = S.disabled;
     sb.classList.toggle('armed', armed);
-    miniSet(d.getElementById('dg'), D ? '⋯' : '위장');
+    var dg = d.getElementById('dg');
+    miniSet(dg, D ? '⋯' : mini.mode === 'auto' ? '자동' : '위장');
+    dg.title = { off:'위장 모드 켜기 (Esc)', on:'자동 위장: 마우스를 올린 동안만 게임이 보여요', auto:'위장 끄기' }[mini.mode];
+    if (boss.on) bossStat();
   }
-  function miniDisguise(){
-    mini.disguise = !mini.disguise;
-    try { localStorage.setItem('forge-mini-disguise', mini.disguise ? '1' : '0'); } catch (e) {}
+  function miniMode(m){
+    mini.mode = m;
+    try { localStorage.setItem('forge-mini-disguise', m); } catch (e) {}
     miniTitle(); miniSync();
   }
   function miniOpen(){
@@ -6230,8 +6244,16 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       d.body.innerHTML = MINI_HTML;
       d.getElementById('fb').addEventListener('click', function(){ $('forgeBtn').click(); miniSync(); });
       d.getElementById('sb').addEventListener('click', function(){ $('sellBtn').click(); miniSync(); });
-      d.getElementById('dg').addEventListener('click', miniDisguise);
-      d.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ e.preventDefault(); miniDisguise(); } });
+      d.getElementById('dg').addEventListener('click', function(){ miniMode({ off:'on', on:'auto', auto:'off' }[mini.mode]); });
+      d.addEventListener('keydown', function(e){
+        if (bossKey(e)) return;
+        var plain = !e.ctrlKey && !e.metaKey && !e.altKey;
+        if (e.key === 'Escape'){ e.preventDefault(); miniMode(mini.mode === 'off' ? 'on' : 'off'); }
+        else if (plain && (e.code === 'Space' || e.key === 'Enter')){ e.preventDefault(); if (!e.repeat) d.getElementById('fb').click(); }
+        else if (plain && e.code === 'KeyS'){ e.preventDefault(); if (!e.repeat) d.getElementById('sb').click(); }
+      });
+      d.documentElement.addEventListener('mouseenter', function(){ mini.hover = true; miniTitle(); miniSync(); });
+      d.documentElement.addEventListener('mouseleave', function(){ mini.hover = false; miniTitle(); miniSync(); });
       w.addEventListener('pagehide', function(){
         if (mini.win !== w) return;
         mini.win = null; miniTitle(); miniButton();
@@ -6242,6 +6264,137 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
   $('miniBtn').addEventListener('click', miniOpen);
   miniButton();
+
+  /* ═════════ 업무 화면 (보스 키) ═════════
+     ` 키(Esc 아래) 또는 머리 부분 "숨기기" → 화면 전체가 가짜 업무 표로 바뀌고, 탭 제목 · 아이콘이 바뀌고, 소리가 꺼집니다.
+     미니 대장간도 함께 메모장이 됩니다. 다시 ` 키, 또는 표를 두 번 클릭(휴대폰은 두 번 톡)하면 돌아옵니다.
+     업무 화면에서도 스페이스를 누르면 강화는 됩니다(소리 · 화면 변화 없이). 맨 아래 상태 표시줄의 "평균"은 지금 단계,
+     "합계"는 골드입니다 — 아는 사람만 아는 숫자. */
+  var boss = { on:false, el:null, icon:'', fake:'' };
+  var BOSS_TASKS = ['거래처 견적 검토', '월간 보고서 작성', '자재 발주 확인', '도면 검토 회의', '예산 집행 점검',
+    '품질 점검표 정리', '협력사 미팅 준비', '안전 교육 자료', '설계 변경 검토', '재고 실사', '공정표 업데이트',
+    '회의록 정리', '구매 요청 승인', '현장 사진 정리', '계약서 검토', '주간 회의 준비'];
+  var BOSS_WHO = ['김 대리', '이 과장', '박 주임', '최 대리', '정 과장', '한 사원'];
+  var BOSS_STATE = ['진행중', '완료', '대기', '진행중', '검토중'];
+  var BOSS_CSS =
+    '.boss{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;color-scheme:light;background:#fff;color:#000;' +
+      'font:12px/1.4 "Segoe UI","맑은 고딕","Malgun Gothic",sans-serif;user-select:none}' +
+    '.bx-menu{display:flex;gap:16px;align-items:center;padding:7px 12px;background:#f3f3f3;border-bottom:1px solid #d4d4d4;white-space:nowrap;overflow:hidden}' +
+    '.bx-menu b{font-weight:600;margin-right:10px}' +
+    '.bx-fx{display:flex;gap:10px;align-items:center;padding:4px 8px;border-bottom:1px solid #d4d4d4}' +
+    '.bx-fx span:first-child{width:64px;padding:1px 5px;border:1px solid #d4d4d4}.bx-fx i{color:#888}' +
+    '.bx-grid{flex:1;overflow:auto}.bx-grid table{border-collapse:collapse;min-width:100%;font-size:12px}' +
+    '.bx-grid th{position:sticky;top:0;background:#f3f3f3;color:#555;font-weight:400;text-align:center;letter-spacing:0;text-transform:none;border:1px solid #d4d4d4;padding:2px 8px;min-width:70px}' +
+    '.bx-grid th:first-child{min-width:34px}' +
+    '.bx-grid td{background:#fff;color:#000;font:inherit;text-align:left;border:1px solid #e2e2e2;padding:2px 8px;height:21px;white-space:nowrap}' +   // 게임 표 스타일을 덮어씀
+    '.bx-grid td.rh{background:#f3f3f3;color:#555;text-align:center;border-color:#d4d4d4}' +
+    '.bx-grid td.n{text-align:right}.bx-grid td.sel{outline:2px solid #1e7145;outline-offset:-2px}' +
+    '.bx-status{display:flex;justify-content:space-between;gap:12px;padding:3px 12px;background:#f3f3f3;border-top:1px solid #d4d4d4;color:#444;white-space:nowrap}';
+  function bossTitle(){
+    var d = new Date();
+    return '주간업무_' + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.xlsx';
+  }
+  function bossIcon(){   // 초록 표 모양 탭 아이콘
+    var c = document.createElement('canvas'), x;
+    c.width = c.height = 32; x = c.getContext('2d');
+    x.fillStyle = '#1e7145'; x.fillRect(2, 2, 28, 28);
+    x.fillStyle = '#fff'; x.fillRect(6, 7, 20, 18);
+    x.fillStyle = '#1e7145'; x.fillRect(6, 12, 20, 1); x.fillRect(6, 17, 20, 1); x.fillRect(6, 22, 20, 1); x.fillRect(15, 7, 1, 18);
+    return c.toDataURL('image/png');
+  }
+  function bossBuild(){
+    var css = document.createElement('style');
+    css.textContent = BOSS_CSS;
+    document.head.appendChild(css);
+    var rnd = rng32(20261103), h = '';
+    h += '<div class="bx-menu"><b>' + bossTitle() + '</b><span>파일</span><span>홈</span><span>삽입</span><span>페이지 레이아웃</span>' +
+         '<span>수식</span><span>데이터</span><span>검토</span><span>보기</span></div>' +
+         '<div class="bx-fx"><span>E9</span><i>fx</i><span>=SUM(E3:E18)</span></div><div class="bx-grid"><table><tr><th></th>';
+    'ABCDEFGHI'.split('').forEach(function(c){ h += '<th>' + c + '</th>'; });
+    h += '</tr>';
+    for (var r = 1; r <= 60; r++){
+      var cells = ['', '', '', '', '', '', '', '', ''], i = r - 3;
+      if (r === 1) cells[0] = '<b>11월 주간 업무 현황</b>';
+      else if (r === 2) cells = ['번호', '업무', '담당', '진행률', '예산(원)', '마감', '상태', '비고', ''].map(function(t){ return t && '<b>' + t + '</b>'; });
+      else if (i < BOSS_TASKS.length){
+        cells = [String(i + 1), BOSS_TASKS[i], BOSS_WHO[Math.floor(rnd() * BOSS_WHO.length)], Math.round(rnd() * 20) * 5 + '%',
+          fmt(Math.round(rnd() * 900 + 30) * 10000), '11/' + ('0' + (Math.floor(rnd() * 27) + 3)).slice(-2),
+          BOSS_STATE[Math.floor(rnd() * BOSS_STATE.length)], '', ''];
+      }
+      h += '<tr><td class="rh">' + r + '</td>';
+      cells.forEach(function(t, c){
+        var cls = (r > 2 && (c === 0 || c === 3 || c === 4) ? 'n' : '') + (r === 9 && c === 4 ? ' sel' : '');
+        h += '<td' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + t + '</td>';
+      });
+      h += '</tr>';
+    }
+    h += '</table></div><div class="bx-status"><span>준비</span><span id="bossStat"></span></div>';
+    var el = document.createElement('div');
+    el.className = 'boss'; el.hidden = true; el.innerHTML = h;
+    el.addEventListener('dblclick', bossToggle);
+    var tap = 0;   // 휴대폰: 두 번 톡
+    el.addEventListener('touchend', function(){ var t = Date.now(); if (t - tap < 350){ tap = 0; bossToggle(); } else tap = t; });
+    document.body.appendChild(el);
+    boss.el = el;
+  }
+  function bossStat(){
+    if (!boss.el) return;
+    var t = '평균: ' + state.level + ' 개수: ' + BOSS_TASKS.length + ' 합계: ' + fmt(state.gold);
+    var el = boss.el.querySelector('#bossStat');
+    if (el.textContent !== t) el.textContent = t;
+  }
+  function bossToggle(){
+    if (!boss.el) bossBuild();
+    boss.on = !boss.on;
+    boss.el.hidden = !boss.on;
+    // "숨기기"를 누른 뒤 스페이스를 치면 그 버튼이 다시 눌려 게임이 드러나므로, 업무 화면을 켜면 버튼에서 손을 뗍니다
+    if (boss.on && document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    var link = document.querySelector('link[rel="icon"]');
+    if (link){
+      if (!boss.icon) boss.icon = link.getAttribute('href');
+      if (boss.on && !boss.fake) boss.fake = bossIcon();
+      link.setAttribute('href', boss.on ? boss.fake : boss.icon);
+    }
+    bossStat(); miniTitle(); miniSync();
+  }
+  function bossKey(e){   // ` 키면 업무 화면을 켜고 끄고 true (글 쓰는 칸에서는 켜지 않음)
+    if (e.code !== 'Backquote' && e.key !== '`') return false;
+    if (e.ctrlKey || e.metaKey || e.altKey) return false;
+    var t = e.target, tag = t && t.tagName;
+    if (!boss.on && (tag === 'INPUT' || tag === 'TEXTAREA' || (t && t.isContentEditable))) return false;
+    e.preventDefault();
+    bossToggle();
+    return true;
+  }
+  document.addEventListener('keydown', bossKey);
+  $('bossBtn').addEventListener('click', bossToggle);
+
+  /* ═════════ 작업 표시줄 (앱으로 설치했을 때) ═════════
+     아이콘 우클릭 메뉴의 "강화하기 · 판매하기"(manifest.webmanifest 의 shortcuts)와, 아이콘 귀퉁이의 단계 숫자(+0 이면 없음).
+     메뉴로 열면 이미 열린 창을 쓰고(launch_handler) 그 동작을 한 번 합니다. 판매는 본 화면 버튼과 같아서
+     비싼 무기는 한 번 더 눌러야 팔립니다. */
+  var badgeLv = -1;
+  function appBadge(){
+    if (!navigator.setAppBadge || state.level === badgeLv) return;
+    badgeLv = state.level;
+    (badgeLv > 0 ? navigator.setAppBadge(badgeLv) : navigator.clearAppBadge()).catch(function(){});
+  }
+  function appAction(url){
+    var a = '';
+    try { a = new URL(url, location.href).searchParams.get('do') || ''; } catch (e) {}
+    if (a !== 'forge' && a !== 'sell') return;
+    try {
+      var u = new URL(location.href);
+      u.searchParams.delete('do');
+      history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+    } catch (e) {}
+    setTimeout(function(){ $(a === 'forge' ? 'forgeBtn' : 'sellBtn').click(); }, 600);
+  }
+  if (window.launchQueue && window.launchQueue.setConsumer){
+    window.launchQueue.setConsumer(function(p){ if (p && p.targetURL) appAction(p.targetURL); });
+  } else if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches){
+    appAction(location.href);
+  }
 
   $('soundBtn').addEventListener('click', function(){
     state.sound = !state.sound;

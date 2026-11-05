@@ -4748,6 +4748,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       state.gold += got;
       state.stats.earned += got;
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      if (isSneak()){ state.fun.snw = (state.fun.snw | 0) + 1; if (state.fun.snw >= 10) achGet(18); }
       pushLog('duel', '결투', foe.name + '님에게 이김 +' + gold(got), null);
     } else pushLog('duellose', '결투', foe.name + '님에게 짐 (기력 -1)', null);
     save();                                                    // 결과는 바로 저장 (연출 도중에 닫아도 그대로)
@@ -4774,7 +4775,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       else tone(196, .25, 'sawtooth', .04);
       render();
     }
-    if (reduced()){ finish(); return true; }
+    if (reduced() || document.hidden || miniHidden()){ finish(); return true; }
     var hpMe = 100, hpFoe = 100, k = 0, meEl = stage.querySelector('.fighter.me'), foeEl = stage.querySelector('.fighter.mob');
     function hit(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
     (function step(){
@@ -4967,6 +4968,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       state.gold += M.gold;
       state.stats.earned += M.gold;
       if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+      if (isSneak()){ state.fun.snw = (state.fun.snw | 0) + 1; if (state.fun.snw >= 10) achGet(18); }
       var u = Math.random(), acc = 0;
       HUNT_DROP.forEach(function(d){ if (!drop && u < (acc += d.p)) drop = d.item; });
       if (drop){ wasAuto = state.auto[drop]; state.items[drop] = Math.min(999, (state.items[drop] | 0) + 1); autoItems(); }
@@ -4993,7 +4995,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       else tone(196, .25, 'sawtooth', .04);
       render();
     }
-    if (reduced()){ finish(); return; }
+    if (reduced() || document.hidden || miniHidden()){ finish(); return; }
     /* 서너 번 주고받는 연출 — 결과는 이미 정해져 있고, 이긴 쪽이 마지막에 남도록 체력을 깎습니다 */
     var hpMe = 100, hpMob = 100, turns = 4, k = 0;
     var meEl = stage.querySelector('.fighter.me'), mobEl = stage.querySelector('.fighter.mob');
@@ -6234,54 +6236,151 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
 
   /* ═════════ 미니 대장간 ═════════
      화면 구석에 항상 위에 떠 있는 손바닥만 한 창입니다 (크롬 · 엣지 PC 의 Document Picture-in-Picture, 없으면 버튼을 숨김).
-     창 안의 강화 · 판매는 본 화면의 버튼을 그대로 눌러서, 규칙(판매 두 번 확인 · +20 무기고 넣기)이 한곳에만 있습니다.
+     상단 4개 탭(위장 시 메모장 메뉴 파일·편집·서식·보기)으로 대장간 · 무기고 · 사냥/결투 · 단톡방/월급루팡을 모두 다룹니다.
      위장 모드(창 안에서 Esc 또는 오른쪽 위 버튼): 메모장처럼 보이고, 소리가 꺼지고, 탭 · 창 제목이 "업무일지"가 됩니다.
      무기는 오른쪽 아래에 작은 회색 낙서처럼 숨어 있다가 마우스를 올리면 커집니다.
-     오른쪽 위 버튼은 끔 → 위장 → 자동(마우스를 올린 동안만 게임, 치우면 메모장) 순서로 돕니다. 이 기기에 기억합니다.
-     단축키(미니 창): 스페이스 · Enter 강화, S 판매, Esc 위장 켜고 끄기, ` 업무 화면. */
-  var mini = { win:null, mode:'off', hover:false, sig:'', title:document.title };
+     위장 중에 행동하면 가끔 "순찰 점검 / 긴급 결재"가 뜨고, 제때 누르면 수당(골드)을 받습니다.
+     단축키(미니 창): 1~4 탭 이동, 스페이스·Enter 강화, S 판매, B 축복서, D 긴급결재, Esc 위장, ` 업무 화면. */
+  var mini = { win:null, mode:'off', hover:false, tab:0, sig:'', vsig:'', hsig:'', dsig:'', msig:'', lsig:'', rsig:'', dmode:null,
+               urg:null, urgAt:0, note:{ text:'', until:0 }, rfAt:0, title:document.title };
   try {
     var miniSaved = localStorage.getItem('forge-mini-disguise');
     mini.mode = miniSaved === '1' || miniSaved === 'on' ? 'on' : miniSaved === 'auto' ? 'auto' : 'off';
   } catch (e) {}
   var MINI_HTML =
-    '<div class="memo"><span>파일</span><span>편집</span><span>보기</span></div>' +
-    '<div class="top"><canvas id="cv" width="300" height="300"></canvas>' +
-    '<div class="info"><b id="nm"></b><span id="gd"></span></div></div>' +
-    '<div id="od"></div><p id="vd"></p>' +
-    '<div class="row"><button id="fb" type="button"></button><button id="sb" type="button"></button></div>' +
-    '<button id="dg" type="button" title="위장 모드 (Esc)"></button>';
+    '<div class="memo">' +
+      '<button type="button" data-t="0"></button><button type="button" data-t="1"></button>' +
+      '<button type="button" data-t="2"></button><button type="button" data-t="3"></button>' +
+      '<button id="dg" type="button" title="위장 모드 (Esc)"></button>' +
+    '</div>' +
+    '<div id="urg" hidden><span id="ut"></span><button id="ub" type="button"></button></div>' +
+    '<div id="t0" class="pane">' +
+      '<div class="top"><canvas id="cv" width="300" height="300"></canvas>' +
+      '<div class="info"><b id="nm"></b><span id="sub"></span><span id="gd"></span></div></div>' +
+      '<div id="od"></div><p id="vd"></p>' +
+      '<div class="subrow"><button id="bb" type="button"></button><button id="lb" type="button" hidden></button><button id="bw" type="button" hidden></button></div>' +
+      '<div class="row"><button id="fb" type="button"></button><button id="sb" type="button"></button></div>' +
+    '</div>' +
+    '<div id="t1" class="pane" hidden>' +
+      '<div id="vh" class="sec"></div><div id="vl" class="vlist"></div><div id="vn" class="note"></div>' +
+      '<div class="row"><button id="vsyn" type="button"></button><button id="vlp" type="button"></button><button id="vsel" type="button"></button></div>' +
+    '</div>' +
+    '<div id="t2" class="pane" hidden>' +
+      '<div id="en" class="sec"></div>' +
+      '<div class="box"><div id="hlb" class="lbl"></div>' +
+        '<div class="srow"><select id="hsel"></select><button id="hb" type="button"></button></div>' +
+        '<div id="hrs" class="note"></div></div>' +
+      '<div class="box"><div class="lhead"><span id="dlb" class="lbl"></span><button id="drf" type="button" class="mini-rf"></button></div>' +
+        '<div id="dlog" class="note" hidden></div>' +
+        '<div id="dbox"><div class="srow"><select id="dsel"></select><button id="db" type="button"></button></div><div id="drs" class="note"></div></div></div>' +
+    '</div>' +
+    '<div id="t3" class="pane" hidden>' +
+      '<div class="lhead"><span id="rh" class="sec"></span><select id="rsel" hidden></select></div>' +
+      '<div id="rms" class="mlist"></div>' +
+      '<form id="rfm" class="srow"><input id="rin" type="text" maxlength="300" autocomplete="off"><button id="rsd" type="submit"></button></form>' +
+      '<div id="lh" class="sec lsec"></div><div id="ll" class="llist"></div>' +
+    '</div>';
   var MINI_CSS =
-    ':root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;height:100%}' +
-    'body{background:#100E0C;color:#F3ECE0;font:13px/1.4 "IBM Plex Sans KR",system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;padding:10px;overflow:hidden;user-select:none}' +
-    '.memo{display:none}.top{display:flex;gap:10px;align-items:center}' +
-    '#cv{width:92px;height:92px;flex:none;border-radius:10px;background:radial-gradient(circle,#2A231C,#1A1613 70%);box-shadow:0 0 0 1px #332B22 inset}' +
-    '.info{display:flex;flex-direction:column;gap:3px;min-width:0;padding-right:34px}' +
-    '#nm{font-size:14px;font-weight:700;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}' +
+    ':root{color-scheme:dark}*{box-sizing:border-box}[hidden]{display:none !important}html,body{margin:0;height:100%}' +
+    'body{background:#100E0C;color:#F3ECE0;font:12.5px/1.4 "IBM Plex Sans KR",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;user-select:none}' +
+    '.memo{display:flex;gap:4px;align-items:center;padding:6px 8px;background:#1A1613;border-bottom:1px solid #332B22;flex:none}' +
+    '.memo button{padding:4px 7px;font-size:11.5px;font-weight:600;border-radius:6px;background:none;color:#8A7F72}' +
+    '.memo button.on{background:#2A231C;color:#F3ECE0}' +
+    '#dg{margin-left:auto;padding:3px 7px;font-size:11px;font-weight:500;color:#B6A997;box-shadow:0 0 0 1px #332B22 inset}' +
+    '#urg{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 10px;background:#2A2015;border-bottom:1px solid #D9A441;color:#FFD27A;font-size:11.5px;flex:none}' +
+    '#urg button{padding:3px 8px;font-size:11px;border-radius:5px;background:#D9A441;color:#100E0C;white-space:nowrap}' +
+    '.pane{flex:1;display:flex;flex-direction:column;gap:7px;padding:10px;min-height:0;overflow-y:auto}' +
+    '.top{display:flex;gap:10px;align-items:center}' +
+    '#cv{width:84px;height:84px;flex:none;border-radius:10px;background:radial-gradient(circle,#2A231C,#1A1613 70%);box-shadow:0 0 0 1px #332B22 inset}' +
+    '.info{display:flex;flex-direction:column;gap:2px;min-width:0}' +
+    '#nm{font-size:13.5px;font-weight:700;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}' +
+    '#sub{font-size:11px;color:#8A7F72}' +
     '#gd,#od{font-family:"IBM Plex Mono",ui-monospace,monospace}#gd{color:#D9A441;font-size:12px}#od{color:#B6A997;font-size:11.5px}' +
-    '#vd{margin:0;min-height:2.8em;color:#B6A997;font-size:12.5px}#vd.v-ok{color:#5FA463}#vd.v-boom{color:#C94A40}' +
-    '.row{display:flex;gap:6px;margin-top:auto}' +
-    'button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:9px 6px;cursor:pointer}button:disabled{opacity:.45;cursor:default}' +
-    '#fb{flex:1.4;background:#E8622C;color:#100E0C}#sb{flex:1;background:#221C17;color:#D9A441;box-shadow:0 0 0 1px #463A2D inset}' +
-    '#sb.armed{background:#C94A40;color:#F3ECE0;box-shadow:none}' +
-    '#dg{position:fixed;top:8px;right:8px;padding:3px 7px;font-size:11px;font-weight:500;background:none;color:#8A7F72;box-shadow:0 0 0 1px #332B22 inset;border-radius:6px}' +
+    '#vd{margin:0;min-height:1.6em;color:#B6A997;font-size:12px}#vd.v-ok{color:#5FA463}#vd.v-boom{color:#C94A40}' +
+    '.subrow{display:flex;gap:5px;flex-wrap:wrap}' +
+    '.subrow button{flex:1;padding:6px 6px;font-size:11.5px;font-weight:600;background:#1A1613;color:#B6A997;box-shadow:0 0 0 1px #332B22 inset;border-radius:6px}' +
+    '.row{display:flex;gap:6px;margin-top:auto;padding-top:2px}' +
+    'button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:8px 6px;cursor:pointer}button:disabled{opacity:.45;cursor:default}' +
+    '#fb,#vsyn,#hb,#db,#rsd{background:#E8622C;color:#100E0C}#fb{flex:1.4}' +
+    '#sb,#vlp,#vsel{flex:1;background:#221C17;color:#D9A441;box-shadow:0 0 0 1px #463A2D inset}' +
+    '#vsyn{flex:1.2}button.armed,#sb.armed{background:#C94A40 !important;color:#F3ECE0 !important;box-shadow:none !important}' +
+    '.sec{font-size:11.5px;font-weight:700;color:#D9A441}.lsec{margin-top:4px;padding-top:6px;border-top:1px solid #2A231C}' +
+    '.lbl{font-size:11.5px;font-weight:700;color:#F3ECE0}.note{font-size:11px;color:#8A7F72;min-height:1.2em}' +
+    '.box{display:flex;flex-direction:column;gap:5px;padding:8px;background:#1A1613;border:1px solid #2A231C;border-radius:8px}' +
+    '.lhead{display:flex;align-items:center;justify-content:space-between;gap:6px}' +
+    '.mini-rf{padding:2px 6px;font-size:11px;font-weight:500;background:#221C17;color:#B6A997;border-radius:5px}' +
+    '.srow{display:flex;gap:5px;align-items:center}.srow select,.srow input,#rsel{flex:1;min-width:0;font:inherit;font-size:11.5px;padding:6px;border-radius:6px;border:1px solid #332B22;background:#100E0C;color:#F3ECE0}' +
+    '#rsel{flex:none;max-width:120px;padding:2px 4px;font-size:11px}' +
+    '.srow button{flex:none;padding:6px 10px;font-size:11.5px;border-radius:6px}' +
+    '.vlist,.mlist,.llist{display:flex;flex-direction:column;gap:3px;overflow-y:auto;min-height:0}' +
+    '.vlist{flex:1;max-height:170px}.vi{text-align:left;padding:5px 7px;font-size:11.5px;font-weight:500;background:#1A1613;color:#F3ECE0;border:1px solid #2A231C;border-radius:6px}' +
+    '.vi.sel{border-color:#E8622C;background:#2A1E17}' +
+    '.mlist{flex:1;min-height:80px;max-height:135px;padding:6px;background:#161310;border:1px solid #2A231C;border-radius:6px;font-size:11.5px;user-select:text}' +
+    '.ml{word-break:break-word}.ml b{color:#D9A441;font-weight:600}.ml.bot{color:#B6A997}' +
+    '.llist{font-size:11.5px;color:#B6A997;max-height:95px}' +
     /* 위장 모드 — 메모장 */
-    'body.disg{color-scheme:light;background:#fff;color:#000;font:13px/1.6 Consolas,"D2Coding","맑은 고딕",monospace;padding:0;gap:0}' +
-    'body.disg .memo{display:flex;gap:14px;padding:4px 10px;font:12px "Segoe UI","맑은 고딕",sans-serif;border-bottom:1px solid #e5e5e5}' +
-    'body.disg .top,body.disg #od,body.disg #vd,body.disg .row{padding-left:10px;padding-right:10px}body.disg .top{padding-top:8px}' +
-    'body.disg #nm,body.disg #gd,body.disg #od,body.disg #vd{font:inherit;color:#000}' +
-    'body.disg #cv{position:fixed;right:8px;bottom:8px;width:28px;height:28px;background:none;box-shadow:none;border-radius:0;filter:grayscale(1);opacity:.3;transition:width .15s,height .15s,opacity .15s,filter .15s}' +
-    'body.disg #cv:hover{width:92px;height:92px;filter:none;opacity:1}' +
-    'body.disg .row{margin-top:8px;padding-bottom:10px}' +
-    'body.disg button,body.disg #fb,body.disg #sb{flex:none;background:#fdfdfd;color:#000;border:1px solid #adadad;border-radius:3px;padding:3px 12px;font:12px "Segoe UI","맑은 고딕",sans-serif;box-shadow:none}' +
-    'body.disg #sb.armed{color:#c00;border-color:#c00}body.disg #dg{top:3px;right:6px;border:0;background:none;box-shadow:none;color:#bbb}';
+    'body.disg{color-scheme:light;background:#fff;color:#000;font:12px/1.55 Consolas,"D2Coding","맑은 고딕",monospace}' +
+    'body.disg .memo{gap:12px;padding:3px 10px;background:#fff;border-bottom:1px solid #e5e5e5;font:12px "Segoe UI","맑은 고딕",sans-serif}' +
+    'body.disg .memo button{padding:1px 2px;font:inherit;font-weight:400;background:none;color:#000;border:0;border-radius:0}' +
+    'body.disg .memo button.on{text-decoration:underline;text-underline-offset:3px}' +
+    'body.disg #dg{margin-left:auto;color:#bbb;box-shadow:none;text-decoration:none}' +
+    'body.disg #urg{background:#f7f7f7;border-bottom:1px solid #dcdcdc;color:#000;padding:4px 10px;font:12px "Segoe UI","맑은 고딕",sans-serif}' +
+    'body.disg .pane{padding:8px 10px;gap:6px}' +
+    'body.disg #nm,body.disg #sub,body.disg #gd,body.disg #od,body.disg #vd,body.disg .sec,body.disg .lbl,body.disg .note,body.disg .llist{font:inherit;color:#000;font-weight:400}' +
+    'body.disg .lsec{border-top-color:#e5e5e5}' +
+    'body.disg #cv{position:fixed;right:8px;bottom:8px;width:26px;height:26px;background:none;box-shadow:none;border-radius:0;filter:grayscale(1);opacity:.28;transition:width .15s,height .15s,opacity .15s,filter .15s;pointer-events:auto}' +
+    'body.disg #cv:hover{width:88px;height:88px;filter:none;opacity:1}' +
+    'body.disg .box,body.disg .mlist{background:#fff;border:1px solid #dcdcdc;border-radius:2px;color:#000}' +
+    'body.disg .ml b,body.disg .ml.bot{color:#000;font-weight:400}' +
+    'body.disg select,body.disg input{background:#fff;color:#000;border:1px solid #adadad;border-radius:2px;font:12px "Segoe UI","맑은 고딕",sans-serif;padding:3px 5px}' +
+    'body.disg .pane button,body.disg #urg button{flex:none;background:#fdfdfd !important;color:#000 !important;border:1px solid #adadad !important;border-radius:2px;padding:3px 10px;font:12px "Segoe UI","맑은 고딕",sans-serif;font-weight:400;box-shadow:none !important}' +
+    'body.disg .vi{width:100%;text-align:left;padding:3px 6px}body.disg .vi.sel{background:#eef3f8 !important;border-color:#0078d7 !important}' +
+    'body.disg button.armed,body.disg #sb.armed{color:#b00 !important;border-color:#b00 !important}';
   function miniMemoTitle(){
     var d = new Date();
     return '업무일지_' + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.txt - 메모장';
   }
-  function miniSet(el, text){ if (el.textContent !== text) el.textContent = text; }
+  function miniSet(el, text){ if (el && el.textContent !== text) el.textContent = text; }
   function miniHidden(){   // 미니 창이 지금 메모장으로 보여야 하는지
     return !!(boss && boss.on) || mini.mode === 'on' || (mini.mode === 'auto' && !mini.hover);
+  }
+  function isSneak(){ return !!(boss && boss.on) || !!(mini.win && miniHidden()); }
+  function miniRollUrg(){
+    var now = Date.now();
+    if (!mini.win || !miniHidden() || mini.urg || now - mini.urgAt < 60000 || Math.random() >= 0.18) return;
+    var c = LEVELS[state.level] && LEVELS[state.level].cost ? LEVELS[state.level].cost : 10000;
+    var g = Math.max(5000, Math.min(300000, Math.round(c * 1.5 / 100) * 100));
+    mini.urg = { kind: Math.random() < 0.5 ? 'patrol' : 'doc', gold: g, until: now + 10000 };
+    mini.urgAt = now;
+  }
+  function miniAct(){ miniRollUrg(); miniSync(); }
+  function urgClaim(){
+    var u = mini.urg;
+    if (!u || Date.now() > u.until){ mini.urg = null; miniSync(); return; }
+    mini.urg = null;
+    state.gold += u.gold;
+    state.stats.earned += u.gold;
+    if (state.gold > state.stats.peak) state.stats.peak = state.gold;
+    state.fun.urg = (state.fun.urg | 0) + 1;
+    if (state.fun.urg >= 5) achGet(19);
+    var tag = u.kind === 'patrol' ? '순찰 점검 통과' : '긴급 결재 승인';
+    pushLog('gift', '결재', tag + ' +' + gold(u.gold), null);
+    mini.note = { text: miniHidden() ? '[처리 완료] ' + tag + ' — 수당 +' + fmt(u.gold) : '🎉 ' + tag + '! +' + gold(u.gold), until: Date.now() + 3200 };
+    render(); save(); miniSync();
+  }
+  function disgFight(txt, kind, D){
+    if (!txt || !D) return txt || '';
+    if (/^승리/.test(txt)){
+      var m = /\+([\d,]+)\s*G/.exec(txt), has = txt.indexOf(ITEMS.bless.full) >= 0;
+      return (kind === 'hunt' ? '점검 완료' : '협의 타결') + (m ? ' — 예산 +' + m[1] : '') + (has ? ' (자동 검토권 +1)' : '');
+    }
+    if (/^패배/.test(txt)) return kind === 'hunt' ? '점검 보류 — 재방문 필요' : '협의 보류 — 추가 검토 필요';
+    return txt;
+  }
+  function miniTab(t){
+    mini.tab = t | 0;
+    if (mini.tab === 3 && online.on && lupin.list === null) loadLupin();
+    miniSync();
   }
   function miniTitle(){
     var on = !!(mini.win && miniHidden());
@@ -6297,39 +6396,240 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function miniSync(){
     var w = mini.win;
     if (!w) return;
-    var d = w.document, D = miniHidden(), sw = currentSword(), lv = state.level, o = odds(lv, state.buffs);
+    var d = w.document, D = miniHidden(), sw = currentSword(), lv = state.level, o = odds(lv, state.buffs), now = Date.now();
     d.body.classList.toggle('disg', D);
-    var sig = state.sword.seed + ':' + lv + ':' + state.sword.rar + ':' + sw.key;
-    if (sig !== mini.sig){ mini.sig = sig; renderStill(d.getElementById('cv'), sw, false); }
-
-    var nm = d.getElementById('nm');
-    miniSet(nm, D ? '진행 단계: ' + lv + '단계' : '+' + lv + ' ' + sw.name);
-    nm.style.color = D ? '' : sw.R.color;
-    miniSet(d.getElementById('gd'), D ? '예산 잔액: ' + fmt(state.gold) : fmt(state.gold) + ' G');
-    miniSet(d.getElementById('od'), o === null ? (D ? '최종 단계 — 보관 대기' : '최고 단계 — 무기고에 넣을 수 있어요')
-      : D ? '승인 ' + pct(o.s) + ' / 보류 ' + pct(o.k) + ' / 반려 ' + pct(o.x)
-          : '성공 ' + pct(o.s) + ' · 유지 ' + pct(o.k) + ' · 파괴 ' + pct(o.x));
-
-    var v = $('verdict'), kind = (/\bv-(\w+)/.exec(v.className) || [])[1] || '', vd = d.getElementById('vd');
-    vd.className = D ? '' : 'v-' + kind;
-    miniSet(vd, !D ? v.textContent
-      : rolling ? '검토 중…'
-      : kind === 'ok' ? '승인 완료 — ' + lv + '단계'
-      : kind === 'boom' ? '반려 — 처음부터 다시 진행'
-      : kind === 'keep' ? '보류 — 단계 유지' : '');
-
-    var F = $('forgeBtn'), S = $('sellBtn'), fb = d.getElementById('fb'), sb = d.getElementById('sb');
-    var fCost = $('forgeCost').textContent, sPrice = $('sellPrice').textContent, armed = S.classList.contains('armed');
-    function num(t){ return /\d/.test(t) ? ' (' + t.replace(/\s*G$/, '') + ')' : ''; }   // "판매 불가" 같은 글은 빼고 숫자만
-    miniSet(fb, D ? (lv === MAX ? '보관' : '제출') + num(fCost) : F.firstChild.nodeValue + ' ' + fCost);
-    miniSet(sb, D ? (armed ? '정말 정산할까요?' : '정산' + num(sPrice))
-                  : /\d/.test(sPrice) || armed ? S.firstChild.nodeValue + ' ' + sPrice : sPrice);
-    fb.disabled = F.disabled;
-    sb.disabled = S.disabled;
-    sb.classList.toggle('armed', armed);
+    var tabs = D ? ['파일', '편집', '서식', '보기'] : ['대장간', '무기고', '전투', '모임'];
+    for (var ti = 0; ti < 4; ti++){
+      var tb = d.querySelector('button[data-t="' + ti + '"]'), pn = d.getElementById('t' + ti);
+      if (tb){ miniSet(tb, tabs[ti]); tb.classList.toggle('on', mini.tab === ti); }
+      if (pn) pn.hidden = mini.tab !== ti;
+    }
     var dg = d.getElementById('dg');
     miniSet(dg, D ? '⋯' : mini.mode === 'auto' ? '자동' : '위장');
     dg.title = { off:'위장 모드 켜기 (Esc)', on:'자동 위장: 마우스를 올린 동안만 게임이 보여요', auto:'위장 끄기' }[mini.mode];
+
+    if (mini.urg && now > mini.urg.until) mini.urg = null;
+    var urgEl = d.getElementById('urg');
+    urgEl.hidden = !mini.urg;
+    if (mini.urg){
+      var sec = Math.max(1, Math.ceil((mini.urg.until - now) / 1000));
+      miniSet(d.getElementById('ut'), D
+        ? (mini.urg.kind === 'patrol' ? '[점검] 부서 근태 확인 요청 (' : '[긴급] 결재 서류 도착 (') + sec + 's)'
+        : (mini.urg.kind === 'patrol' ? '🚨 팀장님 순찰 감지! (' : '📄 긴급 결재 도착! (') + sec + '초)');
+      miniSet(d.getElementById('ub'), D ? '승인 (+' + fmt(mini.urg.gold) + ')' : '처리 +' + gold(mini.urg.gold));
+    }
+
+    function num(t){ return /\d/.test(t) ? ' (' + t.replace(/\s*G$/, '') + ')' : ''; }
+    if (mini.tab === 0){
+      var sig = state.sword.seed + ':' + lv + ':' + state.sword.rar + ':' + sw.key;
+      if (sig !== mini.sig){ mini.sig = sig; renderStill(d.getElementById('cv'), sw, false); }
+      var nm = d.getElementById('nm');
+      miniSet(nm, D ? '진행 단계: ' + lv + '단계' : '+' + lv + ' ' + sw.name);
+      nm.style.color = D ? '' : sw.R.color;
+      miniSet(d.getElementById('sub'), D
+        ? '분류: ' + ['일반', '우대', '중요', '핵심', '기밀'][sw.rar] + ' · ' + (sw.el + 1) + '호'
+        : '[' + sw.R.name + '] ' + sw.E.name + ' 속성');
+      miniSet(d.getElementById('gd'), D ? '예산 잔액: ' + fmt(state.gold) : fmt(state.gold) + ' G');
+      var cs = state.buffs.curse ? (D ? ' (주의)' : ' · 💀저주') : '';
+      miniSet(d.getElementById('od'), (o === null ? (D ? '최종 단계 — 보관 대기' : '최고 단계 — 무기고에 넣을 수 있어요')
+        : D ? '승인 ' + pct(o.s) + ' / 보류 ' + pct(o.k) + ' / 반려 ' + pct(o.x)
+            : '성공 ' + pct(o.s) + ' · 유지 ' + pct(o.k) + ' · 파괴 ' + pct(o.x)) + cs);
+
+      var v = $('verdict'), kind = (/\bv-(\w+)/.exec(v.className) || [])[1] || '', vd = d.getElementById('vd');
+      if (mini.note.until > now){
+        vd.className = D ? '' : 'v-ok';
+        miniSet(vd, mini.note.text);
+      } else {
+        vd.className = D ? '' : 'v-' + kind;
+        miniSet(vd, !D ? v.textContent
+          : rolling ? '검토 중…'
+          : kind === 'ok' ? '승인 완료 — ' + lv + '단계'
+          : kind === 'boom' ? '반려 — 처음부터 다시 진행'
+          : kind === 'keep' ? '보류 — 단계 유지' : '');
+      }
+      var bb = d.getElementById('bb'), prB = $('prBless').textContent;
+      bb.disabled = $('buyBless').disabled;
+      miniSet(bb, D ? (state.buffs.bless ? '검토 반영됨' : state.items.bless > 0 ? '자동 검토(' + state.items.bless + ')' : '검토 요청' + num(prB))
+                    : '축복서 · ' + prB);
+      var lb = d.getElementById('lb'), lp = LEAP[lv];
+      lb.hidden = !lp;
+      if (lp){
+        var armL = leapIsArmed('anvil');
+        lb.disabled = $('leapBtn').disabled;
+        lb.classList.toggle('armed', armL);
+        miniSet(lb, (D ? (armL ? '전결 확인?' : '전결 상신') : (armL ? '정말 도전?' : '+21 도전')) + ' (' + Math.round(lp * 100) + '%)');
+      }
+      var bw = d.getElementById('bw');
+      bw.hidden = $('bellows').hidden;
+      miniSet(bw, D ? '예산 보충 (+300)' : '풀무질 +300 G');
+
+      var F = $('forgeBtn'), S = $('sellBtn'), fb = d.getElementById('fb'), sb = d.getElementById('sb');
+      var fCost = $('forgeCost').textContent, sPrice = $('sellPrice').textContent, armed = S.classList.contains('armed');
+      miniSet(fb, D ? (lv === MAX ? '보관' : '제출') + num(fCost) : F.firstChild.nodeValue + ' ' + fCost);
+      miniSet(sb, D ? (armed ? '정말 정산할까요?' : '정산' + num(sPrice))
+                    : /\d/.test(sPrice) || armed ? S.firstChild.nodeValue + ' ' + sPrice : sPrice);
+      fb.disabled = F.disabled;
+      sb.disabled = S.disabled;
+      sb.classList.toggle('armed', armed);
+    } else if (mini.tab === 1){
+      var V = state.vault;
+      miniSet(d.getElementById('vh'), D ? '보관 문서함 (' + V.length + '/' + VAULT_MAX + ') — 클릭해 선택' : '무기고 ' + V.length + ' / ' + VAULT_MAX + '칸');
+      var vsig = JSON.stringify(V) + '|' + vaultSel.join(',') + '|' + (D ? 1 : 0);
+      if (vsig !== mini.vsig){
+        mini.vsig = vsig;
+        var vl = d.getElementById('vl');
+        vl.textContent = '';
+        if (!V.length){
+          var ve = d.createElement('div'); ve.className = 'note';
+          ve.textContent = D ? '보관된 문서가 없습니다. (20단계 달성 시 보관)' : '+20 무기를 무기고에 넣어 두세요.';
+          vl.appendChild(ve);
+        } else V.forEach(function(vw, i){
+          var vsw = vaultSword(vw), at = vaultSel.indexOf(i), vb = d.createElement('button');
+          vb.type = 'button'; vb.className = 'vi' + (at >= 0 ? ' sel' : '');
+          vb.textContent = D
+            ? (at === 0 ? '[1·기준] ' : at === 1 ? '[2·병합] ' : '· ') + '문서 #' + (i + 1) + ' (' + vw.lv + '단계' + (vsw.awake ? '·완결' : '') + ') — ' + fmt(vaultPrice(vw))
+            : (at === 0 ? '① ' : at === 1 ? '② ' : '') + '+' + vw.lv + ' [' + vsw.R.name + '] ' + vsw.name + ' (' + gold(vaultPrice(vw)) + ')';
+          vb.addEventListener('click', function(){ pickVault(i); miniSync(); });
+          vl.appendChild(vb);
+        });
+      }
+      miniSet(d.getElementById('vn'), vaultSel.length === 2
+        ? (D ? (synthArmed ? '한 번 더 누르면 병합됩니다' : '기준 문서(1)로 병합 준비 완료') : $('synthNote').textContent)
+        : vaultSel.length === 1 ? (D ? '전결 상신(21단계) 또는 처분 정산 가능' : $('vaultLeapNote').textContent)
+        : (D ? '항목을 1개(전결·처분) 또는 2개(병합) 선택하세요' : '합성할 두 자루나 다룰 한 자루를 골라 주세요'));
+      var vsyn = d.getElementById('vsyn'), vlp = d.getElementById('vlp'), vsel = d.getElementById('vsel');
+      var vlpArm = $('vaultLeapBtn').classList.contains('armed');
+      vsyn.disabled = $('synthBtn').disabled; vsyn.classList.toggle('armed', synthArmed);
+      miniSet(vsyn, D ? (synthArmed ? '병합 확인?' : '병합 결재') : $('synthBtn').firstChild.nodeValue);
+      vlp.disabled = $('vaultLeapBtn').disabled; vlp.classList.toggle('armed', vlpArm);
+      miniSet(vlp, D ? (vlpArm ? '전결 확인?' : '전결 상신') : $('vaultLeapBtn').firstChild.nodeValue);
+      vsel.disabled = $('vaultSellBtn').disabled; vsel.classList.toggle('armed', vaultSellArmed);
+      miniSet(vsel, D ? (vaultSellArmed ? '처분 확인?' : '처분 정산') : $('vaultSellBtn').firstChild.nodeValue);
+    } else if (mini.tab === 2){
+      var en = energyNow();
+      miniSet(d.getElementById('en'), D
+        ? '외근 여력: ' + en + ' / ' + ENERGY_MAX + (en >= ENERGY_MAX ? ' (충전 완료)' : ' (다음 ' + energyLeft() + ')')
+        : '기력 ' + en + ' / ' + ENERGY_MAX + (en >= ENERGY_MAX ? ' · 가득 참' : ' · 다음 ' + energyLeft()));
+      miniSet(d.getElementById('hlb'), D ? '[현장 점검 — 외근]' : '사냥터 (몬스터)');
+      var si = huntSel(), hsig = lv + ':' + state.sword.seed + ':' + state.vault.length + ':' + si + ':' + (D ? 1 : 0);
+      var hsel = d.getElementById('hsel');
+      if (hsig !== mini.hsig){
+        mini.hsig = hsig;
+        hsel.textContent = '';
+        MONSTERS.forEach(function(M2, i){
+          var c2 = huntChampion(M2), p2 = huntChance(c2.p, M2), D2 = MONSTER_DATA[M2.key] || { ko:M2.key }, op = d.createElement('option');
+          op.value = String(i); op.selected = i === si;
+          op.textContent = D
+            ? '제' + (i + 1) + '구역 점검 — 완료율 ' + (p2 > 0 ? Math.round(p2 * 100) + '%' : '불가') + ' (+' + fmt(M2.gold) + ')'
+            : D2.ko + ' — ' + (p2 > 0 ? '승률 ' + Math.round(p2 * 100) + '%' : '너무 강함') + ' · +' + gold(M2.gold);
+          hsel.appendChild(op);
+        });
+      }
+      var hb = d.getElementById('hb');
+      hb.disabled = $('huntBtn').disabled;
+      miniSet(hb, D ? '점검 실행' : '사냥하기');
+      miniSet(d.getElementById('hrs'), disgFight($('huntResult').textContent, 'hunt', D));
+
+      miniSet(d.getElementById('dlb'), D ? '[타부서 협의]' : '결투장 (사람끼리)');
+      var drf = d.getElementById('drf');
+      drf.hidden = !online.user;
+      miniSet(drf, D ? '갱신' : '새로고침');
+      var dlog = d.getElementById('dlog'), dbox = d.getElementById('dbox');
+      dlog.hidden = !!online.user; dbox.hidden = !online.user;
+      if (!online.user){
+        miniSet(dlog, D ? '계정 연동 후 협의 가능 (본 화면 상단)' : '본 화면에서 구글 로그인하면 열려요.');
+      } else {
+        var foes = duelFoes(), ch = champion();
+        var dsig = foes.map(function(x){ return x.uid + ':' + x.pw; }).join(',') + '|' + duelPick + '|' + ch.p + '|' + (D ? 1 : 0);
+        var dsel = d.getElementById('dsel');
+        if (dsig !== mini.dsig){
+          mini.dsig = dsig;
+          dsel.textContent = '';
+          if (!foes.length){
+            var eo = d.createElement('option'); eo.value = '';
+            eo.textContent = D ? '협의 가능한 담당자 없음' : '결투 가능한 상대 없음';
+            dsel.appendChild(eo);
+          } else foes.forEach(function(x){
+            var dp = duelChance(ch.p, x.pw), rw = duelGold(ch.p, x.pw), op = d.createElement('option');
+            op.value = x.uid; op.selected = x.uid === duelPick;
+            op.textContent = D
+              ? x.name + ' 담당 (등급 ' + x.pw + ') — 타결률 ' + Math.round(dp * 100) + '% · +' + fmt(rw)
+              : x.name + ' (+' + x.lv + ' · 힘 ' + x.pw + ') — 승률 ' + Math.round(dp * 100) + '% · +' + gold(rw);
+            dsel.appendChild(op);
+          });
+        }
+        var db = d.getElementById('db');
+        db.disabled = $('duelBtn').disabled;
+        miniSet(db, D ? '협의 요청' : '도전하기');
+        miniSet(d.getElementById('drs'), disgFight($('duelResult').textContent, 'duel', D));
+      }
+    } else if (mini.tab === 3){
+      var canR = roomCanSay(), rsel = d.getElementById('rsel');
+      miniSet(d.getElementById('rh'), canR
+        ? (D ? '[회의록 — ' + room.name + ' (' + room.members.length + '명)]' : '단톡방 · ' + room.name + ' (' + room.members.length + '명)')
+        : (D ? '[회의록 — 본 화면에서 회의실 입장 필요]' : '본 화면에서 단톡방에 들어가면 여기서 대화해요'));
+      rsel.hidden = !(online.user && state.rooms.length > 1);
+      if (!rsel.hidden){
+        var rsig = JSON.stringify([state.rooms, room.id]);
+        if (rsig !== mini.rsig){
+          mini.rsig = rsig; rsel.textContent = '';
+          state.rooms.forEach(function(r){
+            var o2 = d.createElement('option'); o2.value = r.id; o2.textContent = r.name; o2.selected = r.id === room.id;
+            rsel.appendChild(o2);
+          });
+        }
+      }
+      var rfm = d.getElementById('rfm'), rin = d.getElementById('rin'), rms = d.getElementById('rms');
+      rfm.hidden = !canR; rms.hidden = !canR;
+      if (mini.dmode !== D){
+        mini.dmode = D;
+        rin.placeholder = D ? '안건 기록 또는 /명령어…' : '메시지 또는 /강화…';
+      }
+      miniSet(d.getElementById('rsd'), D ? '기록' : '전송');
+      if (canR){
+        var msgs = room.msgs.concat(room.local).sort(function(a, b){ return a.t - b.t; }).slice(-25);
+        var msig = room.id + '|' + (D ? 1 : 0) + '|' + msgs.map(function(m){ return m.id + ':' + m.text; }).join('\n');
+        if (msig !== mini.msig){
+          mini.msig = msig; rms.textContent = '';
+          if (!msgs.length){
+            var me0 = d.createElement('div'); me0.className = 'ml bot';
+            me0.textContent = D ? '기록된 회의 내용이 없습니다.' : '아직 대화가 없어요.';
+            rms.appendChild(me0);
+          } else msgs.forEach(function(m){
+            var ml = d.createElement('div');
+            if (m.local){ ml.className = 'ml bot'; ml.textContent = m.text; rms.appendChild(ml); return; }
+            var bot = m.kind === 'bot', adm = m.kind === 'admin';
+            ml.className = 'ml' + (bot ? ' bot' : '');
+            var dt = new Date(m.t), hh = ('0' + dt.getHours()).slice(-2) + ':' + ('0' + dt.getMinutes()).slice(-2);
+            var who = adm ? '관리자' : bot ? (D ? '기록' : '봇') : m.name;
+            if (D){ ml.textContent = hh + ' [' + who + '] ' + m.text; }
+            else {
+              var wb = d.createElement('b'); wb.textContent = who + ' ';
+              ml.appendChild(wb); ml.appendChild(d.createTextNode(m.text));
+            }
+            rms.appendChild(ml);
+          });
+          rms.scrollTop = rms.scrollHeight;
+        }
+      }
+      var today = kst().day, myN = state.fun.wd === today ? state.fun.wn : 0;
+      miniSet(d.getElementById('lh'), D ? '[일일 업무 처리 현황 — 내 실적 ' + myN + '건]' : '오늘의 월급루팡 · 나 오늘 ' + myN + '번');
+      var llist = (lupin.list || []).filter(function(r){ return r.day === today && r.n > 0; }).slice(0, 7);
+      var lsig = (D ? '1|' : '0|') + (lupin.list === null ? (lupin.err ? 'err' : 'wait') : llist.map(function(r){ return r.uid + ':' + r.n + ':' + r.t; }).join(','));
+      if (lsig !== mini.lsig){
+        mini.lsig = lsig;
+        var ll = d.getElementById('ll'); ll.textContent = '';
+        var lmsg = lupin.list === null ? (lupin.err ? '집계 준비 중' : '불러오는 중…') : !llist.length ? (D ? '금일 집계된 내역 없음' : '오늘은 아직 아무도 없어요') : '';
+        if (lmsg){ ll.textContent = lmsg; }
+        else llist.forEach(function(r, i){
+          var lr = d.createElement('div');
+          lr.textContent = D
+            ? (i + 1) + '. ' + String(r.name || '이름 없음') + (r.t ? ' (' + r.t + ')' : '') + ' — ' + (r.n | 0) + '건'
+            : (i === 0 ? '🥷 ' : (i + 1) + '. ') + String(r.name || '이름 없음') + (r.t ? ' 「' + r.t + '」' : '') + ' · ' + (r.n | 0) + '번';
+          ll.appendChild(lr);
+        });
+      }
+    }
     if (boss.on) bossStat();
   }
   function miniMode(m){
@@ -6340,8 +6640,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   function miniOpen(){
     if (mini.win){ mini.win.close(); return; }
     if (!window.documentPictureInPicture) return;
-    window.documentPictureInPicture.requestWindow({ width: 280, height: 300 }).then(function(w){
-      mini.win = w; mini.sig = '';
+    window.documentPictureInPicture.requestWindow({ width: 320, height: 390 }).then(function(w){
+      mini.win = w; mini.sig = mini.vsig = mini.hsig = mini.dsig = mini.msig = mini.lsig = mini.rsig = ''; mini.dmode = null;
       var d = w.document;
       var font = d.createElement('link');
       font.rel = 'stylesheet';
@@ -6350,22 +6650,57 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       css.textContent = MINI_CSS;
       d.head.appendChild(font); d.head.appendChild(css);
       d.body.innerHTML = MINI_HTML;
-      d.getElementById('fb').addEventListener('click', function(){ $('forgeBtn').click(); miniSync(); });
-      d.getElementById('sb').addEventListener('click', function(){ $('sellBtn').click(); miniSync(); });
+      d.querySelector('.memo').addEventListener('click', function(e){
+        var b = e.target.closest('button[data-t]');
+        if (b) miniTab(Number(b.dataset.t));
+      });
       d.getElementById('dg').addEventListener('click', function(){ miniMode({ off:'on', on:'auto', auto:'off' }[mini.mode]); });
+      d.getElementById('ub').addEventListener('click', urgClaim);
+      d.getElementById('fb').addEventListener('click', function(){ $('forgeBtn').click(); miniAct(); });
+      d.getElementById('sb').addEventListener('click', function(){ $('sellBtn').click(); miniAct(); });
+      d.getElementById('bb').addEventListener('click', function(){ $('buyBless').click(); miniAct(); });
+      d.getElementById('lb').addEventListener('click', function(){ $('leapBtn').click(); miniAct(); });
+      d.getElementById('bw').addEventListener('click', function(){ $('bellowsBtn').click(); miniAct(); });
+      d.getElementById('vsyn').addEventListener('click', function(){ $('synthBtn').click(); miniAct(); });
+      d.getElementById('vlp').addEventListener('click', function(){ $('vaultLeapBtn').click(); miniAct(); });
+      d.getElementById('vsel').addEventListener('click', function(){ $('vaultSellBtn').click(); miniAct(); });
+      d.getElementById('hsel').addEventListener('change', function(){ if (!hunting){ state.hunt.sel = Number(this.value); renderHunt(); save(); miniSync(); } });
+      d.getElementById('hb').addEventListener('click', function(){ $('huntBtn').click(); miniAct(); });
+      d.getElementById('dsel').addEventListener('change', function(){ if (!dueling && this.value){ duelPick = this.value; renderDuel(); miniSync(); } });
+      d.getElementById('db').addEventListener('click', function(){ $('duelBtn').click(); miniAct(); });
+      d.getElementById('drf').addEventListener('click', function(){ if (Date.now() - mini.rfAt > 10000){ mini.rfAt = Date.now(); loadArena(true); miniSync(); } });
+      d.getElementById('rsel').addEventListener('change', function(){ $('roomSel').value = this.value; $('roomSel').dispatchEvent(new Event('change')); miniSync(); });
+      d.getElementById('rfm').addEventListener('submit', function(e){
+        e.preventDefault();
+        var inp = d.getElementById('rin'), v = inp.value;
+        inp.value = '';
+        roomSubmit(v);
+        miniAct();
+      });
       d.addEventListener('keydown', function(e){
-        if (bossKey(e)) return;
+        var tag = e.target && e.target.tagName, typing = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
+        if (!typing && bossKey(e)) return;
         var plain = !e.ctrlKey && !e.metaKey && !e.altKey;
-        if (e.key === 'Escape'){ e.preventDefault(); miniMode(mini.mode === 'off' ? 'on' : 'off'); }
-        else if (plain && (e.code === 'Space' || e.key === 'Enter')){ e.preventDefault(); if (!e.repeat) d.getElementById('fb').click(); }
-        else if (plain && e.code === 'KeyS'){ e.preventDefault(); if (!e.repeat) d.getElementById('sb').click(); }
+        if (e.key === 'Escape'){
+          e.preventDefault();
+          if (typing) e.target.blur();
+          else miniMode(mini.mode === 'off' ? 'on' : 'off');
+          return;
+        }
+        if (typing || !plain || e.repeat) return;
+        if (e.code >= 'Digit1' && e.code <= 'Digit4'){ e.preventDefault(); miniTab(Number(e.code.slice(-1)) - 1); }
+        else if (e.code === 'KeyD' && mini.urg){ e.preventDefault(); urgClaim(); }
+        else if (mini.tab === 0 && (e.code === 'Space' || e.key === 'Enter')){ e.preventDefault(); d.getElementById('fb').click(); }
+        else if (mini.tab === 0 && e.code === 'KeyS'){ e.preventDefault(); d.getElementById('sb').click(); }
+        else if (mini.tab === 0 && e.code === 'KeyB'){ e.preventDefault(); d.getElementById('bb').click(); }
       });
       d.documentElement.addEventListener('mouseenter', function(){ mini.hover = true; miniTitle(); miniSync(); });
       d.documentElement.addEventListener('mouseleave', function(){ mini.hover = false; miniTitle(); miniSync(); });
       w.addEventListener('pagehide', function(){
         if (mini.win !== w) return;
-        mini.win = null; miniTitle(); miniButton();
+        mini.win = null; mini.urg = null; miniTitle(); miniButton();
       });
+      if (mini.tab === 3 && online.on && lupin.list === null) loadLupin();
       w.setInterval(miniSync, 200);   // 미니 창의 타이머라서 본 화면이 최소화돼도 느려지지 않습니다
       miniTitle(); miniButton(); miniSync();
     }).catch(function(){});
@@ -6528,14 +6863,18 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     { t:'저주 따위',       d:'저주받은 채로 강화 성공' },
     { t:'조문객',          d:'무덤에서 🌼 조문 10번' },
     { t:'상주',            d:'내 묘비가 5개' },
-    { t:'오늘의 장인',     d:'오늘의 무기 1등' }
+    { t:'오늘의 장인',     d:'오늘의 무기 1등' },
+    { t:'결재 라인 돌파',  d:'업무 화면 · 위장 중에 +15 이상 성공' },
+    { t:'외근의 달인',     d:'업무 화면 · 위장 중에 사냥 · 결투 10번 승리' },
+    { t:'임원 보고 통과',  d:'미니 창 긴급 결재 · 순찰 5번 처리' }
   ];
   function normFun(f){
     f = f && typeof f === 'object' ? f : {};
     var n = function(v, max){ return typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(max, Math.floor(v))) : 0; };
     return { ach: n(f.ach, 1073741823), title: typeof f.title === 'number' && f.title >= 0 && f.title < 30 ? f.title | 0 : -1,
              pick: !!f.pick, wd: n(f.wd, 20991231), wn: n(f.wn, 99999), wt: n(f.wt, 1e9),
-             keep: n(f.keep, 1e6), win: n(f.win, 1e6), hb: n(f.hb, 1e6), cs: n(f.cs, 1e6), seen: n(f.seen, 1e15), cond: n(f.cond, 1e6), gr: n(f.gr, 1e6) };
+             keep: n(f.keep, 1e6), win: n(f.win, 1e6), hb: n(f.hb, 1e6), cs: n(f.cs, 1e6), seen: n(f.seen, 1e15), cond: n(f.cond, 1e6), gr: n(f.gr, 1e6),
+             snw: n(f.snw, 1e6), urg: n(f.urg, 1e6) };
   }
   function kst(){
     var d = new Date(Date.now() + 9 * 3600000);
@@ -6576,6 +6915,8 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
     if (state.fun.cs >= 10) achGet(12, true);
     if (state.fun.cond >= 10) achGet(14, true);
     if (state.fun.gr >= 5) achGet(15, true);
+    if (state.fun.snw >= 10) achGet(18, true);
+    if (state.fun.urg >= 5) achGet(19, true);
   }
   var achSig = '';
   function renderAch(){
@@ -6611,20 +6952,21 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
   }
 
   /* ── 강화 전 · 후 ── */
-  var cursedRoll = false;
+  var cursedRoll = false, sneakRoll = false;
   function funBefore(lv, o){
-    var F = state.fun, k = kst();
+    var F = state.fun, k = kst(), sn = isSneak();
     if (workHours(k)){
       if (F.wd !== k.day){ F.wd = k.day; F.wn = 0; }
       F.wn++; F.wt++;
       if (F.wt >= 100) achGet(9);
       queueLupin();
     }
-    if (boss.on || (mini.win && miniHidden())) achGet(8);
+    if (sn){ achGet(8); miniRollUrg(); }
     if (k.h >= 1 && k.h < 5) achGet(10);
     cursedRoll = !!state.buffs.curse;
+    sneakRoll = sn;
     graveCurse = cursedRoll && curse.pending.length ? curse.pending[curse.pending.length - 1].from : '';
-    graveSneak = !!(boss.on || (mini.win && miniHidden()));
+    graveSneak = sn;
     if (cursedRoll) curseUsed();
     if (lv >= LIVE_LV && roomNews()){
       roomBot('🔴 생중계 — ' + roomWho() + ' +' + lv + ' → +' + (lv + 1) + ' 도전! (성공 ' + pct(o.s) + ' · 파괴 ' + pct(o.x) +
@@ -6640,6 +6982,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       F.keep = 0; F.win = from >= 5 ? F.win + 1 : 0;
       if (F.win >= 5) achGet(5);
       if (cursedRoll) achGet(13);
+      if (state.level >= 15 && (sneakRoll || isSneak())) achGet(17);
     } else {
       F.keep = 0; F.win = 0;
       achGet(0);
@@ -6647,7 +6990,7 @@ tbody tr.now td:first-child{color:var(--ember);font-weight:600}
       if (from >= 18) achGet(7);
       if (from >= 15) graveMake(from);
     }
-    cursedRoll = false;
+    cursedRoll = false; sneakRoll = false;
     if (state.stats.best >= 10) achGet(1);
     if (state.stats.best >= 15) achGet(2);
     if (state.stats.best >= 20) achGet(3);
